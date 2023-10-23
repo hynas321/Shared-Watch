@@ -1,26 +1,30 @@
 import { Room } from "../types/Room";
 
 export interface RoomListProps {
-  title?: string,
   list: Room[];
+  onItemClick: (item: Room) => void;
 }
 
-export default function RoomList({ title, list }: RoomListProps) {
+export default function RoomList({ list, onItemClick }: RoomListProps) {
+  const styles = {
+    cursor: "pointer"
+  }
+
   return (
-    <>
-      { 
-        title &&
-        <h3>{title}</h3>
+    <ul className="list-group rounded-4">
+      {
+        list.map((room, index) => (
+          <li 
+            key={index}
+            className="list-group-item color-bg-muted border-2"
+            style={styles}
+            onClick={() => onItemClick(room)}
+          >
+            <h5 className="d-inline">{room.roomName}</h5>
+            <h6>{`${room.availableSlots}/${room.totalSlots}`}</h6>
+          </li>
+        ))
       }
-      <ul className="list-group">
-        {
-          list.map((item, index) => (
-            <li key={index} className="list-group-item">
-              {item.id}
-            </li>
-          ))
-        }
-      </ul>
-    </>
+    </ul>
   );
 }

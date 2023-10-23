@@ -1,5 +1,5 @@
 export default function Header() {
   return (
-    <h1>Shared Watch</h1>
+    <h2 className="text-white">Shared Watch</h2>
   )
 }
