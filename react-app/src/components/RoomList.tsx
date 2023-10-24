@@ -11,12 +11,12 @@ export default function RoomList({ list, onItemClick }: RoomListProps) {
   }
 
   return (
-    <ul className="list-group rounded-4">
+    <ul className="list-group opacity-75 rounded-3">
       {
         list.map((room, index) => (
           <li 
             key={index}
-            className="list-group-item color-bg-muted border-2"
+            className="list-group-item mt-1 py-3"
             style={styles}
             onClick={() => onItemClick(room)}
           >

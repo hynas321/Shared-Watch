@@ -1,6 +1,6 @@
 export interface ButtonProps {
     text: string,
-    bootstrapClass?: string
+    bootstrapClass: string
     styles: object,
     onClick: () => void;
 }

@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { Room } from "../types/Room";
-import { RoomType } from "../types/RoomType";
-import Header from "./Header";
+import { RoomType } from "../enums/RoomType";
 import RoomList from "./RoomList";
 import Button from "./Button";
+import { useNavigate } from "react-router-dom";
+import { ClientEndpoints } from "../classes/ClientEndpoints";
+import Header from "./Header";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const room1: Room = {
@@ -42,7 +45,7 @@ export default function MainView() {
   }, []);
 
   const handleRoomListItemClick = (item: Room) => {
-    alert(item.roomName);
+    navigate(`${ClientEndpoints.room}/${item.id}`);
   };
 
   const handleCreateRoomButtonClick = () => {
@@ -50,28 +53,30 @@ export default function MainView() {
   }
 
   return (
-    <div className="container">
+    <>
       <Header />
-      <div className="row justify-content-center">
-        <div className="col-xl-6 col-lg-6 col-md-8 col-10">
-          <h3 className="text-white text-center">{"Available rooms"}</h3>
-          <div className="text-end">
-            <Button 
-              text={"Create new room"}
-              bootstrapClass="btn-success rounded-5"
-              styles={{
-                marginTop: "5px",
-                marginBottom: "10px"
-              }}
-              onClick={handleCreateRoomButtonClick}
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-xl-6 col-lg-6 col-md-8 col-10">
+            <h3 className="text-white text-center">{"Available rooms"}</h3>
+            <div className="text-end">
+              <Button 
+                text="Create new room"
+                bootstrapClass="btn-success rounded-4"
+                styles={{
+                  marginTop: "5px",
+                  marginBottom: "10px"
+                }}
+                onClick={handleCreateRoomButtonClick}
+              />
+            </div>
+            <RoomList
+              list={rooms}
+              onItemClick={handleRoomListItemClick}
             />
           </div>
-          <RoomList
-            list={rooms}
-            onItemClick={handleRoomListItemClick}
-          />
         </div>
       </div>
-    </div>
+    </>
   )
 }

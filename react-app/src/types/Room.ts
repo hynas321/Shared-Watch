@@ -1,4 +1,4 @@
-import { RoomType } from "./RoomType"
+import { RoomType } from "../enums/RoomType"
 
 export type Room = {
   id: number,
