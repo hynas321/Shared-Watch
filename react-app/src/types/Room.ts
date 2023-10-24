@@ -1,4 +1,4 @@
-import { RoomType } from "../enums/RoomType"
+import { RoomTypesEnum } from "../enums/RoomTypesEnum"
 
 export type Room = {
   id: number,
@@ -6,5 +6,5 @@ export type Room = {
   hostName: string,
   availableSlots: number,
   totalSlots: number,
-  roomType: RoomType,
+  roomType: RoomTypesEnum,
 }

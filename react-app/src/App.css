@@ -1,3 +1,12 @@
+.background-image {
+  position: relative;
+  background-image: url('./assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Optional for a fixed background */
+  height: 100vh;
+}
+
 .font-border {
   text-shadow: 
     -1px -1px 0px #000,
@@ -10,11 +19,11 @@
     1px  1px 0px #000;
 }
 
-.background-image {
-  position: relative;
-  background-image: url('./assets/background.jpg');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed; /* Optional for a fixed background */
-  height: 100vh;
+.video-player {
+  height: 500px;
+  width: 100%;
+}
+
+.main-menu-list {
+  height: 400px;
 }

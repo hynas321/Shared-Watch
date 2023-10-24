@@ -1,3 +1,4 @@
+import { BsFillCameraReelsFill } from "react-icons/bs";
 import Button from "./Button";
 
 export interface HeaderProps {
@@ -7,7 +8,7 @@ export interface HeaderProps {
 export default function Header({title}: HeaderProps) {
   return (
     <nav className="navbar navbar-dark bg-dark mb-3">
-      <a className="navbar-brand mx-5" href="/"><i>Shared Watch</i></a>
+      <a className="navbar-brand mx-3" href="/"><i><b>SharedWatch</b></i> <BsFillCameraReelsFill /></a>
       { 
         title && <h4 className="text-white mx-auto">{title}</h4>
       }

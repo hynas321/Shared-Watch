@@ -1,18 +1,24 @@
-export default function VideoPlayer() {
+export interface VideoPlayerProps {
+  videoName: string;
+  videoUrl: string;
+}
+
+export default function VideoPlayer({videoName, videoUrl}: VideoPlayerProps) {
   return (
-    <div className="rounded-top-5 bg-dark pt-4 px-5">
-      <div className="embed-responsive embed-responsive-16by9">
-      <iframe
-          className="embed-responsive-item"
-          src="https://www.youtube.com/embed/zpOULjyy-n8?rel=0"
-          title="YouTube Video"
-          allowFullScreen
-          style={{
-            height: "500px",
-            width: "100%"
-          }}
-        ></iframe>
+    <>
+      <div className="rounded-top-5 bg-dark pt-3 px-3 text-center">
+          <span className="text-white">{videoName}</span>
       </div>
-    </div>
+      <div className="rounded-bottom-5 bg-dark pt-3 pb-4 px-3">
+        <div className="embed-responsive embed-responsive-16by9">
+        <iframe
+            className="embed-responsive-item video-player"
+            src={videoUrl}
+            title="Video"
+            allowFullScreen
+          ></iframe>
+        </div>
+      </div>
+    </>
   )
 }
