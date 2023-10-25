@@ -5,7 +5,6 @@ import RoomList from "./RoomList";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
-import { BsPlusCircle } from "react-icons/bs";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -59,8 +58,8 @@ export default function MainView() {
           <h3 className="text-white text-center">{"Available rooms"}</h3>
           <div className="text-end">
             <Button 
-              text={<><BsPlusCircle /> Create new room</>}
-              bootstrapClass="btn-success rounded-4"
+              text={"Create new room"}
+              classNames="btn btn-success rounded-4"
               styles={{
                 marginTop: "5px",
                 marginBottom: "10px"

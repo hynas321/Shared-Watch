@@ -24,6 +24,19 @@
   width: 100%;
 }
 
+.btn-rectangular {
+  border-radius: 0 !important;
+}
+
+.control-panel-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.a-video {
+  text-decoration: none;
+}
+
 .main-menu-list {
   height: 400px;
 }

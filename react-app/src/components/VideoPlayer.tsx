@@ -1,3 +1,6 @@
+import ReactPlayer from "react-player";
+import Button from "./Button";
+
 export interface VideoPlayerProps {
   videoName: string;
   videoUrl: string;
@@ -6,18 +9,23 @@ export interface VideoPlayerProps {
 export default function VideoPlayer({videoName, videoUrl}: VideoPlayerProps) {
   return (
     <>
-      <div className="rounded-top-5 bg-dark pt-3 px-3 text-center">
+      <div className="rounded-top-5 bg-dark pt-2 text-center">
           <span className="text-white">{videoName}</span>
       </div>
-      <div className="rounded-bottom-5 bg-dark pt-3 pb-4 px-3">
-        <div className="embed-responsive embed-responsive-16by9">
-        <iframe
-            className="embed-responsive-item video-player"
-            src={videoUrl}
-            title="Video"
-            allowFullScreen
-          ></iframe>
-        </div>
+      <div className="d-flex justify-content-center rounded-bottom-5 bg-dark pt-2 pb-5">
+        <ReactPlayer
+          url={videoUrl}
+          playing={false}
+          controls={true}
+          light={false}
+          volume={undefined}
+          muted={false}
+          width={"854px"}
+          height={"480px"}
+          style={{}}
+          onPlay={() => {}}
+          onPause={() => {}}
+        />
       </div>
     </>
   )

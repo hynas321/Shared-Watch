@@ -6,13 +6,13 @@ export default function RoomView() {
     <>
       <div className="container">
         <div className="row">
-          <div className="col-lg-8 mt-2">
+          <div className="col-xl-8 col-lg-12 mt-2">
             <VideoPlayer
-              videoName={"REO Speedwagon - Can't Fight This Feeling (Official HD Video)"}
-              videoUrl={"https://www.youtube.com/embed/zpOULjyy-n8?rel=0"}
+              videoName={"COSTA RICA IN 4K 60fps HDR (ULTRA HD)"}
+              videoUrl={"https://www.youtube.com/watch?v=LXb3EKWsInQ"}
             />
           </div>
-          <div className="col-lg-4 mt-2">
+          <div className="col-xl-4 col-lg-12 mt-2">
             <ControlPanel />
           </div>
         </div>

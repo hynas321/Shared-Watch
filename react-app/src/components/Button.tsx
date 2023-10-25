@@ -2,15 +2,15 @@ import { ReactNode } from "react";
 
 export interface ButtonProps {
     text: string | ReactNode,
-    bootstrapClass: string
+    classNames: string,
     styles?: object,
     onClick: (any: any) => void;
 }
 
-export default function Button({text, bootstrapClass, styles, onClick}: ButtonProps) {
+export default function Button({text, classNames: classNames, styles, onClick}: ButtonProps) {
   return (
     <button
-      className={`btn ${bootstrapClass}`}
+      className={classNames}
       style={styles}
       onClick={onClick}
     >

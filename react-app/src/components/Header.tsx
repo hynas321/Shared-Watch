@@ -15,13 +15,13 @@ export default function Header({title}: HeaderProps) {
       <div>
         <Button
           text={"Log in"}
-          bootstrapClass={"btn-secondary"}
+          classNames={"btn btn-secondary"}
           styles={{}}
           onClick={() => {}}
         />
         <Button
           text={"Sign up"}
-          bootstrapClass={"btn-secondary mx-3"}
+          classNames={"btn btn-secondary mx-3"}
           styles={{}}
           onClick={() => {}}
         />
