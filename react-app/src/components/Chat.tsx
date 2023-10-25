@@ -4,7 +4,11 @@ import { ChatMessage } from "../types/ChatMessage";
 import { TextInput } from "./TextInput";
 import { BsSendFill } from "react-icons/bs";
 
-export default function Chat() {
+export interface ChatProps {
+  onChange?: (chatMessages: ChatMessage[]) => void;
+}
+
+export default function Chat({onChange}: ChatProps) {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
   const messagesRef = useRef<HTMLDivElement>(null);
@@ -24,14 +28,24 @@ export default function Chat() {
       return;
     }
 
+    const date = new Date();
+    const currentDate: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+
     const newChatMessage: ChatMessage = {
       username: "User1",
-      text: currentChatMessageText
+      text: currentChatMessageText,
+      date: currentDate
     }
 
     setChatMessages([...chatMessages, newChatMessage])
     setCurrentChatMessageText("");
   };
+
+  useEffect(() => {
+    if (onChange) {
+      onChange(chatMessages);
+    }
+  }, [chatMessages]);
 
   const handleEnterPress = (key: string) => {
     if (key === "Enter") {
@@ -43,6 +57,7 @@ export default function Chat() {
     <>
       <div className="d-flex mb-3">
         <TextInput
+          classNames="form-control rounded-0"
           value={currentChatMessageText}
           placeholder="Enter your message"
           onChange={handleTextInputChange}
@@ -50,7 +65,7 @@ export default function Chat() {
         />
         <Button
           text={<BsSendFill />}
-          classNames="btn btn-primary"
+          classNames="btn btn-primary rounded-0"
           onClick={handleSendMessage}
         />
       </div>
@@ -62,8 +77,11 @@ export default function Chat() {
               key={index}
               className="border border-secondary list-group-item bg-muted border-2"
             >
-              <span className="text-primary"><b>{chatMessage.username}</b>: </span>
-              <span className="text-dark">{chatMessage.text}</span>
+              <div className="d-block chat-message">
+                <small className="text-muted">{`(${chatMessage.date})`} </small>
+                <span className="text-primary"><b>{chatMessage.username}: </b> </span>
+                <span className="text-dark">{chatMessage.text}</span>
+              </div>
             </li>
           ))
         ) :

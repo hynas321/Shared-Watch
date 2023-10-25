@@ -1,5 +1,4 @@
 import ReactPlayer from "react-player";
-import Button from "./Button";
 
 export interface VideoPlayerProps {
   videoName: string;

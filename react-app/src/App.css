@@ -37,6 +37,10 @@
   text-decoration: none;
 }
 
+.chat-message {
+  overflow-wrap: break-word;
+}
+
 .main-menu-list {
   height: 400px;
 }

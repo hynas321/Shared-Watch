@@ -1,6 +1,7 @@
 import { forwardRef } from "react";
 
 export interface TextInputProps {
+  classNames: string;
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
@@ -8,7 +9,7 @@ export interface TextInputProps {
 };
 
 export const TextInput = forwardRef(
-  ({ placeholder, value, onChange, onKeyDown }: TextInputProps,
+  ({ classNames, placeholder, value, onChange, onKeyDown }: TextInputProps,
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,7 +24,7 @@ export const TextInput = forwardRef(
 
     return (
       <input
-        className="form-control"
+        className={classNames}
         ref={ref}
         type="text"
         value={value} 
