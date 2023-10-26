@@ -1,80 +1,112 @@
 import { useState } from "react";
 import Switch from "./Switch";
-import { TextInput } from "./TextInput";
+import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 
 export default function Settings() {
   const [roomPassword, setRoomPassword] = useState<string>("");
-  const [isRoomPrivate, setIsRoomPrivate] = useState<boolean>(false);
+  const [inputFormPassword, setInputFormPassword] = useState<string>("");
+  const [isSendingChatMessagesAllowed, setIsSendingChatMessagesAllowed] = useState<boolean>(true);
   const [isAddingVideosAllowed, setIsAddingVideosAllowed] = useState<boolean>(true);
-  const [isRemovingVideosAllowed, setIsRemovingVideosAllowed] = useState<boolean>(false);
+  const [isRemovingVideosAllowed, setIsRemovingVideosAllowed] = useState<boolean>(true);
+  const [isPlayingVideosOutsideOfPlaylistAllowed, setIsPlayingVideosOutsideOfPlaylistAllowed] = useState<boolean>(true);
   const [isStartingPausingVideosAllowed, setIsStartingPausingVideosAllowed] = useState<boolean>(false);
   const [isSkippingVideosAllowed, setIsSkippingVideosAllowed] = useState<boolean>(false);
 
-  const handleRoomPasswordChange = (value: string) => {
-    setIsRoomPrivate(value.length !== 0);
-    setRoomPassword(value);
+  const handleSetRoomPrivateButtonClick = () => {
+    if (inputFormPassword === roomPassword) {
+      return;
+    }
+
+    if (inputFormPassword.length > 0) {
+      setRoomPassword(inputFormPassword);
+      setInputFormPassword("");
+    }
+    else {
+      setRoomPassword("");
+    }
   }
 
-  const handleAddingVideosSettingChange = (checked: boolean) => {
-    setIsAddingVideosAllowed(checked);
+  const handleRemovePasswordButtonClick = () => {
+    setRoomPassword("");
+    setInputFormPassword("");
   }
 
-  const handleRemovingVideosSettingChange = (checked: boolean) => {
-    setIsRemovingVideosAllowed(checked);
-  }
-
-  const handleStartingPausingVideosSettingChange = (checked: boolean) => {
-    setIsStartingPausingVideosAllowed(checked);
-  }
-
-  const handleSkippingVideosSettingChange = (checked: boolean) => {
-    setIsSkippingVideosAllowed(checked);
+  const handleSetRoomPrivateEnterClick = (key: string) => {
+    if (key === "Enter") {
+      handleSetRoomPrivateButtonClick();
+    }
   }
 
   return (
     <>
       <div className="d-block">
-        <h6 className="text-info text-center">Room settings</h6>
+        <h6 className="text-info text-center mb-3">Room settings</h6>
         <div className="d-flex">
-          <TextInput
+          <InputForm
             classNames="form-control rounded-0"
             placeholder={"Enter password (private room)"}
-            value={roomPassword}
-            onChange={handleRoomPasswordChange}
-            onKeyDown={() => {}}
+            value={inputFormPassword}
+            onChange={(value: string) => setInputFormPassword(value)}
+            onKeyDown={handleSetRoomPrivateEnterClick}
           />
           <Button
             text={<><BsSaveFill /></>}
             classNames="btn btn-primary rounded-0"
-            onClick={() => {}}
+            onClick={handleSetRoomPrivateButtonClick}
           />
         </div>
-        { null && <label className="text-white">Max users</label>}
+        { 
+          (roomPassword.length > 0) && 
+          <div className="mt-2">
+            <span className="text-white room-password">Current password: {roomPassword} </span>
+            <Button
+              text={"Remove password"}
+              classNames="text-primary button-text"
+              onClick={handleRemovePasswordButtonClick}
+            />
+          </div>
+        }
       </div>
       <div className="d-block mt-3">
         <h6 className="text-info text-center">User permissions</h6>
-        <Switch 
-          label={"Add videos to the playlist"}
-          defaultIsChecked={isAddingVideosAllowed}
-          onCheckChange={handleAddingVideosSettingChange} 
-        />
-        <Switch 
-          label={"Remove videos from the playlist"}
-          defaultIsChecked={isRemovingVideosAllowed}
-          onCheckChange={handleRemovingVideosSettingChange} 
-        />
-        <Switch 
-          label={"Start/Pause videos"}
-          defaultIsChecked={isStartingPausingVideosAllowed}
-          onCheckChange={handleStartingPausingVideosSettingChange} 
-        />
-        <Switch 
-          label={"Skip videos"}
-          defaultIsChecked={isSkippingVideosAllowed}
-          onCheckChange={handleSkippingVideosSettingChange} 
-        />
+        <div className="mt-3">
+          <Switch 
+            label={"Send chat messages"}
+            defaultIsChecked={isSendingChatMessagesAllowed}
+            onCheckChange={(checked: boolean) => setIsSendingChatMessagesAllowed(checked)} 
+          />
+        </div>
+        <div className="mt-3"> 
+          <Switch 
+            label={"Add videos to the playlist"}
+            defaultIsChecked={isAddingVideosAllowed}
+            onCheckChange={(checked: boolean) => setIsAddingVideosAllowed(checked)} 
+          />
+          <Switch 
+            label={"Remove videos from the playlist"}
+            defaultIsChecked={isRemovingVideosAllowed}
+            onCheckChange={(checked: boolean) => setIsRemovingVideosAllowed(checked)} 
+          />
+          <Switch
+            label={"Play videos outside of the playlist"}
+            defaultIsChecked={isPlayingVideosOutsideOfPlaylistAllowed}
+            onCheckChange={(checked: boolean) => setIsPlayingVideosOutsideOfPlaylistAllowed(checked)} 
+          />
+        </div>
+        <div className="mt-3">
+          <Switch 
+            label={"Start/Pause videos"}
+            defaultIsChecked={isStartingPausingVideosAllowed}
+            onCheckChange={(checked: boolean) => setIsStartingPausingVideosAllowed(checked)} 
+          />
+          <Switch 
+            label={"Skip videos"}
+            defaultIsChecked={isSkippingVideosAllowed}
+            onCheckChange={(checked: boolean) => setIsSkippingVideosAllowed(checked)} 
+          />
+        </div>
       </div>
     </>
   )

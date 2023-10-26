@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { ChatMessage } from "../types/ChatMessage";
-import { TextInput } from "./TextInput";
+import { InputForm } from "./InputForm";
 import { BsSendFill } from "react-icons/bs";
 
 export interface ChatProps {
@@ -56,7 +56,7 @@ export default function Chat({onChange}: ChatProps) {
   return (
     <>
       <div className="d-flex mb-3">
-        <TextInput
+        <InputForm
           classNames="form-control rounded-0"
           value={currentChatMessageText}
           placeholder="Enter your message"

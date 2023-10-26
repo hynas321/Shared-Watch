@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 
-export interface TextInputProps {
+export interface InputFormProps {
   classNames: string;
   placeholder: string;
   value: string;
@@ -8,8 +8,8 @@ export interface TextInputProps {
   onKeyDown: (key: string) => void;
 };
 
-export const TextInput = forwardRef(
-  ({ classNames, placeholder, value, onChange, onKeyDown }: TextInputProps,
+export const InputForm = forwardRef(
+  ({ classNames, placeholder, value, onChange, onKeyDown }: InputFormProps,
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {

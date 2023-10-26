@@ -1,7 +1,7 @@
 import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
 import { QueuedVideo } from "../types/QueuedVideo";
 import Button from "./Button";
-import { TextInput } from "./TextInput";
+import { InputForm } from "./InputForm";
 import { useEffect, useRef, useState } from "react";
 
 export interface PlaylistProps {
@@ -57,7 +57,6 @@ export default function Playlist({onChange}: PlaylistProps) {
   }
 
   const handleRemoveQueuedVideoButtonClick = (event: any, index: number) => {
-    console.log(index);
     event.preventDefault();
     setQueuedVideos(queuedVideos.filter((_, i) => i !== index));
   }
@@ -65,7 +64,7 @@ export default function Playlist({onChange}: PlaylistProps) {
   return (
     <>
       <div className="d-flex mb-3">
-        <TextInput
+        <InputForm
           classNames="form-control rounded-0"
           value={currentVideoUrlText}
           placeholder="Paste video URL"
