@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PanelsEnum } from "../enums/PanelsEnum";
 import Button from "./Button";
-import { BsFillChatTextFill, BsGearFill } from 'react-icons/bs';
+import { BsDoorOpenFill, BsFillChatTextFill, BsGearFill } from 'react-icons/bs';
 import Chat from "./Chat";
 import Playlist from "./Playlist";
 import Users from "./Users";
@@ -9,12 +9,15 @@ import Settings from "./Settings";
 import { ChatMessage } from "../types/ChatMessage";
 import { QueuedVideo } from "../types/QueuedVideo";
 import { User } from "../types/User";
+import { useNavigate } from "react-router-dom";
+import { ClientEndpoints } from "../classes/ClientEndpoints";
 
 export default function ControlPanel() {
   const [activePanel, setActivePanel] = useState<PanelsEnum>(PanelsEnum.Chat);
   const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
   const [queuedVideosCount, setQueuedVideosCount] = useState<number>(0);
   const [usersCount, setUsersCount] = useState<number>(0);
+  const navigate = useNavigate();
 
   useEffect(() => {}, [activePanel])
 
@@ -34,10 +37,25 @@ export default function ControlPanel() {
     setUsersCount(users.length);
   }
 
+  const handleLeaveRoomButtonClick = () => {
+    navigate(ClientEndpoints.mainMenu); 
+  }
+
   return (
     <div>
       <div className="rounded-top-5 bg-dark pt-3 pb-3 px-4">
-        <h5 className="text-white text-center">Test room</h5>
+      <div className="d-flex align-items-center">
+        <div className="text-center flex-grow-1">
+          <h5 className="text-white">Test room</h5>
+        </div>
+      </div>
+      <div className="d-flex justify-content-center">
+      <Button
+            text={<><BsDoorOpenFill /> Leave</>}
+            classNames={"btn btn-danger btn-sm"}
+            onClick={handleLeaveRoomButtonClick}
+          />
+      </div>
       </div>
       <div className="row">
         <div className="btn-group" role="group">

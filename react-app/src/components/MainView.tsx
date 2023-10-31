@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { Room } from "../types/Room";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import RoomList from "./RoomList";
-import Button from "./Button";
+import { ButtonProps } from "./Button";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
+import Modal from "./Modal";
+import CreateRoom from "./CreateRoom";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -47,24 +49,34 @@ export default function MainView() {
     navigate(`${ClientEndpoints.room}/${item.id}`);
   };
 
-  const handleCreateRoomButtonClick = () => {
-    alert("clicked");
+  const handleModalAcceptButtonClick = () => {
+    navigate(`${ClientEndpoints.room}/${1}`);
+  };
+
+  const modalButtonProps: ButtonProps = {
+    text: "Create new room",
+    classNames: "btn btn-success rounded-4",
+    styles: {
+      marginTop: "5px",
+      marginBottom: "10px"
+    },
+    onClick: () => {}
   }
 
   return (
     <div className="container">
       <div className="row justify-content-center">
         <div className="main-menu-list col-xl-6 col-lg-6 col-md-8 col-10 bg-dark py-3 px-5 rounded-4">
+          
           <h3 className="text-white text-center">{"Available rooms"}</h3>
-          <div className="text-end">
-            <Button 
-              text={"Create new room"}
-              classNames="btn btn-success rounded-4"
-              styles={{
-                marginTop: "5px",
-                marginBottom: "10px"
-              }}
-              onClick={handleCreateRoomButtonClick}
+          <div className="d-flex justify-content-end">
+            <Modal
+              title={"Create new room"}
+              acceptText="Create"
+              declineText="Go back"
+              buttonProps={modalButtonProps}
+              body={<CreateRoom />}
+              onAcceptClick={handleModalAcceptButtonClick}
             />
           </div>
           <RoomList

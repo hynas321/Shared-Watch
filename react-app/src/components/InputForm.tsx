@@ -5,7 +5,7 @@ export interface InputFormProps {
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
-  onKeyDown: (key: string) => void;
+  onKeyDown?: (key: string) => void;
 };
 
 export const InputForm = forwardRef(

@@ -26,7 +26,7 @@ export default function RoomList({ list, onItemClick }: RoomListProps) {
             style={room.availableSlots !== room.totalSlots ? availableRoomStyles : fullRoomStyles}
             onClick={room.availableSlots !== room.totalSlots ? () => onItemClick(room) : () => {}}
           >
-            <h5 className="d-inline">{room.roomName}</h5>
+            <h5>{room.roomName}</h5>
             <h6><BsFillPeopleFill /> {`${room.availableSlots}/${room.totalSlots}`}</h6>
           </li>
         ))

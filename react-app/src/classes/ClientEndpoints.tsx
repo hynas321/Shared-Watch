@@ -1,4 +1,4 @@
 export class ClientEndpoints {
-  static mainMenu = "";
+  static mainMenu = "/";
   static room = "/room";
 }
