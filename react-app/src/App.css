@@ -37,6 +37,11 @@
   text-decoration: none;
 }
 
+.a-collapse {
+  text-decoration: none;
+  color: black;
+}
+
 .chat-message {
   overflow-wrap: break-word;
 }

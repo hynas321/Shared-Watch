@@ -18,7 +18,7 @@ export default function MainView() {
   useEffect(() => {
     const room1: Room = {
       hash: "abc",
-      roomName: "Test Room 1",
+      roomName: "Let's watch Shrek!",
       occupiedSlots: 2,
       totalSlots: 4,
       roomType: RoomTypesEnum.public
@@ -26,7 +26,7 @@ export default function MainView() {
 
     const room2: Room = {
       hash: "bcd",
-      roomName: "Test Room 2",
+      roomName: "VIPs only",
       occupiedSlots: 5,
       totalSlots: 5,
       roomType: RoomTypesEnum.private
@@ -34,7 +34,7 @@ export default function MainView() {
  
     const room3: Room = {
       hash: "adr",
-      roomName: "Test Room 3",
+      roomName: "Weebs out",
       occupiedSlots: 1,
       totalSlots: 3,
       roomType: RoomTypesEnum.public
@@ -171,7 +171,7 @@ export default function MainView() {
       </div>
       {
         displayedRooms.length === 0 &&
-        <h5 className="text-danger text-center mt-3">No rooms found</h5>
+        <h5 className="text-info text-center mt-3">No rooms found</h5>
       }
       {
         displayedRooms.length !== 0 &&
