@@ -6,11 +6,10 @@ export interface InputFormProps {
   value: string;
   onChange: (value: string) => void;
   onKeyDown?: (key: string) => void;
-  onClick?: (event: any) => void;
 };
 
 export const InputForm = forwardRef(
-  ({ classNames, placeholder, value, onChange, onKeyDown, onClick }: InputFormProps,
+  ({ classNames, placeholder, value, onChange, onKeyDown}: InputFormProps,
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,12 +22,6 @@ export const InputForm = forwardRef(
       }
     }
 
-    const handleOnClick = (event: any) => {
-      if (onClick != null) {
-        onClick(event);
-      }
-    }
-
     return (
       <input
         className={classNames}
@@ -38,7 +31,6 @@ export const InputForm = forwardRef(
         placeholder={placeholder}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        onClick={handleOnClick}
       />
     );
   }

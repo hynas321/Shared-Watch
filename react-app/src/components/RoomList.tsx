@@ -42,6 +42,8 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
             className="list-group-item mt-1 py-2"
             style={room.occupiedSlots !== room.totalSlots ? availableRoomStyles : fullRoomStyles}
             onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public) ? () => onPublicRoomClick(room) : undefined}
+          >
+            <div
             {
               ...room.roomType === RoomTypesEnum.private ? {
                 'data-bs-toggle': 'collapse',
@@ -49,25 +51,23 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
                 'aria-expanded': false
               } : {}
             }
-          >
-            <h5>{room.roomType === RoomTypesEnum.private && <BsFillLockFill />} {room.roomName}</h5>
-            <h6><BsFillPeopleFill /> {`${room.occupiedSlots}/${room.totalSlots}`}</h6>
+            >
+              <h5>{room.roomType === RoomTypesEnum.private && <BsFillLockFill />} {room.roomName}</h5>
+              <h6><BsFillPeopleFill /> {`${room.occupiedSlots}/${room.totalSlots}`}</h6>
+            </div>
             {
               (room.roomType === RoomTypesEnum.private && room.occupiedSlots !== room.totalSlots) &&
                 <div className="collapse" id={`collapseExample-${room.hash}`}>
-                  <div className="card card-body">
-                    <span>Provide password to enter the room</span>
+                  <div className="d-flex">
                     <InputForm
-                      classNames={"form-control"}
-                      placeholder={"Type here"}
+                      classNames={"form-control mx-1"}
+                      placeholder={"Enter password"}
                       value={privateRoomPassword}
                       onChange={(value: string) => setPrivateRoomPassword(value)}
                     />
                     <Button
-                      text={"Enter the room"}
-                      classNames={
-                        `btn btn-primary ${!isEnterPrivateRoomButtonEnabled && "disabled"}`
-                      }
+                      text={"Enter"}
+                      classNames={`btn btn-primary mx-1 ${!isEnterPrivateRoomButtonEnabled && "disabled"}`}
                       onClick={(room: Room) => onPrivateRoomClick(room, privateRoomPassword)}
                     />
                   </div>
