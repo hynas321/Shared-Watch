@@ -13,16 +13,18 @@ export interface ModalProps {
 export default function Modal({title, acceptText, declineText, buttonProps, body, onAcceptClick}: ModalProps) {
   return (
     <>
-      <div
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        <Button
+      <div>
+        <span
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+          <Button
             text={buttonProps.text}
             classNames={buttonProps.classNames}
             styles={buttonProps.styles}
             onClick={buttonProps.onClick}
           />
+        </span>
       </div>
       <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog">
         <div className="modal-dialog" role="document">

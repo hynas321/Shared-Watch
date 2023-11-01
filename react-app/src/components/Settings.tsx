@@ -3,10 +3,12 @@ import Switch from "./Switch";
 import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
+import FormRange from "./FormRange";
 
 export default function Settings() {
   const [roomPassword, setRoomPassword] = useState<string>("");
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
+  const [maxUsers, setMaxUsers] = useState<number>(6);
   const [isSendingChatMessagesAllowed, setIsSendingChatMessagesAllowed] = useState<boolean>(true);
   const [isAddingVideosAllowed, setIsAddingVideosAllowed] = useState<boolean>(true);
   const [isRemovingVideosAllowed, setIsRemovingVideosAllowed] = useState<boolean>(true);
@@ -68,6 +70,17 @@ export default function Settings() {
             />
           </div>
         }
+        <div className="text-white text-center">
+          <FormRange
+            label={"Max users"}
+            labelClassNames={"mt-3"}
+            minValue={2}
+            maxValue={10}
+            defaultValue={6}
+            step={1}
+            onChange={(value: number) => setMaxUsers(value)}
+          />
+        </div>
       </div>
       <div className="d-block mt-3">
         <h6 className="text-info text-center">User permissions</h6>

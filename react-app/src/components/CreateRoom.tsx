@@ -18,12 +18,12 @@ export default function CreateRoom() {
       </div>
       <div className="d-block mt-3">
       <h6 className="text-dark text-center mb-3"><b>Room password (optional)</b></h6>
-          <InputForm
-            classNames="form-control rounded-0"
-            placeholder={"Enter password (private room)"}
-            value={roomPassword}
-            onChange={(value: string) => setRoomPassword(value)}
-          />
+        <InputForm
+          classNames="form-control rounded-0"
+          placeholder={"Enter password (private room)"}
+          value={roomPassword}
+          onChange={(value: string) => setRoomPassword(value)}
+        />
       </div>
     </>
   )
