@@ -17,9 +17,12 @@ export default function ControlPanel() {
   const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
   const [queuedVideosCount, setQueuedVideosCount] = useState<number>(0);
   const [usersCount, setUsersCount] = useState<number>(0);
+  const [maxUsersCount] = useState<number>(10);
   const navigate = useNavigate();
 
-  useEffect(() => {}, [activePanel])
+  useEffect(() => {
+    //fetch number values
+  }, []);
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     setActivePanel(panelsEnumValue);
@@ -50,11 +53,11 @@ export default function ControlPanel() {
         </div>
       </div>
       <div className="d-flex justify-content-center">
-      <Button
-            text={<><BsDoorOpenFill /> Leave</>}
-            classNames={"btn btn-danger btn-sm"}
-            onClick={handleLeaveRoomButtonClick}
-          />
+        <Button
+          text={<><BsDoorOpenFill /> Leave</>}
+          classNames={"btn btn-danger btn-sm"}
+          onClick={handleLeaveRoomButtonClick}
+        />
       </div>
       </div>
       <div className="row">
@@ -82,7 +85,7 @@ export default function ControlPanel() {
           <Button 
             text={
               <>
-                <span className="badge rounded-pill bg-success mt-2">{usersCount}</span> Users
+                <span className="badge rounded-pill bg-success mt-2">{usersCount}/{maxUsersCount}</span> Users
               </>
             }
             classNames={activePanel === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}

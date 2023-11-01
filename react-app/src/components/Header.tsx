@@ -1,6 +1,8 @@
 import { BsFillCameraReelsFill } from "react-icons/bs";
 import Button from "./Button";
 import { useState } from "react";
+import Dropdown from "./Dropdown";
+import Friends from "./Friends";
 
 export default function Header() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -31,6 +33,10 @@ export default function Header() {
           isLoggedIn &&
           <>
             <span className="text-white mx-3">{username}</span>
+            <Dropdown
+              title={"Friends"}
+              body={<Friends />}
+            />
             <Button
               text={"Log out"}
               classNames={"btn btn-secondary mx-3"}

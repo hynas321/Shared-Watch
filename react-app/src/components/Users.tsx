@@ -38,7 +38,6 @@ export default function Users({onChange}: UsersProps) {
   }
 
   const handleRemoveUserButtonClick = (event: any, index: number) => {
-    console.log(index);
     event.preventDefault();
     setUsers(users.filter((_, i) => i !== index));
   }
@@ -59,11 +58,11 @@ export default function Users({onChange}: UsersProps) {
                 {
                   user.isAdmin ? 
                     <Button
-                    text={<BsShieldFillMinus />}
-                    classNames="btn btn-outline-warning"
-                    styles={{marginLeft: "5px"}}
-                    onClick={() => handleAdminStatusButtonClick(false, index)}
-                  />
+                      text={<BsShieldFillMinus />}
+                      classNames="btn btn-outline-warning"
+                      styles={{marginLeft: "5px"}}
+                      onClick={() => handleAdminStatusButtonClick(false, index)}
+                    />
                   :
                   <Button
                     text={<BsShieldFillPlus />}
