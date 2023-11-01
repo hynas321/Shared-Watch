@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { PanelsEnum } from "../enums/PanelsEnum";
 import Button from "./Button";
-import { BsDoorOpenFill, BsFillChatTextFill, BsGearFill } from 'react-icons/bs';
+import { BsDoorOpenFill, BsFillChatTextFill, BsFillLockFill, BsGearFill } from 'react-icons/bs';
 import Chat from "./Chat";
 import Playlist from "./Playlist";
 import Users from "./Users";
@@ -11,9 +11,11 @@ import { QueuedVideo } from "../types/QueuedVideo";
 import { User } from "../types/User";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
+import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export default function ControlPanel() {
   const [activePanel, setActivePanel] = useState<PanelsEnum>(PanelsEnum.Chat);
+  const [roomType] = useState<RoomTypesEnum>(RoomTypesEnum.private);
   const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
   const [queuedVideosCount, setQueuedVideosCount] = useState<number>(0);
   const [usersCount, setUsersCount] = useState<number>(0);
@@ -49,7 +51,9 @@ export default function ControlPanel() {
       <div className="rounded-top-5 bg-dark pt-3 pb-3 px-4">
       <div className="d-flex align-items-center">
         <div className="text-center flex-grow-1">
-          <h5 className="text-white">Test room</h5>
+          <h5 className="text-white">
+          {roomType === RoomTypesEnum.private && <BsFillLockFill />} Test room
+          </h5>
         </div>
       </div>
       <div className="d-flex justify-content-center">

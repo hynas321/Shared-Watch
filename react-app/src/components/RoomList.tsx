@@ -50,7 +50,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
               } : {}
             }
           >
-            <h5>{room.roomName} {room.roomType === RoomTypesEnum.private && <BsFillLockFill />}</h5>
+            <h5>{room.roomType === RoomTypesEnum.private && <BsFillLockFill />} {room.roomName}</h5>
             <h6><BsFillPeopleFill /> {`${room.occupiedSlots}/${room.totalSlots}`}</h6>
             {
               (room.roomType === RoomTypesEnum.private && room.occupiedSlots !== room.totalSlots) &&

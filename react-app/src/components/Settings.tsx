@@ -15,6 +15,7 @@ export default function Settings() {
   const [isPlayingVideosOutsideOfPlaylistAllowed, setIsPlayingVideosOutsideOfPlaylistAllowed] = useState<boolean>(true);
   const [isStartingPausingVideosAllowed, setIsStartingPausingVideosAllowed] = useState<boolean>(false);
   const [isSkippingVideosAllowed, setIsSkippingVideosAllowed] = useState<boolean>(false);
+  const [userIsAdmin] = useState<boolean>(false);
 
   const handleSetRoomPrivateButtonClick = () => {
     if (inputFormPassword === roomPassword) {
@@ -44,42 +45,50 @@ export default function Settings() {
   return (
     <>
       <div className="d-block">
-        <h6 className="text-info text-center mb-3">Room settings</h6>
-        <div className="d-flex">
-          <InputForm
-            classNames="form-control rounded-0"
-            placeholder={"Enter password (private room)"}
-            value={inputFormPassword}
-            onChange={(value: string) => setInputFormPassword(value)}
-            onKeyDown={handleSetRoomPrivateEnterClick}
-          />
-          <Button
-            text={<><BsSaveFill /></>}
-            classNames="btn btn-primary rounded-0"
-            onClick={handleSetRoomPrivateButtonClick}
-          />
-        </div>
-        { 
-          (roomPassword.length > 0) && 
-          <div className="mt-2">
-            <span className="text-white room-password">Current password: {roomPassword} </span>
-            <Button
-              text={"Remove password"}
-              classNames="text-primary button-text"
-              onClick={handleRemovePasswordButtonClick}
-            />
-          </div>
-        }
+          {
+            userIsAdmin &&
+            <>
+              <h6 className="text-info text-center mb-3">Room settings</h6>
+              <div className="d-flex">
+                <InputForm
+                  classNames="form-control rounded-0"
+                  placeholder={"Enter password (private room)"}
+                  value={inputFormPassword}
+                  onChange={(value: string) => setInputFormPassword(value)}
+                  onKeyDown={handleSetRoomPrivateEnterClick}
+                />
+                <Button
+                  text={<><BsSaveFill /></>}
+                  classNames="btn btn-primary rounded-0"
+                  onClick={handleSetRoomPrivateButtonClick}
+                />
+              </div>
+              { 
+                (roomPassword.length > 0) && 
+                <div className="mt-2">
+                  <span className="text-white room-password">Current password: {roomPassword} </span>
+                  <Button
+                    text={"Remove password"}
+                    classNames="text-primary button-text"
+                    onClick={handleRemovePasswordButtonClick}
+                  />
+                </div>
+              }
+            </>
+          }
         <div className="text-white text-center">
-          <FormRange
-            label={"Max users"}
-            labelClassNames={"mt-3"}
-            minValue={2}
-            maxValue={10}
-            defaultValue={6}
-            step={1}
-            onChange={(value: number) => setMaxUsers(value)}
-          />
+          {
+            userIsAdmin &&
+            <FormRange
+              label={"Max users"}
+              labelClassNames={"mt-3"}
+              minValue={2}
+              maxValue={10}
+              defaultValue={6}
+              step={1}
+              onChange={(value: number) => setMaxUsers(value)}
+            />
+          }
         </div>
       </div>
       <div className="d-block mt-3">
@@ -88,6 +97,7 @@ export default function Settings() {
           <Switch 
             label={"Send chat messages"}
             defaultIsChecked={isSendingChatMessagesAllowed}
+            isEnabled={userIsAdmin}
             onCheckChange={(checked: boolean) => setIsSendingChatMessagesAllowed(checked)} 
           />
         </div>
@@ -95,16 +105,19 @@ export default function Settings() {
           <Switch 
             label={"Add videos to the playlist"}
             defaultIsChecked={isAddingVideosAllowed}
+            isEnabled={userIsAdmin}
             onCheckChange={(checked: boolean) => setIsAddingVideosAllowed(checked)} 
           />
           <Switch 
             label={"Remove videos from the playlist"}
             defaultIsChecked={isRemovingVideosAllowed}
+            isEnabled={userIsAdmin}
             onCheckChange={(checked: boolean) => setIsRemovingVideosAllowed(checked)} 
           />
           <Switch
             label={"Play videos outside of the playlist"}
             defaultIsChecked={isPlayingVideosOutsideOfPlaylistAllowed}
+            isEnabled={userIsAdmin}
             onCheckChange={(checked: boolean) => setIsPlayingVideosOutsideOfPlaylistAllowed(checked)} 
           />
         </div>
@@ -112,11 +125,13 @@ export default function Settings() {
           <Switch 
             label={"Start/Pause videos"}
             defaultIsChecked={isStartingPausingVideosAllowed}
+            isEnabled={userIsAdmin}
             onCheckChange={(checked: boolean) => setIsStartingPausingVideosAllowed(checked)} 
           />
           <Switch 
             label={"Skip videos"}
             defaultIsChecked={isSkippingVideosAllowed}
+            isEnabled={userIsAdmin}
             onCheckChange={(checked: boolean) => setIsSkippingVideosAllowed(checked)} 
           />
         </div>

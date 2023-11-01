@@ -66,7 +66,7 @@ export default function MainMenuModal({title, acceptText, declineText, onAcceptC
             </div>
             </div>
             <div className="modal-footer bg-light">
-              <span className="rounded-1" data-bs-dismiss="modal">
+              <span className="rounded-1" {...(isAcceptButtonEnabled ? {'data-bs-dismiss': 'modal'} : {})}>
                 <Button
                   text={acceptText}
                   classNames={`btn btn-primary ${!isAcceptButtonEnabled && "disabled"}`}

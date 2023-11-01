@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 export interface SwitchProps {
   label: string;
   defaultIsChecked: boolean;
+  isEnabled: boolean;
   onCheckChange: (checked: boolean) => void;
 }
 
-export default function Switch({ label, defaultIsChecked, onCheckChange }: SwitchProps) {
+export default function Switch({ label, defaultIsChecked, isEnabled, onCheckChange }: SwitchProps) {
   const [isChecked, setIsChecked] = useState(defaultIsChecked);
 
   const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,6 +24,7 @@ export default function Switch({ label, defaultIsChecked, onCheckChange }: Switc
         role="switch"
         id="flexSwitchCheckChecked"
         checked={isChecked}
+        disabled={!isEnabled}
         onChange={handleCheckChange}
       />
       <label className="form-check-label text-white" htmlFor="flexSwitchCheckChecked">
