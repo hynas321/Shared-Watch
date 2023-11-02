@@ -16,9 +16,6 @@ export default function VideoPlayer({videoName, videoUrl}: VideoPlayerProps) {
           url={videoUrl}
           playing={false}
           controls={true}
-          light={false}
-          volume={undefined}
-          muted={false}
           width={"854px"}
           height={"480px"}
           style={{}}

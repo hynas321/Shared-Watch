@@ -47,7 +47,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
             {
               ...room.roomType === RoomTypesEnum.private ? {
                 'data-bs-toggle': 'collapse',
-                'data-bs-target': `#collapseExample-${room.hash}`,
+                'data-bs-target': `#collapseExample-${room.roomHash}`,
                 'aria-expanded': false
               } : {}
             }
@@ -57,7 +57,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
             </div>
             {
               (room.roomType === RoomTypesEnum.private && room.occupiedSlots !== room.totalSlots) &&
-                <div className="collapse" id={`collapseExample-${room.hash}`}>
+                <div className="collapse" id={`collapseExample-${room.roomHash}`}>
                   <div className="d-flex">
                     <InputForm
                       classNames={"form-control mx-1"}

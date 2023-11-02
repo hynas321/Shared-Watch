@@ -17,7 +17,7 @@ export default function MainView() {
 
   useEffect(() => {
     const room1: Room = {
-      hash: "abc",
+      roomHash: "abc",
       roomName: "Let's watch Shrek!",
       occupiedSlots: 2,
       totalSlots: 4,
@@ -25,7 +25,7 @@ export default function MainView() {
     };
 
     const room2: Room = {
-      hash: "bcd",
+      roomHash: "bcd",
       roomName: "VIPs only",
       occupiedSlots: 5,
       totalSlots: 5,
@@ -33,7 +33,7 @@ export default function MainView() {
     };
  
     const room3: Room = {
-      hash: "adr",
+      roomHash: "adr",
       roomName: "Weebs out",
       occupiedSlots: 1,
       totalSlots: 3,
@@ -41,7 +41,7 @@ export default function MainView() {
     };
 
     const room4: Room = {
-      hash: "rere",
+      roomHash: "rere",
       roomName: "My roooom",
       occupiedSlots: 2,
       totalSlots: 6,
@@ -49,7 +49,7 @@ export default function MainView() {
     };
 
     const room5: Room = {
-      hash: "ere",
+      roomHash: "ere",
       roomName: "Cinema",
       occupiedSlots: 6,
       totalSlots: 6,
@@ -57,7 +57,7 @@ export default function MainView() {
     };
 
     const room6: Room = {
-      hash: "agf",
+      roomHash: "agf",
       roomName: "Cinema 2",
       occupiedSlots: 5,
       totalSlots: 6,
@@ -127,11 +127,11 @@ export default function MainView() {
   }, [displayOnlyAvailableRooms]);
 
   const handlePublicRoomListItemClick = (item: Room) => {
-    navigate(`${ClientEndpoints.room}/${item.hash}`);
+    navigate(`${ClientEndpoints.room}/${item.roomHash}`);
   };
 
   const handlePrivateRoomListItemClick = (item: Room, password: string) => {
-    navigate(`${ClientEndpoints.room}/${item.hash}`);
+    navigate(`${ClientEndpoints.room}/${item.roomHash}`);
   }
 
   const handleModalAcceptButtonClick = () => {

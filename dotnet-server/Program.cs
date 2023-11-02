@@ -14,6 +14,11 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod()   
     );
 });
+builder.Services.AddControllers()
+    .AddJsonOptions(options => 
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
+    });
 
 builder.Services.AddSingleton<AccountRepository>();
 
