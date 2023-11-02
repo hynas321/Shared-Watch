@@ -78,20 +78,12 @@ export default function ControlPanel() {
             onClick={() => handlePanelButtonClick(PanelsEnum.Chat)} 
           />
           <Button 
-            text={
-              <>
-                <span className="badge rounded-pill bg-success mt-2">{queuedVideosCount}</span> Playlist
-              </>
-            }
+            text={<><span className="badge rounded-pill bg-success mt-2">{queuedVideosCount}</span> Playlist</>}
             classNames={activePanel === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
           />
           <Button 
-            text={
-              <>
-                <span className="badge rounded-pill bg-success mt-2">{usersCount}/{maxUsersCount}</span> Users
-              </>
-            }
+            text={<><span className="badge rounded-pill bg-success mt-2">{usersCount}/{maxUsersCount}</span> Users</>}
             classNames={activePanel === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Users)} 
           />
