@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { Room } from "../types/Room";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import RoomList from "./RoomList";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import MainMenuModal from "./MainMenuModal";
 import { InputForm } from "./InputForm";
 import Switch from "./Switch";
+import { HttpManager } from "../classes/HttpManager";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -15,59 +15,17 @@ export default function MainView() {
   const [searchText, setSearchText] = useState<string>("");
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const room1: Room = {
-      roomHash: "abc",
-      roomName: "Let's watch Shrek!",
-      occupiedSlots: 2,
-      totalSlots: 4,
-      roomType: RoomTypesEnum.public
-    };
+  const httpManager: HttpManager = new HttpManager();
 
-    const room2: Room = {
-      roomHash: "bcd",
-      roomName: "VIPs only",
-      occupiedSlots: 5,
-      totalSlots: 5,
-      roomType: RoomTypesEnum.private
-    };
- 
-    const room3: Room = {
-      roomHash: "adr",
-      roomName: "Weebs out",
-      occupiedSlots: 1,
-      totalSlots: 3,
-      roomType: RoomTypesEnum.public
-    };
-
-    const room4: Room = {
-      roomHash: "rere",
-      roomName: "My roooom",
-      occupiedSlots: 2,
-      totalSlots: 6,
-      roomType: RoomTypesEnum.private
-    };
-
-    const room5: Room = {
-      roomHash: "ere",
-      roomName: "Cinema",
-      occupiedSlots: 6,
-      totalSlots: 6,
-      roomType: RoomTypesEnum.public
-    };
-
-    const room6: Room = {
-      roomHash: "agf",
-      roomName: "Cinema 2",
-      occupiedSlots: 5,
-      totalSlots: 6,
-      roomType: RoomTypesEnum.private
-    };
-
-    const updatedRooms: Room[] = [room1, room2, room3, room4, room5, room6];
-
+  const fetchRooms = async () => {
+    const updatedRooms = await httpManager.getAllRooms();
+    console.log(updatedRooms)
     setRooms(updatedRooms);
     setDisplayedRooms(updatedRooms);
+  }
+  
+  useEffect(() => {
+    fetchRooms();
   }, []);
 
   useEffect(() => {
@@ -134,10 +92,6 @@ export default function MainView() {
     navigate(`${ClientEndpoints.room}/${item.roomHash}`);
   }
 
-  const handleModalAcceptButtonClick = () => {
-    navigate(`${ClientEndpoints.room}/${1}`);
-  };
-
   return (
 <div className="container">
   <div className="row justify-content-center">
@@ -160,13 +114,12 @@ export default function MainView() {
             />
           </div>
         </div>
-        <div>
+        <div className="text-center">
           <MainMenuModal
             title={"Create new room"}
             acceptText="Create"
             declineText="Go back"
-            onAcceptClick={handleModalAcceptButtonClick}
-          />  
+          />
         </div>
       </div>
       {

@@ -1,8 +1,9 @@
-import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
+import { BsFilm, BsPlusCircleFill, BsXCircle } from "react-icons/bs";
 import { QueuedVideo } from "../types/QueuedVideo";
 import Button from "./Button";
 import { InputForm } from "./InputForm";
 import { useEffect, useRef, useState } from "react";
+import VideoIcon from './../assets/video-icon.png'
 
 export interface PlaylistProps {
   onChange?: (queuedVideos: QueuedVideo[]) => void;
@@ -14,8 +15,8 @@ export default function Playlist({onChange}: PlaylistProps) {
   const queuedVideosRef = useRef<HTMLDivElement>(null);
 
   const videoThumbnailStyle = {
-    width: "60px",
-    height: "45px"
+    width: "40px",
+    height: "40px"
   };
 
   useEffect(() => {
@@ -34,10 +35,7 @@ export default function Playlist({onChange}: PlaylistProps) {
     }
 
     const newQueuedVideo: QueuedVideo = {
-      url: "https://www.youtube.com/watch?v=p2zMXSXhZ9M",
-      image: "https://img.youtube.com/vi/UgkvcWx8oXw/2.jpg",
-      title: currentVideoUrlText
-      //title can be fetched from webpage's title (from URL)
+      url: currentVideoUrlText,
     };
 
     setQueuedVideos([...queuedVideos, newQueuedVideo])
@@ -89,10 +87,10 @@ export default function Playlist({onChange}: PlaylistProps) {
             >
               <div className="row">
                 <div className="col-auto">
-                    {queuedVideo.image !== undefined && <img src={queuedVideo.image} style={videoThumbnailStyle} alt="Video Thumbnail" />}
+                  <img src={VideoIcon} alt="Video Icon" style={videoThumbnailStyle} />
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
-                  <small>{queuedVideo.title !== undefined ? queuedVideo.title : queuedVideo.url}</small>
+                 <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>{queuedVideo.url}</small>
                   <div>
                     <Button
                       text={<BsXCircle/>}

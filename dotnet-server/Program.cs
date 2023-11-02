@@ -13,7 +13,8 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader()
             .AllowAnyMethod()   
     );
-});
+}); 
+
 builder.Services.AddControllers()
     .AddJsonOptions(options => 
     {

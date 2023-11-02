@@ -1,13 +1,18 @@
 public class RoomManager {
     private static List<Room> rooms = new List<Room>();
 
-    public bool InsertRoom(string roomName, string roomPassword)
+    public bool AddRoom(Room room)
     {
         try
-        {   
-            Room newRoom = new Room(roomName, roomPassword);
+        {
+            bool roomExists = rooms.Any(r => r.RoomName == room.RoomName);
 
-            rooms.Add(newRoom);
+            if (roomExists)
+            {
+                return false;
+            }
+
+            rooms.Add(room);
             return true;
         }
         catch (Exception)
@@ -19,6 +24,27 @@ public class RoomManager {
     public Room GetRoom(string roomHash)
     {
         return rooms.FirstOrDefault(r => r.RoomHash == roomHash) ?? null;
+    }
+
+    public IEnumerable<Room> GetAllRooms()
+    {
+        return rooms;
+    }
+
+    public IEnumerable<RoomDTO> GetAllRoomsDTO()
+    {
+        foreach (var room in rooms)
+        {
+            RoomDTO roomDTO = new RoomDTO(
+                room.RoomHash,
+                room.RoomName,
+                room.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private,
+                room.Users.Count,
+                room.RoomSettings.MaxUsers
+            );
+
+            yield return roomDTO;
+        }
     }
 
     public User GetUser(string roomHash, string accessToken)
@@ -40,7 +66,7 @@ public class RoomManager {
         return user;
     }
 
-    public bool InsertUser(string roomHash, User user)
+    public bool AddUser(string roomHash, User user)
     {
         try
         {

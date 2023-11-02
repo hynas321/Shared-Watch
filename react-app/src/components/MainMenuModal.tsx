@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 import Button from "./Button"
 import { InputForm } from "./InputForm";
+import { HttpManager } from "../classes/HttpManager";
+import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
+import { useNavigate } from "react-router-dom";
+import { ClientEndpoints } from "../classes/ClientEndpoints";
 
 export interface MainMenuModalProps {
   title: string;
   acceptText: string;
   declineText: string;
-  onAcceptClick: () => void;
 }
 
-export default function MainMenuModal({title, acceptText, declineText, onAcceptClick}: MainMenuModalProps) {
+export default function MainMenuModal({title, acceptText, declineText}: MainMenuModalProps) {
   const [roomPassword, setRoomPassword] = useState<string>("");
   const [roomName, setRoomName] = useState<string>("");
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
-  
+  const navigate = useNavigate();
+
+  const httpManager: HttpManager = new HttpManager();
+
   useEffect(() => {
     if (roomName.length >= 3) {
       setIsAcceptButtonEnabled(true);
@@ -24,21 +30,26 @@ export default function MainMenuModal({title, acceptText, declineText, onAcceptC
 
   }, [roomName]);
 
+  const handleCreateRoomButtonClick = async () => {
+    const createRoomOutput: RoomCreateOutput | null = await httpManager.createRoom(roomName, roomPassword, "testUser");
+
+    if (createRoomOutput === null) {
+      return;
+    }
+
+    localStorage.setItem("accessToken", createRoomOutput.accessToken);
+    navigate(`${ClientEndpoints.room}/${createRoomOutput.roomHash}`);
+  }
+
   return (
     <>
-      <div>
-        <span data-bs-toggle="modal" data-bs-target="#exampleModal">
-          <Button
-            text={"Create new room"}
-            classNames={"btn btn-success rounded-4"}
-            styles={{
-              marginTop: "5px",
-              marginBottom: "10px"
-            }}
-            onClick={() => {}}
-          />
-        </span>
-      </div>
+      <span data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <Button
+          text={"Create new room"}
+          classNames={"btn btn-success"}
+          onClick={() => {}}
+        />
+      </span>
       <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog">
         <div className="modal-dialog" role="document">
           <div className="modal-content">
@@ -70,7 +81,7 @@ export default function MainMenuModal({title, acceptText, declineText, onAcceptC
                 <Button
                   text={acceptText}
                   classNames={`btn btn-primary ${!isAcceptButtonEnabled && "disabled"}`}
-                  onClick={onAcceptClick}
+                  onClick={handleCreateRoomButtonClick}
                 />
               </span>
               <span className="rounded-1" data-bs-dismiss="modal">

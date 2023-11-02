@@ -11,5 +11,6 @@ public class Account {
     public string Email { get; set; }
 
     [Required]
+    [MinLength(0)]
     public string Password { get; set; }
 }

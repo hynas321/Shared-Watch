@@ -46,6 +46,10 @@
   overflow-wrap: break-word;
 }
 
+.queued-video {
+  overflow-wrap: break-word;
+}
+
 .room-password {
   overflow-wrap: break-word;
 }

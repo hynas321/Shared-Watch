@@ -19,7 +19,7 @@ public partial class RoomHubConnection : Hub
             User user = new User(username);
             UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
 
-            _roomManager.InsertUser(room.RoomHash, user);
+            _roomManager.AddUser(room.RoomHash, user);
             
             await Clients.GroupExcept(roomHash, Context.ConnectionId).SendAsync(HubMethods.OnJoinRoom, JsonHelper.Serialize(userDTO));
             await Clients.Client(Context.ConnectionId).SendAsync(HubMethods.OnJoinRoom, JsonHelper.Serialize(user));

@@ -11,11 +11,11 @@ public class Room
     public RoomSettings RoomSettings { get; set; }
     public VideoPlayerState VideoPlayerState { get; set; }
 
-    public Room(string roomName, [Optional] string roomPassword)
+    public Room(string roomName, string roomPassword)
     {
         RoomHash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
         RoomName = roomName;
-        RoomPassword = roomPassword ?? null;
+        RoomPassword = roomPassword;
         ChatMessages = new List<ChatMessage>();
         QueuedVideos = new List<QueuedVideo>();
         Users = new List<User>();
