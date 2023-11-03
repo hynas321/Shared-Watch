@@ -32,6 +32,8 @@ export class HttpManager {
         username: username
       };
 
+      console.log(requestBody);
+
       const response = await fetch(`${"http://localhost:5050"}/${HttpApiEndpoints.createRoom}`, {
         method: 'POST',
         body: JSON.stringify(requestBody),

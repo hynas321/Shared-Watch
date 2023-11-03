@@ -21,8 +21,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
     });
 
-builder.Services.AddSingleton<AccountRepository>();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -7,7 +7,7 @@ public class RoomCreateInput
     public string RoomName { get; set; }
 
     [MinLength(0)]
-    public string Password { get; set; } = "";
+    public string RoomPassword { get; set; } = "";
 
     [Required]
     public string Username { get; set; }

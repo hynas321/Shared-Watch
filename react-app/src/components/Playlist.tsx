@@ -1,4 +1,4 @@
-import { BsFilm, BsPlusCircleFill, BsXCircle } from "react-icons/bs";
+import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
 import { QueuedVideo } from "../types/QueuedVideo";
 import Button from "./Button";
 import { InputForm } from "./InputForm";
@@ -65,6 +65,7 @@ export default function Playlist({onChange}: PlaylistProps) {
         <InputForm
           classNames="form-control rounded-0"
           value={currentVideoUrlText}
+          trim={true}
           placeholder="Paste video URL"
           onChange={handleTextInputChange}
           onKeyDown={handleEnterPress}

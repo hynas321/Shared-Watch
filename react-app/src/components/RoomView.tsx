@@ -1,7 +1,16 @@
+import { useDispatch } from "react-redux";
 import ControlPanel from "./ControlPanel";
 import VideoPlayer from "./VideoPlayer";
+import { useEffect } from "react";
+import { updatedIsInRoom } from "../redux/slices/userState-slice";
 
 export default function RoomView() {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(updatedIsInRoom(true));
+  }, []);
+
   return (
     <div className="container">
       <div className="row">

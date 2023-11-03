@@ -1,3 +1,4 @@
+using Dotnet.Server.Configuration;
 using Microsoft.AspNetCore.Mvc;
 
 namespace dotnet_server.Controllers;
@@ -7,11 +8,13 @@ namespace dotnet_server.Controllers;
 public class RoomController : ControllerBase
 {
     private readonly ILogger<RoomController> _logger;
+    private readonly IConfiguration _configuration;
     private readonly RoomManager _roomManager = new RoomManager();
 
-    public RoomController(ILogger<RoomController> logger)
+    public RoomController(ILogger<RoomController> logger, IConfiguration configuration)
     {
         _logger = logger;
+        _configuration = configuration;
     }
 
     [HttpGet("GetAll")]
@@ -30,6 +33,27 @@ public class RoomController : ControllerBase
         }
     }
 
+    [HttpGet("GetAllDetails")]
+    public IActionResult GetAllDetails([FromHeader] string globalAdminToken)
+    {
+        try
+        {   
+            if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
+            IEnumerable<Room> rooms = _roomManager.GetAllRooms();
+
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(rooms));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
     [HttpPost("Create")]
     public IActionResult Create([FromBody] RoomCreateInput input)
     {
@@ -39,8 +63,8 @@ public class RoomController : ControllerBase
             {   
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
-
-            Room room = new Room(input.RoomName, input.Password);
+    
+            Room room = new Room(input.RoomName, input.RoomPassword);
 
             bool roomAdded = _roomManager.AddRoom(room);
 
@@ -72,6 +96,4 @@ public class RoomController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
     }
-
-    
 }

@@ -4,6 +4,7 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { useEffect, useState } from "react";
+import { useAppSelector } from "../redux/hooks";
 
 export interface RoomListProps {
   list: Room[];
@@ -14,6 +15,7 @@ export interface RoomListProps {
 export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }: RoomListProps) {
   const [privateRoomPassword, setPrivateRoomPassword] = useState<string>("");
   const [isEnterPrivateRoomButtonEnabled, setIsEnterPrivateRoomButtonEnabled] = useState<boolean>(false);
+  const userState = useAppSelector((state) => state.userState);
 
   useEffect(() => {
     if (privateRoomPassword.length > 0) {
@@ -40,8 +42,8 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
           <li
             key={index}
             className="list-group-item mt-1 py-2"
-            style={room.occupiedSlots !== room.totalSlots ? availableRoomStyles : fullRoomStyles}
-            onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public) ? () => onPublicRoomClick(room) : undefined}
+            style={(room.occupiedSlots === room.totalSlots || userState.username.length < 3) ? fullRoomStyles : availableRoomStyles}
+            onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public && userState.username.length >= 3) ? () => onPublicRoomClick(room) : undefined}
           >
             <div
             {
@@ -56,13 +58,14 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
               <h6><BsFillPeopleFill /> {`${room.occupiedSlots}/${room.totalSlots}`}</h6>
             </div>
             {
-              (room.roomType === RoomTypesEnum.private && room.occupiedSlots !== room.totalSlots) &&
+              (room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.private && userState.username.length >= 3) &&
                 <div className="collapse" id={`collapseExample-${room.roomHash}`}>
                   <div className="d-flex">
                     <InputForm
                       classNames={"form-control mx-1"}
                       placeholder={"Enter password"}
                       value={privateRoomPassword}
+                      trim={true}
                       onChange={(value: string) => setPrivateRoomPassword(value)}
                     />
                     <Button

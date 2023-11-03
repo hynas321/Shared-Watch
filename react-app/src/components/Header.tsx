@@ -1,51 +1,34 @@
 import { BsFillCameraReelsFill } from "react-icons/bs";
-import Button from "./Button";
-import { useState } from "react";
-import Dropdown from "./Dropdown";
-import Friends from "./Friends";
+import { InputForm } from "./InputForm";
+import { useAppSelector } from "../redux/hooks";
+import { useDispatch } from "react-redux";
+import { updatedUsername } from "../redux/slices/userState-slice";
 
 export default function Header() {
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [username] = useState<string>("Username");
+  const userState = useAppSelector((state) => state.userState);
+  const dispatch = useDispatch();
 
   return (
     <nav className="navbar navbar-dark bg-dark mb-3">
       <a className="navbar-brand mx-3" href="/"><i><b>SharedWatch</b></i> <BsFillCameraReelsFill /></a>
-      <div className="d-flex align-items-center">
+      <div className="d-flex align-items-center mx-3">
         {
-          !isLoggedIn &&
+          !userState.isInRoom &&
           <>
-            <Button
-              text={"Log in"}
-              classNames={"btn btn-primary"}
-              styles={{}}
-              onClick={() => setIsLoggedIn(true)}
-            />
-            <Button
-              text={"Sign up"}
-              classNames={"btn btn-secondary mx-3"}
-              styles={{}}
-              onClick={() => setIsLoggedIn(true)}
+            <span className="text-white" style={{marginRight: "15px"}}>Your username: </span>
+            <InputForm
+              classNames={"rounded-3"}
+              placeholder={"Type here"}
+              value={userState.username}
+              trim={true}
+              onChange={(value: string) => dispatch(updatedUsername(value))}
             />
           </>
         }
         {
-          isLoggedIn &&
-          <>
-            <span className="text-white mx-3">{username}</span>
-            <Dropdown
-              title={"Friends"}
-              body={<Friends />}
-            />
-            <Button
-              text={"Log out"}
-              classNames={"btn btn-secondary mx-3"}
-              styles={{}}
-              onClick={() => setIsLoggedIn(false)}
-            />
-          </>
+          userState.isInRoom &&
+          <span className="text-white" style={{marginRight: "15px"}}><b>{userState.username}</b></span>
         }
-
       </div>
     </nav>
   )
