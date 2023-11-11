@@ -8,10 +8,8 @@ import { InputForm } from "./InputForm";
 import Switch from "./Switch";
 import { HttpManager } from "../classes/HttpManager";
 import { useDispatch } from "react-redux";
-import { updatedIsInRoom, updatedUsername } from "../redux/slices/userState-slice";
+import { updatedIsInRoom } from "../redux/slices/userState-slice";
 import { useAppSelector } from "../redux/hooks";
-import Alert from "./Alert";
-import { BsFillCameraReelsFill } from "react-icons/bs";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -103,23 +101,12 @@ export default function MainView() {
   return (
     <div className="container">
       <div className="row justify-content-center">
-      <div className="main-menu-panel d-block justify-content-center text-center mb-3">
-          <h2 className="text-white font-border"><b>Shared Watch</b> <BsFillCameraReelsFill /></h2>
-            <span className="text-white" style={{marginRight: "15px"}}>Your username: </span>
-              <InputForm
-                classNames={"rounded-3"}
-                placeholder={"Type here"}
-                value={userState.username}
-                trim={true}
-                onChange={(value: string) => dispatch(updatedUsername(value))}
-              />
-          </div>
         <div className="main-menu-panel col-xl-6 col-lg-6 col-md-8 col-10 bg-dark py-3 px-5 rounded-4">
-          <h3 className="text-white text-center ">Rooms</h3>
-          <div className="d-flex justify-content-between align-items-center">
+          <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
+          <div className="d-flex justify-content-center">
             <div>
               <InputForm
-                classNames={"rounded-3"}
+                classNames={`form-control rounded-3 ${userState.username.length < 3 && "disabled"}`}
                 placeholder={"Search room name"}
                 value={searchText}
                 trim={false}
@@ -129,26 +116,22 @@ export default function MainView() {
                 <Switch
                   label={"Show only available rooms"}
                   defaultIsChecked={displayOnlyAvailableRooms as boolean}
-                  isEnabled={true}
+                  isEnabled={userState.username.length >= 3}
                   onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
                 />
               </div>
             </div>
-            <div className="text-center">
+            <div>
               <CreateRoomModal
-                title={"Create new room"}
+                title={"Create room"}
                 acceptText="Create"
                 declineText="Go back"
               />
             </div>
           </div>
           {
-            userState.username.length < 3 &&
-            <h6 className="text-info text-center mt-1">Enter username with at least 3 characters to access rooms</h6>
-          }
-          {
             displayedRooms.length === 0 &&
-            <h5 className="text-danger text-center mt-3">No rooms found</h5>
+              <h5 className="text-danger text-center mt-5 mb-5"><b><i>No rooms found</i></b></h5>
           }
           {
             displayedRooms.length !== 0 &&

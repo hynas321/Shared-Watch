@@ -2,14 +2,14 @@ import axios from "axios";
 import { RoomCreateInput } from "../types/HttpTypes/Input/RoomCreateInput";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { Room } from "../types/Room";
-import { AuthorizationManager } from "./AuthorizationManager";
+import { LocalStorageManager } from "./LocalStorageManager";
 import { HttpApiEndpoints } from "./HttpApiEndpoints";
 import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
 
 export class HttpManager {
   private httpServerUrl = "http://localhost:5050";
-  private authorizationManager = new AuthorizationManager();
+  private authorizationManager = new LocalStorageManager();
 
   async getAllRooms(): Promise<Room[]> {
     try {
@@ -86,6 +86,7 @@ export class HttpManager {
     try {
       const authorizationToken = this.authorizationManager.getAuthorizationToken();
 
+      console.log(authorizationToken);
       const response = await fetch(`${this.httpServerUrl}/${HttpApiEndpoints.leaveRoom}/${roomHash}`, {
         method: 'DELETE',
         headers: {

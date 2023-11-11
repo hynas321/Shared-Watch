@@ -9,20 +9,22 @@ export default function Header() {
   const dispatch = useDispatch();
 
   return (
-    <nav className="navbar navbar-dark bg-dark mb-4">
-      <a className="navbar-brand mx-3" href="/"></a>
-      <div className="d-flex align-items-center mx-3">
-        {
-          !userState.isInRoom &&
-          <>
-
-          </>
-        }
-        {
-          userState.isInRoom &&
-          <span className="text-white" style={{marginRight: "15px"}}><b>{userState.username}</b></span>
-        }
-      </div>
-    </nav>
+<nav className="navbar navbar-dark bg-dark mb-3">
+  <div className="d-flex align-items-center">
+    <a className="navbar-brand ms-3" href="/"><i><b>SharedWatch</b></i> <BsFillCameraReelsFill /></a>
+    {!userState.isInRoom &&
+      <InputForm
+        classNames={`form-control form-control-sm rounded-3 ms-3 ${userState.username.length < 3 ? "is-invalid" : "is-valid"}`}
+        placeholder={"Enter your username"}
+        value={userState.username}
+        trim={true}
+        onChange={(value: string) => dispatch(updatedUsername(value))}
+      />
+    }
+    {userState.isInRoom &&
+      <span className="text-white ms-3">Your username: <b>{userState.username}</b></span>
+    }
+  </div>
+</nav>
   )
 }

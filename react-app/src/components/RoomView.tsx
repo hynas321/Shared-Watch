@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import ControlPanel from "./ControlPanel";
 import VideoPlayer from "./VideoPlayer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { updatedIsInRoom } from "../redux/slices/userState-slice";
 import { HttpManager } from "../classes/HttpManager";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import { useAppSelector } from "../redux/hooks";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 
 export default function RoomView() {
+  const [userIsLeavingRoom, setUserIsLeavingRoom] = useState<boolean>(false);
   const userState = useAppSelector((state) => state.userState);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -28,22 +29,22 @@ export default function RoomView() {
   }
 
   const leaveRoom = async() => {
-    console.log(roomHash);
     const leaveRoomOutput = await httpManager.leaveRoom(roomHash);
 
-    if (!leaveRoomOutput) {
-      //Todo
+    if (leaveRoomOutput) {
+      setUserIsLeavingRoom(true);
     }
 
-    //Todo
+    navigate(`${ClientEndpoints.mainMenu}`);
   }
 
   useEffect(() => {
-    console.log(`roomHash: ${roomHash}`);
-    console.log(`roomPassword: ${roomPassword}`);
-    console.log(`username: ${userState.username}`);
     joinRoom();
     return () => {
+      if (!userIsLeavingRoom) {
+        return;
+      }
+
       leaveRoom();
     };
   }, []);

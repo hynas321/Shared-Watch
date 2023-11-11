@@ -1,10 +1,13 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
+import { LocalStorageManager } from "../../classes/LocalStorageManager";
 
 export interface UserState {
   username: string,
   isAdmin: boolean,
   isInRoom: boolean
 };
+
+const localStorageManager = new LocalStorageManager();
 
 const initialState: UserState = {
   username: "",
@@ -18,7 +21,7 @@ const userStateSlice = createSlice({
   reducers: {
     updatedUsername(state, action: PayloadAction<string>) {
       state.username = action.payload;
-      localStorage.setItem("username", state.username);
+      localStorageManager.setUsername(action.payload);
     },
     updatedIsAdmin(state, action: PayloadAction<boolean>) {
       state.isAdmin = action.payload;

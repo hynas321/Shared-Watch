@@ -6,6 +6,7 @@ import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { useAppSelector } from "../redux/hooks";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -20,7 +21,8 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const userState = useAppSelector((state) => state.userState);
   const navigate = useNavigate();
 
-  const httpManager: HttpManager = new HttpManager();
+  const httpManager = new HttpManager();
+  const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
     if (roomName.length >= 3) {
@@ -39,18 +41,26 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       return;
     }
 
-    localStorage.setItem("accessToken", createRoomOutput.accessToken);
-    navigate(`${ClientEndpoints.room}/${createRoomOutput.roomHash}`);
+    localStorageManager.setAuthorizationToken(createRoomOutput.accessToken);
+
+    navigate(
+      `${ClientEndpoints.room}/${createRoomOutput.roomHash}`, {
+        state: {
+          roomHash: createRoomOutput.roomHash,
+          roomPassword: roomPassword
+        }
+      }
+    );
   }
 
   return (
     <>
       <button
-        className={`btn btn-success ${userState.username.length < 3 && "disabled"}`}
+        className={`btn btn-success ms-3 ${userState.username.length < 3 && "disabled"}`}
         data-bs-toggle="modal"
         data-bs-target="#exampleModal"
       >
-        Create new room
+        {title}
       </button>
       <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog">
         <div className="modal-dialog" role="document">

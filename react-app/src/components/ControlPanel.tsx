@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { HttpManager } from "../classes/HttpManager";
-import { AuthorizationManager } from "../classes/AuthorizationManager";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export interface ControlPanelProps {
   roomHash: string
@@ -29,7 +29,7 @@ export default function ControlPanel({roomHash}: ControlPanelProps) {
   const navigate = useNavigate();
 
   const httpManager = new HttpManager();
-  const authorizationManager = new AuthorizationManager();
+  const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
     //fetch number values
