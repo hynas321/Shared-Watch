@@ -13,11 +13,33 @@ public class RoomManager {
             }
 
             rooms.Add(room);
+
             return true;
         }
         catch (Exception)
         {
             return false;
+        }
+    }
+
+    public Room RemoveRoom(string roomHash)
+    {
+        try
+        {
+            Room room = GetRoom(roomHash);
+
+            if (room == null)
+            {
+                return null;
+            }
+
+            rooms.Remove(room);
+
+            return room;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 
@@ -47,23 +69,30 @@ public class RoomManager {
         }
     }
 
-    public User GetUser(string roomHash, string accessToken)
+    public User GetUser(string roomHash, string authorizationToken)
     {
-        Room room = GetRoom(roomHash);
+        try
+        {
+            Room room = GetRoom(roomHash);
 
-        if (room == null)
+            if (room == null)
+            {
+                return null;
+            }
+
+            User user = room.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return user;
+        }
+        catch (Exception)
         {
             return null;
         }
-
-        User user = room.Users.FirstOrDefault(u => u.AccessToken == accessToken);
-
-        if (user == null)
-        {
-            return null;
-        }
-
-        return user;
     }
 
     public bool AddUser(string roomHash, User user)
@@ -87,7 +116,7 @@ public class RoomManager {
         }
     }
 
-    public User DeleteUser(string roomHash, string accessToken)
+    public User DeleteUser(string roomHash, string authorizationToken)
     {
         try
         {
@@ -98,7 +127,7 @@ public class RoomManager {
                 return null;
             }
 
-            User user = room.Users.FirstOrDefault(u => u.AccessToken == accessToken);
+            User user = room.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
 
             if (user == null)
             {

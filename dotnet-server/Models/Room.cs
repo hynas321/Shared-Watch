@@ -1,5 +1,3 @@
-using System.Runtime.InteropServices;
-
 public class Room
 {
     public string RoomHash { get; set; }
@@ -7,6 +5,7 @@ public class Room
     public string RoomPassword { get; set; }
     public List<ChatMessage> ChatMessages { get; set; }
     public List<QueuedVideo> QueuedVideos { get; set; }
+    public List<User> ActiveUsers { get; set; }
     public List<User> Users { get; set; }
     public RoomSettings RoomSettings { get; set; }
     public VideoPlayerState VideoPlayerState { get; set; }

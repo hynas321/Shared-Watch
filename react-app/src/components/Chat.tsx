@@ -59,6 +59,7 @@ export default function Chat({onChange}: ChatProps) {
         <InputForm
           classNames="form-control rounded-0"
           value={currentChatMessageText}
+          trim={false}
           placeholder="Enter your message"
           onChange={handleTextInputChange}
           onKeyDown={handleEnterPress}

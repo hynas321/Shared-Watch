@@ -35,11 +35,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const handleCreateRoomButtonClick = async () => {
     const createRoomOutput: RoomCreateOutput | null = await httpManager.createRoom(roomName, roomPassword, userState.username);
 
-    if (createRoomOutput === null) {
+    if (createRoomOutput == null) {
       return;
     }
 
-    console.log(createRoomOutput);
     localStorage.setItem("accessToken", createRoomOutput.accessToken);
     navigate(`${ClientEndpoints.room}/${createRoomOutput.roomHash}`);
   }

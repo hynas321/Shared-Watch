@@ -54,6 +54,7 @@ export default function Settings() {
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
                   value={inputFormPassword}
+                  trim={false}
                   onChange={(value: string) => setInputFormPassword(value)}
                   onKeyDown={handleSetRoomPrivateEnterClick}
                 />

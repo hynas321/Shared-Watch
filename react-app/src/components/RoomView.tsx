@@ -3,12 +3,49 @@ import ControlPanel from "./ControlPanel";
 import VideoPlayer from "./VideoPlayer";
 import { useEffect } from "react";
 import { updatedIsInRoom } from "../redux/slices/userState-slice";
+import { HttpManager } from "../classes/HttpManager";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAppSelector } from "../redux/hooks";
+import { ClientEndpoints } from "../classes/ClientEndpoints";
 
 export default function RoomView() {
+  const userState = useAppSelector((state) => state.userState);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { roomHash, roomPassword } = location.state ?? "";
+
+  const httpManager = new HttpManager();
+
+  const joinRoom = async () => {
+    const joinRoomOutput = await httpManager.joinRoom(roomHash, roomPassword, userState.username);
+
+    if (joinRoomOutput === null) {
+      navigate(`${ClientEndpoints.mainMenu}`);
+    }
+
+    dispatch(updatedIsInRoom(true));
+  }
+
+  const leaveRoom = async() => {
+    console.log(roomHash);
+    const leaveRoomOutput = await httpManager.leaveRoom(roomHash);
+
+    if (!leaveRoomOutput) {
+      //Todo
+    }
+
+    //Todo
+  }
 
   useEffect(() => {
-    dispatch(updatedIsInRoom(true));
+    console.log(`roomHash: ${roomHash}`);
+    console.log(`roomPassword: ${roomPassword}`);
+    console.log(`username: ${userState.username}`);
+    joinRoom();
+    return () => {
+      leaveRoom();
+    };
   }, []);
 
   return (
@@ -21,7 +58,7 @@ export default function RoomView() {
           />
         </div>
         <div className="col-xl-4 col-lg-12 mt-2">
-          <ControlPanel />
+          <ControlPanel roomHash={roomHash} />
         </div>
       </div>
     </div>

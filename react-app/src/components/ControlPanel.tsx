@@ -12,8 +12,14 @@ import { User } from "../types/User";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
+import { HttpManager } from "../classes/HttpManager";
+import { AuthorizationManager } from "../classes/AuthorizationManager";
 
-export default function ControlPanel() {
+export interface ControlPanelProps {
+  roomHash: string
+}
+
+export default function ControlPanel({roomHash}: ControlPanelProps) {
   const [activePanel, setActivePanel] = useState<PanelsEnum>(PanelsEnum.Chat);
   const [roomType] = useState<RoomTypesEnum>(RoomTypesEnum.private);
   const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
@@ -21,6 +27,9 @@ export default function ControlPanel() {
   const [usersCount, setUsersCount] = useState<number>(0);
   const [maxUsersCount] = useState<number>(10);
   const navigate = useNavigate();
+
+  const httpManager = new HttpManager();
+  const authorizationManager = new AuthorizationManager();
 
   useEffect(() => {
     //fetch number values
@@ -42,8 +51,16 @@ export default function ControlPanel() {
     setUsersCount(users.length);
   }
 
-  const handleLeaveRoomButtonClick = () => {
+  const handleLeaveRoomButtonClick = async () => {
     navigate(ClientEndpoints.mainMenu); 
+  
+    const leaveRoomOutput = await httpManager.leaveRoom(roomHash);
+
+    if (!leaveRoomOutput) {
+      //Todo
+    }
+
+    //Todo
   }
 
   return (

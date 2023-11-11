@@ -1,5 +1,6 @@
 using Dotnet.Server.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 
 namespace dotnet_server.Controllers;
 
@@ -37,7 +38,7 @@ public class RoomController : ControllerBase
     public IActionResult GetAllDetails([FromHeader] string globalAdminToken)
     {
         try
-        {   
+        {
             if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
             {
                 return StatusCode(StatusCodes.Status401Unauthorized);
@@ -73,11 +74,15 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status409Conflict);
             }
             
-            User user = new User(input.Username, true);
+            User user = new User(
+                username: input.Username,
+                isAdmin: true,
+                isInRoom: false
+            );
 
-            bool userAdded = _roomManager.AddUser(room.RoomHash, user);
+            bool isUserAdded = _roomManager.AddUser(room.RoomHash, user);
 
-            if (!userAdded)
+            if (!isUserAdded)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
@@ -85,10 +90,119 @@ public class RoomController : ControllerBase
             RoomCreateOutput output = new RoomCreateOutput()
             {
                 RoomHash = room.RoomHash,
-                AccessToken = user.AccessToken,
+                AccessToken = user.AuthorizationToken,
             };
 
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(output));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpPost("Join/{roomHash}")]
+    public IActionResult Join([FromBody] RoomJoinInput input, [FromRoute] string roomHash)
+    {
+        try
+        {
+            string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+
+            if (!ModelState.IsValid || roomHash == "")
+            {   
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            Room room = _roomManager.GetRoom(roomHash);
+
+            if (room == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            if (room.RoomPassword != input.RoomPassword)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
+            if (room.Users.Any(u => u.Username == input.Username && u.IsInRoom == true))
+            {   
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            User user = _roomManager.GetUser(roomHash, authorizationToken);
+            RoomJoinOutput output = new RoomJoinOutput();
+
+            /*
+            if (user != null && authorizationToken != user.AuthorizationToken)
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            if (user != null && authorizationToken == user.AuthorizationToken && user.IsInRoom == true)
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            if (user != null && authorizationToken == user.AuthorizationToken && user.IsInRoom == false)
+            {
+                output.AccessToken = authorizationToken;
+                user.IsInRoom = true;
+                return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
+            }*/
+
+            User newUser = new User(
+                input.Username,
+                isInRoom: true,
+                isAdmin: false
+            );
+
+            output.AccessToken = newUser.AuthorizationToken;
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpDelete("Leave/{roomHash}")]
+    public IActionResult Leave([FromRoute] string roomHash)
+    {
+        try
+        {
+            string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+
+            if (roomHash == "" || authorizationToken == "")
+            {   
+                return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            Room room = _roomManager.GetRoom(roomHash);
+
+            if (room == null)
+            {
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            User user = _roomManager.GetUser(roomHash, authorizationToken);
+
+            if (user == null)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
+            user.IsInRoom = false;
+
+            //Remove room if no user is inside
+            if (room.Users.Count(u => u.IsInRoom == true) == 0)
+            {
+                _roomManager.RemoveRoom(roomHash);
+            }
+
+            return StatusCode(StatusCodes.Status200OK);
         }
         catch (Exception ex)
         {
