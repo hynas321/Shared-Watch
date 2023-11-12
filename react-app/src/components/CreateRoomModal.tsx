@@ -7,6 +7,9 @@ import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { useAppSelector } from "../redux/hooks";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
+import { RoomTypesEnum } from "../enums/RoomTypesEnum";
+import { useDispatch } from "react-redux";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -20,6 +23,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
   const userState = useAppSelector((state) => state.userState);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
@@ -43,14 +47,15 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
 
     localStorageManager.setAuthorizationToken(createRoomOutput.accessToken);
 
-    navigate(
-      `${ClientEndpoints.room}/${createRoomOutput.roomHash}`, {
-        state: {
-          roomHash: createRoomOutput.roomHash,
-          roomPassword: roomPassword
-        }
-      }
-    );
+    const roomStateObj: RoomState = {
+      roomHash: createRoomOutput.roomHash,
+      roomName: roomName,
+      roomType: roomPassword.length === 0 ? RoomTypesEnum.public : RoomTypesEnum.private,
+      password: roomPassword,
+    };
+
+    dispatch(updatedRoomState(roomStateObj));
+    navigate(`${ClientEndpoints.room}/${createRoomOutput.roomHash}`);
   }
 
   return (
@@ -76,6 +81,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
                   placeholder="Enter room name (min 3 characters)"
                   value={roomName}
                   trim={false}
+                  isEnabled={true}
                   onChange={(value: string) => setRoomName(value)}
                 />
             </div>
@@ -86,6 +92,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
                 placeholder={"Enter password (private room)"}
                 value={roomPassword}
                 trim={true}
+                isEnabled={true}
                 onChange={(value: string) => setRoomPassword(value)}
               />
             </div>

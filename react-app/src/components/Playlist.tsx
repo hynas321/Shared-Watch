@@ -67,6 +67,7 @@ export default function Playlist({onChange}: PlaylistProps) {
           value={currentVideoUrlText}
           trim={true}
           placeholder="Paste video URL"
+          isEnabled={true}
           onChange={handleTextInputChange}
           onKeyDown={handleEnterPress}
         />

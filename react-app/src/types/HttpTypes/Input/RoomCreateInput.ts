@@ -1,5 +1,5 @@
 export type RoomCreateInput = {
-    roomName: string,
-    roomPassword: string,
-    username: string
+  roomName: string,
+  roomPassword: string,
+  username: string
 }

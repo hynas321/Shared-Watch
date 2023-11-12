@@ -55,6 +55,7 @@ export default function Settings() {
                   placeholder={"Enter password (private room)"}
                   value={inputFormPassword}
                   trim={false}
+                  isEnabled={true}
                   onChange={(value: string) => setInputFormPassword(value)}
                   onKeyDown={handleSetRoomPrivateEnterClick}
                 />

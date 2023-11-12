@@ -38,7 +38,6 @@ function App() {
 
   return (
     <div className="bg-image background-image">
-      <Header />
       <RouterProvider router={router}/>
     </div>
   )

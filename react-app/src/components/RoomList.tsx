@@ -26,23 +26,14 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
     }
   }, [privateRoomPassword]);
 
-  const availableRoomStyles = {
-    cursor: "pointer"
-  }
-
-  const fullRoomStyles = {
-    cursor: "not-allowed",
-    color: "darkgray"
-  }
-
   return (
     <div className="list-group rounded-3">
       {
         list.map((room, index) => (
           <li
             key={index}
-            className="list-group-item mt-1 py-2"
-            style={(room.occupiedSlots === room.totalSlots || userState.username.length < 3) ? fullRoomStyles : availableRoomStyles}
+            className={`list-group-item mt-1 py-2 ${(room.occupiedSlots === room.totalSlots || userState.username.length < 3) ? "unavailable-element" : "available-element"}`}
+            style={(room.occupiedSlots === room.totalSlots || userState.username.length < 3) ? {color: "darkgray"} : {}}
             onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public && userState.username.length >= 3) ? () => onPublicRoomClick(room) : undefined}
           >
             <div
@@ -66,6 +57,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
                       placeholder={"Enter password"}
                       value={privateRoomPassword}
                       trim={true}
+                      isEnabled={true}
                       onChange={(value: string) => setPrivateRoomPassword(value)}
                     />
                     <Button

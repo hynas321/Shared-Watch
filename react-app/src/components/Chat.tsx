@@ -61,6 +61,7 @@ export default function Chat({onChange}: ChatProps) {
           value={currentChatMessageText}
           trim={false}
           placeholder="Enter your message"
+          isEnabled={true}
           onChange={handleTextInputChange}
           onKeyDown={handleEnterPress}
         />

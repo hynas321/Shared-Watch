@@ -72,6 +72,14 @@
   overflow-y: auto;
 }
 
+.available-element {
+  cursor: pointer;
+}
+
+.unavailable-element {
+  cursor: not-allowed;
+}
+
 .box-container {
   display: flex;
 }

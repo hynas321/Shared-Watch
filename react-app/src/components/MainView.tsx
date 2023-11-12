@@ -10,6 +10,8 @@ import { HttpManager } from "../classes/HttpManager";
 import { useDispatch } from "react-redux";
 import { updatedIsInRoom } from "../redux/slices/userState-slice";
 import { useAppSelector } from "../redux/hooks";
+import Header from "./Header";
+import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -91,60 +93,80 @@ export default function MainView() {
   }, [displayOnlyAvailableRooms]);
 
   const handlePublicRoomListItemClick = (item: Room) => {
-    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { roomHash: item.roomHash, roomPassword: "" } });
+    const roomStateObj: RoomState = {
+      roomHash: item.roomHash,
+      roomName: item.roomName,
+      roomType: item.roomType,
+      password: "",
+    };
+
+    dispatch(updatedRoomState(roomStateObj));
+    navigate(`${ClientEndpoints.room}/${item.roomHash}`);
   };
 
   const handlePrivateRoomListItemClick = (item: Room, password: string) => {
-    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { roomHash: item.roomHash, roomPassword: password } });
+    const roomStateObj: RoomState = {
+      roomHash: item.roomHash,
+      roomName: item.roomName,
+      roomType: item.roomType,
+      password: password,
+    };
+
+    dispatch(updatedRoomState(roomStateObj));
+    navigate(`${ClientEndpoints.room}/${item.roomHash}`);
   }
 
   return (
-    <div className="container">
-      <div className="row justify-content-center">
-        <div className="main-menu-panel col-xl-6 col-lg-6 col-md-8 col-10 bg-dark py-3 px-5 rounded-4">
-          <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
-          <div className="d-flex justify-content-center">
-            <div>
-              <InputForm
-                classNames={`form-control rounded-3 ${userState.username.length < 3 && "disabled"}`}
-                placeholder={"Search room name"}
-                value={searchText}
-                trim={false}
-                onChange={(value: string) => setSearchText(value)}
-              />
-              <div className="mt-3 mb-3">
-                <Switch
-                  label={"Show only available rooms"}
-                  defaultIsChecked={displayOnlyAvailableRooms as boolean}
+    <>
+      <Header />
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="main-menu-panel col-xl-6 col-lg-6 col-md-8 col-10 bg-dark py-3 px-5 rounded-4">
+            <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
+            <div className="d-flex justify-content-center">
+              <div>
+                <InputForm
+                  classNames="form-control rounded-3 disabled"
+                  placeholder={"Search room name"}
+                  value={searchText}
+                  trim={false}
                   isEnabled={userState.username.length >= 3}
-                  onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
+                  onChange={(value: string) => setSearchText(value)}
+                />
+                <div className="mt-3 mb-3">
+                  <Switch
+                    label={"Show only available rooms"}
+                    defaultIsChecked={displayOnlyAvailableRooms as boolean}
+                    isEnabled={userState.username.length >= 3}
+                    onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
+                  />
+                </div>
+              </div>
+              <div>
+                <CreateRoomModal
+                  title={"Create room"}
+                  acceptText="Create"
+                  declineText="Go back"
                 />
               </div>
             </div>
-            <div>
-              <CreateRoomModal
-                title={"Create room"}
-                acceptText="Create"
-                declineText="Go back"
-              />
-            </div>
+            {
+              displayedRooms.length === 0 &&
+                <h5 className="text-danger text-center mt-5 mb-5"><b><i>No rooms found</i></b></h5>
+            }
+            {
+              displayedRooms.length !== 0 &&
+              <div className="main-menu-list">
+                <RoomList
+                  list={displayedRooms}
+                  onPublicRoomClick={handlePublicRoomListItemClick}
+                  onPrivateRoomClick={handlePrivateRoomListItemClick}
+                />
+              </div>
+            }
           </div>
-          {
-            displayedRooms.length === 0 &&
-              <h5 className="text-danger text-center mt-5 mb-5"><b><i>No rooms found</i></b></h5>
-          }
-          {
-            displayedRooms.length !== 0 &&
-            <div className="main-menu-list">
-              <RoomList
-                list={displayedRooms}
-                onPublicRoomClick={handlePublicRoomListItemClick}
-                onPrivateRoomClick={handlePrivateRoomListItemClick}
-              />
-            </div>
-          }
         </div>
       </div>
-    </div>
+    </>
   )
 }
