@@ -12,6 +12,10 @@ import { updatedIsInRoom } from "../redux/slices/userState-slice";
 import { useAppSelector } from "../redux/hooks";
 import Header from "./Header";
 import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { PromiseOutput } from "../types/HttpTypes/PromiseOutput";
+import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -22,13 +26,18 @@ export default function MainView() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  
   const httpManager: HttpManager = new HttpManager();
 
   const fetchRooms = async () => {
-    const updatedRooms = await httpManager.getAllRooms();
+    const getAllRoomsOutput: PromiseOutput = await httpManager.getAllRooms();
 
-    setRooms(updatedRooms);
-    setDisplayedRooms(updatedRooms);
+    if (getAllRoomsOutput.status !== HttpStatusCodes.OK) {
+      toast.error("Could not load the rooms");
+    }
+
+    setRooms(getAllRoomsOutput?.data ?? []);
+    setDisplayedRooms(getAllRoomsOutput?.data ?? []);
   }
   
   useEffect(() => {
@@ -117,38 +126,43 @@ export default function MainView() {
   }
 
   return (
-    <>
-      <Header />
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="main-menu-panel col-xl-6 col-lg-6 col-md-8 col-10 bg-dark py-3 px-5 rounded-4">
-            <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
-            <div className="d-flex justify-content-center">
-              <div>
+  <>
+    <Header />
+    <ToastContainer
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar={false}
+      closeOnClick={true}
+      draggable={true}
+      pauseOnHover={false}
+      theme="dark"
+    />
+    <div className="container">
+      <div className="row justify-content-center">
+        <div className="main-menu-panel col-xl-6 col-lg-6 col-md-8 col-10 bg-dark py-3 px-5 rounded-4">
+          <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
+            <div className="d-flex justify-content-center align-items-center">
                 <InputForm
                   classNames="form-control rounded-3 disabled"
-                  placeholder={"Search room name"}
+                  placeholder="Search room name"
                   value={searchText}
                   trim={false}
                   isEnabled={userState.username.length >= 3}
                   onChange={(value: string) => setSearchText(value)}
                 />
-                <div className="mt-3 mb-3">
-                  <Switch
-                    label={"Show only available rooms"}
-                    defaultIsChecked={displayOnlyAvailableRooms as boolean}
-                    isEnabled={userState.username.length >= 3}
-                    onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
-                  />
-                </div>
-              </div>
-              <div>
                 <CreateRoomModal
-                  title={"Create room"}
+                  title="Create room"
                   acceptText="Create"
                   declineText="Go back"
                 />
-              </div>
+            </div>
+            <div className="mt-3 mb-3">
+              <Switch
+                label="Show only available rooms"
+                defaultIsChecked={displayOnlyAvailableRooms as boolean}
+                isEnabled={userState.username.length >= 3}
+                onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
+              />
             </div>
             {
               displayedRooms.length === 0 &&
@@ -156,7 +170,7 @@ export default function MainView() {
             }
             {
               displayedRooms.length !== 0 &&
-              <div className="main-menu-list">
+              <div className="main-menu-list mb-3">
                 <RoomList
                   list={displayedRooms}
                   onPublicRoomClick={handlePublicRoomListItemClick}

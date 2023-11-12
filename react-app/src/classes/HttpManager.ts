@@ -1,35 +1,40 @@
 import axios from "axios";
 import { RoomCreateInput } from "../types/HttpTypes/Input/RoomCreateInput";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
-import { Room } from "../types/Room";
 import { LocalStorageManager } from "./LocalStorageManager";
 import { HttpApiEndpoints } from "./HttpApiEndpoints";
 import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
+import { PromiseOutput as PromiseOutput } from "../types/HttpTypes/PromiseOutput";
+import { Room } from "../types/Room";
 
 export class HttpManager {
   private httpServerUrl = "http://localhost:5050";
   private authorizationManager = new LocalStorageManager();
 
-  async getAllRooms(): Promise<Room[]> {
+  async getAllRooms(): Promise<PromiseOutput> {
     try {
-        const response = await fetch(`${this.httpServerUrl}/${HttpApiEndpoints.getAllRooms}`, {
-          method: 'GET',
-          headers: {'Content-Type': 'application/json'}
-        });
+      const response = await axios.get(
+        `${this.httpServerUrl}/${HttpApiEndpoints.getAllRooms}`, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+
+      const output: PromiseOutput = {
+        status: response.status as number,
+        data: response.data as Room[]
+      }
   
-        if (response.status !== 200) {
-          return [] as Room[];
-        } 
-  
-        return await response.json() as Room[];
+      return output as PromiseOutput;
     }
-    catch (error) {
-      return [] as Room[];
+    catch (error: any) {
+      return { status: error.response.status, data: undefined } as PromiseOutput;
     }
   }
 
-  async createRoom(roomName: string, roomPassword: string, username: string): Promise<RoomCreateOutput | null> {
+  async createRoom(roomName: string, roomPassword: string, username: string): Promise<PromiseOutput> {
     try {
       const requestBody: RoomCreateInput = {
         roomName: roomName,
@@ -37,24 +42,28 @@ export class HttpManager {
         username: username
       };
 
-      const response = await fetch(`${this.httpServerUrl}/${HttpApiEndpoints.createRoom}`, {
-        method: 'POST',
-        body: JSON.stringify(requestBody),
-        headers: {'Content-Type': 'application/json'}
-      });
+      const response = await axios.post(
+        `${this.httpServerUrl}/${HttpApiEndpoints.createRoom}`,
+        requestBody, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }
+      );
 
-      if (response.status !== 201) {
-        return null;
-      } 
+      const output: PromiseOutput = {
+        status: response.status as number,
+        data: response.data as RoomCreateOutput
+      }
 
-      return await response.json() as RoomCreateOutput;
+      return output as PromiseOutput;
     }
-    catch (error) {
-      return null;
+    catch (error: any) {
+      return { status: error.response.status as number, data: undefined } as PromiseOutput;
     }
   }
 
-  async joinRoom(roomHash: string, roomPassword: string, username: string): Promise<RoomJoinOutput | null> {
+  async joinRoom(roomHash: string, roomPassword: string, username: string): Promise<PromiseOutput> {
     try {
       const requestBody: RoomJoinInput = {
         roomPassword: roomPassword,
@@ -69,40 +78,42 @@ export class HttpManager {
           },
         }
       );
-
-      if (response.status !== 200) {
-        return null;
+      
+      const output: PromiseOutput = {
+        status: response.status as number,
+        data: response.data as RoomJoinOutput
       }
 
-      return response.data as RoomJoinOutput;
+      return output as PromiseOutput;
 
-    } catch (error) {
-      return null;
+    } catch (error: any) {
+      return { status: error.response.status as number, data: undefined } as PromiseOutput;
     }
   }
 
 
-  async leaveRoom(roomHash: string): Promise<boolean> {
+  async leaveRoom(roomHash: string): Promise<PromiseOutput> {
     try {
       const authorizationToken = this.authorizationManager.getAuthorizationToken();
 
-      console.log(authorizationToken);
-      const response = await fetch(`${this.httpServerUrl}/${HttpApiEndpoints.leaveRoom}/${roomHash}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authorizationToken}`
+      const response = await axios.delete(
+        `${this.httpServerUrl}/${HttpApiEndpoints.leaveRoom}/${roomHash}`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authorizationToken}`
+          }
         }
-      });
+      );
 
-      if (response.status !== 200) {
-        return false;
+      const output: PromiseOutput = {
+        status: response.status as number,
+        data: response.data as RoomJoinOutput
       }
 
-      return true;
-    }
-    catch {
-      return false;
+      return output as PromiseOutput;
+
+    } catch (error: any) {
+      return { status: error.response.status as number, data: undefined } as PromiseOutput;
     }
   }
 }

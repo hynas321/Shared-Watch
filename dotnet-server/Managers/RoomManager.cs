@@ -61,7 +61,7 @@ public class RoomManager {
                 room.RoomHash,
                 room.RoomName,
                 room.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private,
-                room.Users.Count,
+                room.Users.Count(u => u.IsInRoom == true),
                 room.RoomSettings.MaxUsers
             );
 
@@ -141,6 +141,34 @@ public class RoomManager {
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    public bool UpdateUserInRoom(string roomHash, string authorizationToken, bool isInRoom)
+    {
+      try
+        {
+            Room room = rooms.FirstOrDefault(r => r.RoomHash == roomHash);
+
+            if (room == null)
+            {
+                return false;
+            }
+
+            int userIndex = room.Users.FindIndex(u => u.AuthorizationToken == authorizationToken);
+
+            if (userIndex == -1)
+            {
+                return false;
+            }
+
+            room.Users[userIndex].IsInRoom = isInRoom;
+
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 }

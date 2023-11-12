@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Button from "./Button"
 import { InputForm } from "./InputForm";
 import { HttpManager } from "../classes/HttpManager";
-import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { useAppSelector } from "../redux/hooks";
@@ -10,6 +9,9 @@ import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { useDispatch } from "react-redux";
+import { PromiseOutput } from "../types/HttpTypes/PromiseOutput";
+import { HttpStatusCodes } from "../classes/HttpStatusCodes";
+import { toast } from "react-toastify";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -39,34 +41,46 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   }, [roomName]);
 
   const handleCreateRoomButtonClick = async () => {
-    const createRoomOutput: RoomCreateOutput | null = await httpManager.createRoom(roomName, roomPassword, userState.username);
+    const createRoomOutput: PromiseOutput = await httpManager.createRoom(roomName, roomPassword, userState.username);
+    
+    if (createRoomOutput.status !== HttpStatusCodes.CREATED) {
 
-    if (createRoomOutput == null) {
+      switch(createRoomOutput.status) {
+        case HttpStatusCodes.CONFLICT:
+          toast.error("The room with this name already exists");
+          break;
+        default:
+          toast.error("Could not create the room");
+          break;
+      }
+
       return;
     }
 
-    localStorageManager.setAuthorizationToken(createRoomOutput.accessToken);
+    localStorageManager.setAuthorizationToken(createRoomOutput.data.accessToken);
 
     const roomStateObj: RoomState = {
-      roomHash: createRoomOutput.roomHash,
+      roomHash: createRoomOutput.data.roomHash,
       roomName: roomName,
       roomType: roomPassword.length === 0 ? RoomTypesEnum.public : RoomTypesEnum.private,
       password: roomPassword,
     };
 
     dispatch(updatedRoomState(roomStateObj));
-    navigate(`${ClientEndpoints.room}/${createRoomOutput.roomHash}`);
+    navigate(`${ClientEndpoints.room}/${createRoomOutput.data.roomHash}`);
   }
 
   return (
     <>
-      <button
-        className={`btn btn-success ms-3 ${userState.username.length < 3 && "disabled"}`}
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        {title}
-      </button>
+      <div>
+        <button
+          className={`btn btn-success ms-3 ${userState.username.length < 3 && "disabled"}`}
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+          {title}
+        </button>
+      </div>
       <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog">
         <div className="modal-dialog" role="document">
           <div className="modal-content">

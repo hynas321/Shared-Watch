@@ -2,7 +2,6 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './App.css'
 import MainView from './components/MainView'
 import RoomView from './components/RoomView';
-import Header from './components/Header';
 import NotFoundView from './components/NotFoundView';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';

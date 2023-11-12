@@ -8,6 +8,10 @@ import { useNavigate } from "react-router-dom";
 import { useAppSelector } from "../redux/hooks";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import Header from "./Header";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { PromiseOutput } from "../types/HttpTypes/PromiseOutput";
+import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 
 export default function RoomView() {
   const dispatch = useDispatch();
@@ -18,9 +22,21 @@ export default function RoomView() {
   const httpManager = new HttpManager();
 
   const joinRoom = async () => {
-    const joinRoomOutput = await httpManager.joinRoom(roomState.roomHash, roomState.password, userState.username);
+    const joinRoomOutput: PromiseOutput = await httpManager.joinRoom(roomState.roomHash, roomState.password, userState.username);
 
-    if (joinRoomOutput === null) {
+    if (joinRoomOutput.status !== HttpStatusCodes.OK) {
+
+      switch(joinRoomOutput.status) {
+        case HttpStatusCodes.NOT_FOUND:
+          toast.error("Room not found");
+          break;
+        case HttpStatusCodes.CONFLICT:
+          toast.error("A user with your username already exists in the room");
+          break;
+        default:
+          toast.error("Could not join the room");
+      }
+
       navigate(`${ClientEndpoints.mainMenu}`);
     }
 

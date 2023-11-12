@@ -126,7 +126,12 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            if (room.Users.Any(u => u.Username == input.Username && u.IsInRoom == true))
+            if (room.RoomSettings.MaxUsers == room.Users.Count(u => u.IsInRoom == true))
+            {
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            if (room.Users.Any(u => u.Username == input.Username && u.IsInRoom == true && authorizationToken != u.AuthorizationToken))
             {   
                 return StatusCode(StatusCodes.Status409Conflict);
             }
@@ -159,6 +164,14 @@ public class RoomController : ControllerBase
             );
 
             output.AccessToken = newUser.AuthorizationToken;
+
+            bool isNewUserAdded = _roomManager.AddUser(roomHash, newUser);
+
+            if (!isNewUserAdded)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
         }
         catch (Exception ex)
@@ -194,7 +207,12 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            user.IsInRoom = false;
+            bool isUserInRoomUpdated = _roomManager.UpdateUserInRoom(roomHash, authorizationToken, false);
+
+            if (!isUserInRoomUpdated)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
             //Remove room if no user is inside
             if (room.Users.Count(u => u.IsInRoom == true) == 0)
