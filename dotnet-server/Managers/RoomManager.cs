@@ -95,6 +95,21 @@ public class RoomManager {
         }
     }
 
+    public IEnumerable<UserDTO> GetUsersDTO(string roomHash)
+    {
+        Room room = GetRoom(roomHash);
+
+        foreach (var user in room.Users)
+        {
+            UserDTO userDTO = new UserDTO(
+                user.Username,
+                user.IsAdmin
+            );
+
+            yield return userDTO;
+        }
+    }
+
     public bool AddUser(string roomHash, User user)
     {
         try

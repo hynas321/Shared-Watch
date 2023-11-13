@@ -7,7 +7,7 @@ public class Room
     public List<QueuedVideo> QueuedVideos { get; set; }
     public List<User> Users { get; set; }
     public RoomSettings RoomSettings { get; set; }
-    public VideoPlayerState VideoPlayerState { get; set; }
+    public VideoPlayerSettings VideoPlayerSettings { get; set; }
 
     public Room(string roomName, string roomPassword)
     {
@@ -18,7 +18,7 @@ public class Room
         QueuedVideos = new List<QueuedVideo>();
         Users = new List<User>();
         RoomSettings = new RoomSettings();
-        VideoPlayerState = new VideoPlayerState();
+        VideoPlayerSettings = new VideoPlayerSettings();
     }
 }
 

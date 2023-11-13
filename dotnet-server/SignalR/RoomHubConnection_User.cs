@@ -31,7 +31,7 @@ public partial class RoomHubConnection : Hub
     }
 
     [HubMethodName(HubMethods.LeaveRoom)]
-    public async Task LeaveRoom(string roomHash, string accessToken)
+    public async Task LeaveRoom(string roomHash, string authorizationToken)
     {
         try
         {
@@ -42,7 +42,7 @@ public partial class RoomHubConnection : Hub
                 return;
             }
 
-            User deletedUser = _roomManager.DeleteUser(roomHash, accessToken);
+            User deletedUser = _roomManager.DeleteUser(roomHash, authorizationToken);
             UserDTO deletedUserDTO = new UserDTO(deletedUser.Username, deletedUser.IsAdmin);
 
             await Clients.GroupExcept(roomHash, Context.ConnectionId).SendAsync(HubMethods.OnJoinRoom, JsonHelper.Serialize(deletedUserDTO));

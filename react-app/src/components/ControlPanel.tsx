@@ -13,14 +13,22 @@ import { useNavigate } from "react-router-dom";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { HttpManager } from "../classes/HttpManager";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { RoomSettings } from "../types/RoomSettings";
 
-export default function ControlPanel() {
+export interface ControlPanelProps {
+  initialChatMessages: ChatMessage[],
+  initialQueuedVideos: QueuedVideo[],
+  initialUsers: User[],
+  initialRoomSettings: RoomSettings,
+}
+
+export default function ControlPanel({initialChatMessages, initialQueuedVideos, initialUsers, initialRoomSettings}: ControlPanelProps) {
   const [activePanel, setActivePanel] = useState<PanelsEnum>(PanelsEnum.Chat);
   const [roomType] = useState<RoomTypesEnum>(RoomTypesEnum.private);
-  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(0);
-  const [queuedVideosCount, setQueuedVideosCount] = useState<number>(0);
-  const [usersCount, setUsersCount] = useState<number>(0);
-  const [maxUsersCount] = useState<number>(10);
+  const [unreadChatMessagesCount, setUnreadChatMessagesCount] = useState<number>(initialChatMessages.length);
+  const [queuedVideosCount, setQueuedVideosCount] = useState<number>(initialQueuedVideos.length);
+  const [usersCount, setUsersCount] = useState<number>(initialUsers.length);
+  const [maxUsersCount] = useState<number>(initialRoomSettings.maxUsers);
   const navigate = useNavigate();
 
   const httpManager = new HttpManager();
@@ -90,10 +98,10 @@ export default function ControlPanel() {
         </div>
       </div>
       <div className="rounded-bottom-5 bg-dark pt-4 pb-4 px-4">
-        { activePanel === PanelsEnum.Chat && <Chat onChange={handleChatChange} /> }
-        { activePanel === PanelsEnum.Playlist && <Playlist onChange={handlePlaylistChange} /> }
-        { activePanel === PanelsEnum.Users && <Users onChange={handleUsers} /> }
-        { activePanel === PanelsEnum.Settings && <Settings /> }
+        { activePanel === PanelsEnum.Chat && <Chat initialChatMessages={initialChatMessages} onChange={handleChatChange} /> }
+        { activePanel === PanelsEnum.Playlist && <Playlist initialQueuedVideos={initialQueuedVideos} onChange={handlePlaylistChange} /> }
+        { activePanel === PanelsEnum.Users && <Users initialUsers={initialUsers} onChange={handleUsers} /> }
+        { activePanel === PanelsEnum.Settings && <Settings initialRoomSettings={initialRoomSettings} /> }
       </div>
     </div>
   )

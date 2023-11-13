@@ -5,14 +5,13 @@ import { LocalStorageManager } from "./LocalStorageManager";
 import { HttpApiEndpoints } from "./HttpApiEndpoints";
 import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
-import { PromiseOutput as PromiseOutput } from "../types/HttpTypes/PromiseOutput";
 import { Room } from "../types/Room";
 
 export class HttpManager {
   private httpServerUrl = "http://localhost:5050";
   private authorizationManager = new LocalStorageManager();
 
-  async getAllRooms(): Promise<PromiseOutput> {
+  async getAllRooms(): Promise<[statusCode: number, rooms: Room[] | undefined]> {
     try {
       const response = await axios.get(
         `${this.httpServerUrl}/${HttpApiEndpoints.getAllRooms}`, {
@@ -21,20 +20,15 @@ export class HttpManager {
           },
         }
       );
-
-      const output: PromiseOutput = {
-        status: response.status as number,
-        data: response.data as Room[]
-      }
   
-      return output as PromiseOutput;
+      return [response.status, response.data];
     }
     catch (error: any) {
-      return { status: error.response.status, data: undefined } as PromiseOutput;
+      return [error.response.status, undefined]
     }
   }
 
-  async createRoom(roomName: string, roomPassword: string, username: string): Promise<PromiseOutput> {
+  async createRoom(roomName: string, roomPassword: string, username: string): Promise<[number, RoomCreateOutput | undefined]> {
     try {
       const requestBody: RoomCreateInput = {
         roomName: roomName,
@@ -51,19 +45,14 @@ export class HttpManager {
         }
       );
 
-      const output: PromiseOutput = {
-        status: response.status as number,
-        data: response.data as RoomCreateOutput
-      }
-
-      return output as PromiseOutput;
+      return [response.status, response.data] as [number, RoomCreateOutput];
     }
     catch (error: any) {
-      return { status: error.response.status as number, data: undefined } as PromiseOutput;
+      return [error.response.status, undefined]
     }
   }
 
-  async joinRoom(roomHash: string, roomPassword: string, username: string): Promise<PromiseOutput> {
+  async joinRoom(roomHash: string, roomPassword: string, username: string): Promise<[number, RoomJoinOutput | undefined]> {
     try {
       const requestBody: RoomJoinInput = {
         roomPassword: roomPassword,
@@ -78,21 +67,16 @@ export class HttpManager {
           },
         }
       );
-      
-      const output: PromiseOutput = {
-        status: response.status as number,
-        data: response.data as RoomJoinOutput
-      }
 
-      return output as PromiseOutput;
+      return [response.status, response.data] as [number, RoomJoinOutput]
 
     } catch (error: any) {
-      return { status: error.response.status as number, data: undefined } as PromiseOutput;
+      return [error.response.status, undefined];
     }
   }
 
 
-  async leaveRoom(roomHash: string): Promise<PromiseOutput> {
+  async leaveRoom(roomHash: string): Promise<number> {
     try {
       const authorizationToken = this.authorizationManager.getAuthorizationToken();
 
@@ -105,15 +89,10 @@ export class HttpManager {
         }
       );
 
-      const output: PromiseOutput = {
-        status: response.status as number,
-        data: response.data as RoomJoinOutput
-      }
-
-      return output as PromiseOutput;
+      return response.status as number;
 
     } catch (error: any) {
-      return { status: error.response.status as number, data: undefined } as PromiseOutput;
+      return error.response.status as number;
     }
   }
 }

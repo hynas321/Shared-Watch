@@ -1,7 +1,7 @@
 import { useDispatch } from "react-redux";
 import ControlPanel from "./ControlPanel";
 import VideoPlayer from "./VideoPlayer";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { updatedIsInRoom } from "../redux/slices/userState-slice";
 import { HttpManager } from "../classes/HttpManager";
 import { useNavigate } from "react-router-dom";
@@ -10,23 +10,38 @@ import { ClientEndpoints } from "../classes/ClientEndpoints";
 import Header from "./Header";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { PromiseOutput } from "../types/HttpTypes/PromiseOutput";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
+import { ChatMessage } from "../types/ChatMessage";
+import { QueuedVideo } from "../types/QueuedVideo";
+import { RoomSettings } from "../types/RoomSettings";
+import { User } from "../types/User";
+import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function RoomView() {
+  const [initialChatMessages, setInitialChatMessages] = useState<ChatMessage[]>([]);
+  const [initialQueuedVideos, setInitialQueuedVideos] = useState<QueuedVideo[]>([]);
+  const [initialUsers, setInitialUsers] = useState<User[]>([]);
+  const [initialRoomSettings, setInitialRoomSettings] = useState<RoomSettings>({} as RoomSettings);
+  const [initialVideoPlayerSettings, setInitialVideoPlayerSettings] = useState<VideoPlayerSettings>({} as VideoPlayerSettings);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userState = useAppSelector((state) => state.userState);
   const roomState = useAppSelector((state) => state.roomState);
 
   const httpManager = new HttpManager();
+  const localStorageManager = new LocalStorageManager();
 
   const joinRoom = async () => {
-    const joinRoomOutput: PromiseOutput = await httpManager.joinRoom(roomState.roomHash, roomState.password, userState.username);
+    const [responseStatusCode, responseData] = await httpManager.joinRoom(roomState.roomHash, roomState.password, userState.username);
 
-    if (joinRoomOutput.status !== HttpStatusCodes.OK) {
+    if (responseStatusCode !== HttpStatusCodes.OK) {
 
-      switch(joinRoomOutput.status) {
+      switch(responseStatusCode) {
+        case HttpStatusCodes.UNAUTHORIZED:
+          toast.error("Wrong room password");
+          break;
         case HttpStatusCodes.NOT_FOUND:
           toast.error("Room not found");
           break;
@@ -36,7 +51,12 @@ export default function RoomView() {
         default:
           toast.error("Could not join the room");
       }
-
+      
+      localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
+      //
+      //TODO TODO TODO 
+      //
+      console.log("test")
       navigate(`${ClientEndpoints.mainMenu}`);
     }
 
@@ -49,6 +69,7 @@ export default function RoomView() {
   };
 
   useEffect(() => {
+    console.log("test")
     joinRoom();
     return () => {
       //TODO
@@ -61,13 +82,15 @@ export default function RoomView() {
       <div className="container">
         <div className="row">
           <div className="col-xl-8 col-lg-12 mt-2">
-            <VideoPlayer
-              videoName={"COSTA RICA IN 4K 60fps HDR (ULTRA HD)"}
-              videoUrl={"https://www.youtube.com/watch?v=LXb3EKWsInQ"}
-            />
+            <VideoPlayer videoPlayerSettings={{url: "abc", isPlaying: false}}/>
           </div>
           <div className="col-xl-4 col-lg-12 mt-2">
-            <ControlPanel />
+            <ControlPanel
+              initialChatMessages={initialChatMessages ?? []}
+              initialQueuedVideos={initialQueuedVideos ?? []}
+              initialUsers={initialUsers ?? []}
+              initialRoomSettings={initialRoomSettings ?? {} as RoomSettings}
+            />
           </div>
         </div>
       </div>

@@ -6,6 +6,7 @@ import NotFoundView from './components/NotFoundView';
 import { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { updatedUsername } from './redux/slices/userState-slice';
+import Header from './components/Header';
 
 function App() {
   const dispatch = useDispatch();

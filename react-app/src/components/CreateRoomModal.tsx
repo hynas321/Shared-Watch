@@ -9,9 +9,9 @@ import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { useDispatch } from "react-redux";
-import { PromiseOutput } from "../types/HttpTypes/PromiseOutput";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
+import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -41,11 +41,11 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   }, [roomName]);
 
   const handleCreateRoomButtonClick = async () => {
-    const createRoomOutput: PromiseOutput = await httpManager.createRoom(roomName, roomPassword, userState.username);
+    const [responseStatusCode, responseData]: [number, RoomCreateOutput | undefined] = await httpManager.createRoom(roomName, roomPassword, userState.username);
     
-    if (createRoomOutput.status !== HttpStatusCodes.CREATED) {
+    if (responseStatusCode !== HttpStatusCodes.CREATED) {
 
-      switch(createRoomOutput.status) {
+      switch(responseStatusCode) {
         case HttpStatusCodes.CONFLICT:
           toast.error("The room with this name already exists");
           break;
@@ -57,17 +57,18 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       return;
     }
 
-    localStorageManager.setAuthorizationToken(createRoomOutput.data.accessToken);
+    localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
 
     const roomStateObj: RoomState = {
-      roomHash: createRoomOutput.data.roomHash,
+      roomHash: responseData?.roomHash as string,
       roomName: roomName,
       roomType: roomPassword.length === 0 ? RoomTypesEnum.public : RoomTypesEnum.private,
       password: roomPassword,
     };
 
+    toast.success("Room created successfully");
     dispatch(updatedRoomState(roomStateObj));
-    navigate(`${ClientEndpoints.room}/${createRoomOutput.data.roomHash}`);
+    navigate(`${ClientEndpoints.room}/${responseData?.roomHash}`);
   }
 
   return (

@@ -18,43 +18,6 @@ public class RoomController : ControllerBase
         _configuration = configuration;
     }
 
-    [HttpGet("GetAll")]
-    public IActionResult GetAll()
-    {
-        try 
-        {   
-            IEnumerable<RoomDTO> roomsDTO = _roomManager.GetAllRoomsDTO();
-
-            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomsDTO));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
-    [HttpGet("GetAllDetails")]
-    public IActionResult GetAllDetails([FromHeader] string globalAdminToken)
-    {
-        try
-        {
-            if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
-            {
-                return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-
-            IEnumerable<Room> rooms = _roomManager.GetAllRooms();
-
-            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(rooms));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
     [HttpPost("Create")]
     public IActionResult Create([FromBody] RoomCreateInput input)
     {
@@ -62,6 +25,7 @@ public class RoomController : ControllerBase
         {
             if (!ModelState.IsValid)
             {   
+                _logger.LogInformation("Create: Status 400");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
     
@@ -71,32 +35,22 @@ public class RoomController : ControllerBase
 
             if (!roomAdded)
             {
+                _logger.LogInformation("Create: Status 409");
                 return StatusCode(StatusCodes.Status409Conflict);
-            }
-            
-            User user = new User(
-                username: input.Username,
-                isAdmin: true,
-                isInRoom: false
-            );
-
-            bool isUserAdded = _roomManager.AddUser(room.RoomHash, user);
-
-            if (!isUserAdded)
-            {
-                return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
             RoomCreateOutput output = new RoomCreateOutput()
             {
                 RoomHash = room.RoomHash,
-                AccessToken = user.AuthorizationToken,
+                AuthorizationToken = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8)
             };
 
+            _logger.LogInformation("Create: Status 201");
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(output));
         }
         catch (Exception ex)
         {
+            _logger.LogInformation("Create: Status 500");
             _logger.LogError(ex.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -111,6 +65,7 @@ public class RoomController : ControllerBase
 
             if (!ModelState.IsValid || roomHash == "")
             {   
+                _logger.LogInformation("Join: Status 500");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
@@ -118,60 +73,63 @@ public class RoomController : ControllerBase
 
             if (room == null)
             {
+                _logger.LogInformation("Join: Status 404");
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
             if (room.RoomPassword != input.RoomPassword)
             {
+                _logger.LogInformation("Join: Status 401");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
             if (room.RoomSettings.MaxUsers == room.Users.Count(u => u.IsInRoom == true))
             {
+                _logger.LogInformation("Join: Status 409");
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
             if (room.Users.Any(u => u.Username == input.Username && u.IsInRoom == true && authorizationToken != u.AuthorizationToken))
-            {   
+            {
+                _logger.LogInformation("Join: Status 409");
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
             User user = _roomManager.GetUser(roomHash, authorizationToken);
-            RoomJoinOutput output = new RoomJoinOutput();
+            RoomJoinOutput output;
+            bool isUserFirstAdmin = false;
 
-            /*
-            if (user != null && authorizationToken != user.AuthorizationToken)
+            if (room.Users.Count == 0)
             {
-                return StatusCode(StatusCodes.Status409Conflict);
+                isUserFirstAdmin = true;
             }
-
-            if (user != null && authorizationToken == user.AuthorizationToken && user.IsInRoom == true)
-            {
-                return StatusCode(StatusCodes.Status409Conflict);
-            }
-
-            if (user != null && authorizationToken == user.AuthorizationToken && user.IsInRoom == false)
-            {
-                output.AccessToken = authorizationToken;
-                user.IsInRoom = true;
-                return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
-            }*/
 
             User newUser = new User(
                 input.Username,
                 isInRoom: true,
-                isAdmin: false
+                isAdmin: isUserFirstAdmin
             );
+            
+            output = new RoomJoinOutput()
+            {
+                AuthorizationToken = newUser.AuthorizationToken,
+                ChatMessages = room.ChatMessages,
+                QueuedVideos = room.QueuedVideos,
+                Users = _roomManager.GetUsersDTO(roomHash).ToList(),
+                RoomSettings = room.RoomSettings,
+                VideoPlayerSettings = room.VideoPlayerSettings
 
-            output.AccessToken = newUser.AuthorizationToken;
+            };
 
             bool isNewUserAdded = _roomManager.AddUser(roomHash, newUser);
 
             if (!isNewUserAdded)
             {
+                _logger.LogInformation("Join: Status 500");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
+            _logger.LogInformation("Join: Status 200");
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
         }
         catch (Exception ex)
@@ -189,7 +147,8 @@ public class RoomController : ControllerBase
             string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
 
             if (roomHash == "" || authorizationToken == "")
-            {   
+            {
+                _logger.LogInformation($"Leave: Status 400. authorizationToken: {authorizationToken}, roomHash: {roomHash}");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
@@ -197,6 +156,7 @@ public class RoomController : ControllerBase
 
             if (room == null)
             {
+                _logger.LogInformation($"Leave: Status 404. authorizationToken: {authorizationToken}, roomHash: {roomHash}");
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
@@ -204,6 +164,7 @@ public class RoomController : ControllerBase
 
             if (user == null)
             {
+                _logger.LogInformation($"Leave: Status 401. authorizationToken: {authorizationToken}, roomHash: {roomHash}");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
@@ -211,16 +172,58 @@ public class RoomController : ControllerBase
 
             if (!isUserInRoomUpdated)
             {
+                _logger.LogInformation($"Leave: Status 500. authorizationToken: {authorizationToken}, roomHash: {roomHash}");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
             //Remove room if no user is inside
-            if (room.Users.Count(u => u.IsInRoom == true) == 0)
+            if (!room.Users.Any(u => u.IsInRoom == true))
             {
                 _roomManager.RemoveRoom(roomHash);
             }
 
+            _logger.LogInformation($"Leave: Status 200. authorizationToken: {authorizationToken}, roomHash: {roomHash}");
             return StatusCode(StatusCodes.Status200OK);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet("GetAll")]
+    public IActionResult GetAll()
+    {
+        try 
+        {   
+            IEnumerable<RoomDTO> roomsDTO = _roomManager.GetAllRoomsDTO();
+
+            _logger.LogInformation($"GetAll: Status 200.");
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomsDTO));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
+    [HttpGet("GetAllDetails")]
+    public IActionResult GetAllDetails([FromHeader] string globalAdminToken)
+    {
+        try
+        {
+            if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
+            {
+                _logger.LogInformation("GetAllDetails: Status 401");
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
+            IEnumerable<Room> rooms = _roomManager.GetAllRooms();
+
+            _logger.LogInformation("GetAllDetails: Status 200");
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(rooms));
         }
         catch (Exception ex)
         {

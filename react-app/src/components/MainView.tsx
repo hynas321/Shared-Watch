@@ -14,7 +14,6 @@ import Header from "./Header";
 import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { PromiseOutput } from "../types/HttpTypes/PromiseOutput";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 
 export default function MainView() {
@@ -26,18 +25,17 @@ export default function MainView() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  
   const httpManager: HttpManager = new HttpManager();
 
   const fetchRooms = async () => {
-    const getAllRoomsOutput: PromiseOutput = await httpManager.getAllRooms();
+    const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();
 
-    if (getAllRoomsOutput.status !== HttpStatusCodes.OK) {
+    if (responseStatusCode !== HttpStatusCodes.OK) {
       toast.error("Could not load the rooms");
     }
 
-    setRooms(getAllRoomsOutput?.data ?? []);
-    setDisplayedRooms(getAllRoomsOutput?.data ?? []);
+    setRooms(responseData ?? []);
+    setDisplayedRooms(responseData ?? []);
   }
   
   useEffect(() => {

@@ -12,7 +12,6 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
-import { PromiseOutput } from "../types/HttpTypes/PromiseOutput";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 
 export default function Header() {
@@ -34,9 +33,9 @@ export default function Header() {
     dispatch(updatedRoomType(RoomTypesEnum.public));
     dispatch(updatedIsInRoom(false));
 
-    const leaveRoomOutput: PromiseOutput = await httpManager.leaveRoom(roomState.roomHash);
+    const responseStatusCode: number = await httpManager.leaveRoom(roomState.roomHash);
 
-    if (leaveRoomOutput.status !== HttpStatusCodes.OK) {
+    if (responseStatusCode === HttpStatusCodes.OK) {
       toast.success("You have left the room");
     }
     else {

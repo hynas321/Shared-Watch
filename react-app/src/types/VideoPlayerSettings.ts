@@ -1,4 +1,4 @@
-export type VideoPlayerState = {
+export type VideoPlayerSettings = {
   url: string,
   isPlaying: boolean
 }

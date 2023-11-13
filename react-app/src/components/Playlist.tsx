@@ -6,11 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import VideoIcon from './../assets/video-icon.png'
 
 export interface PlaylistProps {
+  initialQueuedVideos: QueuedVideo[];
   onChange?: (queuedVideos: QueuedVideo[]) => void;
 }
 
-export default function Playlist({onChange}: PlaylistProps) {
-  const [queuedVideos, setQueuedVideos] = useState<QueuedVideo[]>([]);
+export default function Playlist({initialQueuedVideos, onChange}: PlaylistProps) {
+  const [queuedVideos, setQueuedVideos] = useState<QueuedVideo[]>(initialQueuedVideos);
   const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
   const queuedVideosRef = useRef<HTMLDivElement>(null);
 

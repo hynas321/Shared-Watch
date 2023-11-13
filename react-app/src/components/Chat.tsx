@@ -5,11 +5,12 @@ import { InputForm } from "./InputForm";
 import { BsSendFill } from "react-icons/bs";
 
 export interface ChatProps {
+  initialChatMessages: ChatMessage[];
   onChange?: (chatMessages: ChatMessage[]) => void;
 }
 
-export default function Chat({onChange}: ChatProps) {
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+export default function Chat({initialChatMessages, onChange}: ChatProps) {
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChatMessages);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
   const messagesRef = useRef<HTMLDivElement>(null);
 

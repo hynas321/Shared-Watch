@@ -4,17 +4,22 @@ import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 import FormRange from "./FormRange";
+import { RoomSettings } from "../types/RoomSettings";
 
-export default function Settings() {
+export interface SettingsProps {
+  initialRoomSettings: RoomSettings;
+}
+
+export default function Settings({initialRoomSettings}: SettingsProps) {
   const [roomPassword, setRoomPassword] = useState<string>("");
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
-  const [, setMaxUsers] = useState<number>(6);
-  const [isSendingChatMessagesAllowed, setIsSendingChatMessagesAllowed] = useState<boolean>(true);
-  const [isAddingVideosAllowed, setIsAddingVideosAllowed] = useState<boolean>(true);
-  const [isRemovingVideosAllowed, setIsRemovingVideosAllowed] = useState<boolean>(true);
-  const [isPlayingVideosOutsideOfPlaylistAllowed, setIsPlayingVideosOutsideOfPlaylistAllowed] = useState<boolean>(true);
-  const [isStartingPausingVideosAllowed, setIsStartingPausingVideosAllowed] = useState<boolean>(false);
-  const [isSkippingVideosAllowed, setIsSkippingVideosAllowed] = useState<boolean>(false);
+  const [, setMaxUsers] = useState<number>(initialRoomSettings.maxUsers);
+  const [isSendingChatMessagesAllowed, setIsSendingChatMessagesAllowed] = useState<boolean>(initialRoomSettings.isSendingChatMessagesAllowed);
+  const [isAddingVideosAllowed, setIsAddingVideosAllowed] = useState<boolean>(initialRoomSettings.isAddingVideosAllowed);
+  const [isRemovingVideosAllowed, setIsRemovingVideosAllowed] = useState<boolean>(initialRoomSettings.isRemovingVideosAllowed);
+  const [isPlayingVideosOutsideOfPlaylistAllowed, setIsPlayingVideosOutsideOfPlaylistAllowed] = useState<boolean>(initialRoomSettings.isPlayingVideosOutsideOfPlaylistAllowed);
+  const [isStartingPausingVideosAllowed, setIsStartingPausingVideosAllowed] = useState<boolean>(initialRoomSettings.isStartingPausingVideosAllowed);
+  const [isSkippingVideosAllowed, setIsSkippingVideosAllowed] = useState<boolean>(initialRoomSettings.isSkippingVideosAllowed);
   const [userIsAdmin] = useState<boolean>(false);
 
   const handleSetRoomPrivateButtonClick = () => {

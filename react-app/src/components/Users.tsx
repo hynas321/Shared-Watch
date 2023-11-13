@@ -4,11 +4,12 @@ import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMin
 import Button from "./Button";
 
 export interface UsersProps {
+  initialUsers: User[]
   onChange?: (users: User[]) => void;
 }
 
-export default function Users({onChange}: UsersProps) {
-  const [users, setUsers] = useState<User[]>([]);
+export default function Users({initialUsers, onChange}: UsersProps) {
+  const [users, setUsers] = useState<User[]>(initialUsers);
 
   useEffect(() => {
     const user1 = {
