@@ -28,11 +28,6 @@ export default function Header() {
   const localStorageManager = new LocalStorageManager();
 
   const handleLeaveRoomButtonClick = async () => {
-    dispatch(updatedRoomHash(""));
-    dispatch(updatedRoomName(""));
-    dispatch(updatedRoomType(RoomTypesEnum.public));
-    dispatch(updatedIsInRoom(false));
-
     const responseStatusCode: number = await httpManager.leaveRoom(roomState.roomHash);
 
     if (responseStatusCode === HttpStatusCodes.OK) {
@@ -41,6 +36,11 @@ export default function Header() {
     else {
       toast.warning("You have left the room");
     }
+
+    dispatch(updatedRoomHash(""));
+    dispatch(updatedRoomName(""));
+    dispatch(updatedRoomType(RoomTypesEnum.public));
+    dispatch(updatedIsInRoom(false));
 
     navigate(ClientEndpoints.mainMenu);
   }

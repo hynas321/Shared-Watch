@@ -51,8 +51,6 @@ export default function RoomView() {
         default:
           toast.error("Could not join the room");
       }
-      
-      localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
       //
       //TODO TODO TODO 
       //
@@ -60,6 +58,7 @@ export default function RoomView() {
       navigate(`${ClientEndpoints.mainMenu}`);
     }
 
+    localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
     dispatch(updatedIsInRoom(true));
   }
 

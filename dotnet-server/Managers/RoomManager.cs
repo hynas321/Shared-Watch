@@ -163,21 +163,21 @@ public class RoomManager {
     {
       try
         {
-            Room room = rooms.FirstOrDefault(r => r.RoomHash == roomHash);
+            Room room = GetRoom(roomHash);
 
             if (room == null)
             {
                 return false;
             }
 
-            int userIndex = room.Users.FindIndex(u => u.AuthorizationToken == authorizationToken);
+            User user = room.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
 
-            if (userIndex == -1)
+            if (user == null)
             {
                 return false;
             }
 
-            room.Users[userIndex].IsInRoom = isInRoom;
+            user.IsInRoom = isInRoom;
 
             return true;
         }

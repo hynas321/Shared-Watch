@@ -41,8 +41,7 @@ public class RoomController : ControllerBase
 
             RoomCreateOutput output = new RoomCreateOutput()
             {
-                RoomHash = room.RoomHash,
-                AuthorizationToken = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8)
+                RoomHash = room.RoomHash
             };
 
             _logger.LogInformation("Create: Status 201");
@@ -50,7 +49,6 @@ public class RoomController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("Create: Status 500");
             _logger.LogError(ex.ToString());
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
@@ -95,7 +93,19 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
-            User user = _roomManager.GetUser(roomHash, authorizationToken);
+            if (room.Users.Any(u => u.Username != input.Username && u.IsInRoom == true && authorizationToken == u.AuthorizationToken))
+            {
+                _logger.LogInformation("Join: Status 409");
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            if (room.Users.Any(u => u.Username == input.Username && u.IsInRoom == true && authorizationToken == u.AuthorizationToken))
+            {
+                _logger.LogInformation("Join: Status 409");
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+
             RoomJoinOutput output;
             bool isUserFirstAdmin = false;
 
@@ -176,9 +186,12 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
 
+            Room updatedRoom = _roomManager.GetRoom(roomHash);
             //Remove room if no user is inside
-            if (!room.Users.Any(u => u.IsInRoom == true))
+            _logger.LogInformation(updatedRoom.Users.Count(u => u.IsInRoom == true).ToString());
+            if (updatedRoom.Users.Count(u => u.IsInRoom == true) == 0)
             {
+                _logger.LogInformation($"Room {roomHash} has been removed");
                 _roomManager.RemoveRoom(roomHash);
             }
 

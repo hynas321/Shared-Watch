@@ -3,14 +3,8 @@ import './App.css'
 import MainView from './components/MainView'
 import RoomView from './components/RoomView';
 import NotFoundView from './components/NotFoundView';
-import { useEffect } from 'react';
-import { useDispatch } from 'react-redux';
-import { updatedUsername } from './redux/slices/userState-slice';
-import Header from './components/Header';
 
 function App() {
-  const dispatch = useDispatch();
-
   const router = createBrowserRouter([
     {
       path: "/",
@@ -25,16 +19,6 @@ function App() {
       element: <NotFoundView />
     }
   ]);
-
-  useEffect(() => {
-    const username = localStorage.getItem("username");
-
-    if (!username) {
-      return;
-    }
-  
-    dispatch(updatedUsername(username));
-  }, []);
 
   return (
     <div className="bg-image background-image">

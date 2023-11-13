@@ -57,8 +57,6 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       return;
     }
 
-    localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
-
     const roomStateObj: RoomState = {
       roomHash: responseData?.roomHash as string,
       roomName: roomName,

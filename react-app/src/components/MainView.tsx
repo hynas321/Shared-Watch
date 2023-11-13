@@ -8,7 +8,7 @@ import { InputForm } from "./InputForm";
 import Switch from "./Switch";
 import { HttpManager } from "../classes/HttpManager";
 import { useDispatch } from "react-redux";
-import { updatedIsInRoom } from "../redux/slices/userState-slice";
+import { updatedIsInRoom, updatedUsername } from "../redux/slices/userState-slice";
 import { useAppSelector } from "../redux/hooks";
 import Header from "./Header";
 import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
@@ -36,11 +36,21 @@ export default function MainView() {
 
     setRooms(responseData ?? []);
     setDisplayedRooms(responseData ?? []);
+
+    console.log(responseData);
   }
   
   useEffect(() => {
     dispatch(updatedIsInRoom(false));
     fetchRooms();
+
+    const username = localStorage.getItem("username");
+
+    if (!username) {
+      return;
+    }
+  
+    dispatch(updatedUsername(username));
   }, []);
 
   useEffect(() => {
