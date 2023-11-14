@@ -4,7 +4,7 @@ import VideoPlayer from "./VideoPlayer";
 import { useEffect, useState } from "react";
 import { updatedIsInRoom } from "../redux/slices/userState-slice";
 import { HttpManager } from "../classes/HttpManager";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAppSelector } from "../redux/hooks";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import Header from "./Header";
@@ -17,8 +17,11 @@ import { RoomSettings } from "../types/RoomSettings";
 import { User } from "../types/User";
 import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { HttpUrlHelper } from "../classes/HttpUrlHelper";
+import { NavigationState } from "../types/NavigationState";
 
 export default function RoomView() {
+  const [roomHash, setRoomHash] = useState<string>("");
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>();
   const [initialChatMessages, setInitialChatMessages] = useState<ChatMessage[]>([]);
   const [initialQueuedVideos, setInitialQueuedVideos] = useState<QueuedVideo[]>([]);
@@ -26,20 +29,46 @@ export default function RoomView() {
   const [initialRoomSettings, setInitialRoomSettings] = useState<RoomSettings>({} as RoomSettings);
   const [initialVideoPlayerSettings, setInitialVideoPlayerSettings] = useState<VideoPlayerSettings>({} as VideoPlayerSettings);
 
+  const location = useLocation();
+  const { ...navigationState }: NavigationState = location.state ?? false;
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const userState = useAppSelector((state) => state.userState);
-  const roomState = useAppSelector((state) => state.roomState);
 
   const httpManager = new HttpManager();
+  const httpUrlHelper = new HttpUrlHelper();
   const localStorageManager = new LocalStorageManager();
   
+  useEffect(() => {
+    const hash: string = httpUrlHelper.getRoomHash(window.location.href);
+    console.log(navigationState);
+    console.log(hash);
+    if (hash || hash.length === 0) {
+      toast.error("Room not found");
+    }
+
+    setRoomHash(hash);
+
+    return () => {
+      //TODO
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!roomHash) {
+      return;
+    }
+
+    joinRoom();
+    setIsDataLoaded(true);
+  }, [roomHash]);
+
   const joinRoom = async () => {
-    const [responseStatusCode, responseData] = await httpManager.joinRoom(roomState.roomHash, roomState.password, userState.username);
+    const [responseStatusCode, responseData] = await httpManager.joinRoom(roomHash, navigationState.password, userState.username);
 
     if (responseStatusCode !== HttpStatusCodes.OK) {
-      
-      console.log(localStorageManager.getAuthorizationToken());
+
       switch(responseStatusCode) {
         case HttpStatusCodes.UNAUTHORIZED:
           toast.error("Wrong room password");
@@ -63,7 +92,7 @@ export default function RoomView() {
 
     localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
     dispatch(updatedIsInRoom(true));
-    console.log(responseData)
+
     setInitialChatMessages(responseData?.chatMessages as ChatMessage[]);
     setInitialQueuedVideos(responseData?.queuedVideos as QueuedVideo[]);
     setInitialUsers(responseData?.users as User[]);
@@ -71,19 +100,11 @@ export default function RoomView() {
     setInitialVideoPlayerSettings(responseData?.videoPlayerSettings as VideoPlayerSettings);
   }
 
-  const leaveRoom = async() => {
-    const leaveRoomOutput = await httpManager.leaveRoom(roomState.roomHash);
+  /*const leaveRoom = async() => {
+    const leaveRoomOutput = await httpManager.leaveRoom(roomHash);
     navigate(`${ClientEndpoints.mainMenu}`);
   };
-
-  useEffect(() => {
-    console.log("test")
-    joinRoom();
-    setIsDataLoaded(true);
-    return () => {
-      //TODO
-    };
-  }, []);
+*/
 
   useEffect(() => {
 

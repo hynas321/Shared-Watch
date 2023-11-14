@@ -5,13 +5,11 @@ import { HttpManager } from "../classes/HttpManager";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { useAppSelector } from "../redux/hooks";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
-import { useDispatch } from "react-redux";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
+import { NavigationState } from "../types/NavigationState";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -25,10 +23,8 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
   const userState = useAppSelector((state) => state.userState);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const httpManager = new HttpManager();
-  const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
     if (roomName.length >= 3) {
@@ -57,16 +53,13 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       return;
     }
 
-    const roomStateObj: RoomState = {
-      roomHash: responseData?.roomHash as string,
+    const navigationState: NavigationState = {
       roomName: roomName,
       roomType: roomPassword.length === 0 ? RoomTypesEnum.public : RoomTypesEnum.private,
       password: roomPassword,
     };
 
-    toast.success("Room created successfully");
-    dispatch(updatedRoomState(roomStateObj));
-    navigate(`${ClientEndpoints.room}/${responseData?.roomHash}`);
+    navigate(`${ClientEndpoints.room}/${responseData?.roomHash}`, { state: { ...navigationState } });
   }
 
   return (

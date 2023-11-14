@@ -7,28 +7,30 @@ import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { HttpManager } from "../classes/HttpManager";
-import { updatedRoomHash, updatedRoomName, updatedRoomType } from "../redux/slices/roomState-slice";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
+import { HttpUrlHelper } from "../classes/HttpUrlHelper";
 
 export default function Header() {
+  const [roomHash, setRoomHash] = useState<string>("");
   const userState = useAppSelector((state) => state.userState);
-  const roomState = useAppSelector((state) => state.roomState);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const httpUrlHelper = new HttpUrlHelper();
+
   useEffect(() => {
     dispatch(updatedUsername(localStorageManager.getUsername()));
+    setRoomHash(httpUrlHelper.getRoomHash(window.location.href));
   }, []);
 
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
 
   const handleLeaveRoomButtonClick = async () => {
-    const responseStatusCode: number = await httpManager.leaveRoom(roomState.roomHash);
+    const responseStatusCode: number = await httpManager.leaveRoom(roomHash);
 
     if (responseStatusCode === HttpStatusCodes.OK) {
       toast.success("You have left the room");
@@ -37,11 +39,7 @@ export default function Header() {
       toast.warning("You have left the room");
     }
 
-    dispatch(updatedRoomHash(""));
-    dispatch(updatedRoomName(""));
-    dispatch(updatedRoomType(RoomTypesEnum.public));
     dispatch(updatedIsInRoom(false));
-
     navigate(ClientEndpoints.mainMenu);
   }
 

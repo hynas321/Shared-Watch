@@ -11,10 +11,10 @@ import { useDispatch } from "react-redux";
 import { updatedIsInRoom, updatedUsername } from "../redux/slices/userState-slice";
 import { useAppSelector } from "../redux/hooks";
 import Header from "./Header";
-import { RoomState, updatedRoomState } from "../redux/slices/roomState-slice";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
+import { NavigationState } from "../types/NavigationState";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -36,8 +36,6 @@ export default function MainView() {
 
     setRooms(responseData ?? []);
     setDisplayedRooms(responseData ?? []);
-
-    console.log(responseData);
   }
   
   useEffect(() => {
@@ -110,27 +108,23 @@ export default function MainView() {
   }, [displayOnlyAvailableRooms]);
 
   const handlePublicRoomListItemClick = (item: Room) => {
-    const roomStateObj: RoomState = {
-      roomHash: item.roomHash,
+    const navigationState: NavigationState = {
       roomName: item.roomName,
       roomType: item.roomType,
       password: "",
     };
 
-    dispatch(updatedRoomState(roomStateObj));
-    navigate(`${ClientEndpoints.room}/${item.roomHash}`);
+    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { ...navigationState } });
   };
 
   const handlePrivateRoomListItemClick = (item: Room, password: string) => {
-    const roomStateObj: RoomState = {
-      roomHash: item.roomHash,
+    const navigationState: NavigationState = {
       roomName: item.roomName,
       roomType: item.roomType,
       password: password,
     };
 
-    dispatch(updatedRoomState(roomStateObj));
-    navigate(`${ClientEndpoints.room}/${item.roomHash}`);
+    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { ...navigationState } });
   }
 
   return (
