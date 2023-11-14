@@ -85,7 +85,7 @@ export default function Playlist({initialQueuedVideos, onChange}: PlaylistProps)
             <a 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"
-              href={queuedVideo.url}
+              href={queuedVideo.url.startsWith('http') ? queuedVideo.url : `http://${queuedVideo.url}`}
               target={"_blank"}
             >
               <div className="row">

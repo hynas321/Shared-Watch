@@ -54,6 +54,8 @@ export class HttpManager {
 
   async joinRoom(roomHash: string, roomPassword: string, username: string): Promise<[number, RoomJoinOutput | undefined]> {
     try {
+      const authorizationToken = this.authorizationManager.getAuthorizationToken();
+
       const requestBody: RoomJoinInput = {
         roomPassword: roomPassword,
         username: username
@@ -63,7 +65,8 @@ export class HttpManager {
         `${this.httpServerUrl}/${HttpApiEndpoints.joinRoom}/${roomHash}`,
         requestBody, {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authorizationToken}`
           },
         }
       );

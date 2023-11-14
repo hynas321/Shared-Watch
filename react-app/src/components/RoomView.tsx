@@ -19,6 +19,7 @@ import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function RoomView() {
+  const [isDataLoaded, setIsDataLoaded] = useState<boolean>();
   const [initialChatMessages, setInitialChatMessages] = useState<ChatMessage[]>([]);
   const [initialQueuedVideos, setInitialQueuedVideos] = useState<QueuedVideo[]>([]);
   const [initialUsers, setInitialUsers] = useState<User[]>([]);
@@ -32,34 +33,42 @@ export default function RoomView() {
 
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
-
+  
   const joinRoom = async () => {
     const [responseStatusCode, responseData] = await httpManager.joinRoom(roomState.roomHash, roomState.password, userState.username);
 
     if (responseStatusCode !== HttpStatusCodes.OK) {
-
+      
+      console.log(localStorageManager.getAuthorizationToken());
       switch(responseStatusCode) {
         case HttpStatusCodes.UNAUTHORIZED:
           toast.error("Wrong room password");
+          break;
+        case HttpStatusCodes.FORBIDDEN:
+          toast.error("Room full");
           break;
         case HttpStatusCodes.NOT_FOUND:
           toast.error("Room not found");
           break;
         case HttpStatusCodes.CONFLICT:
-          toast.error("A user with your username already exists in the room");
+          toast.error("The user is already in the room");
           break;
         default:
           toast.error("Could not join the room");
       }
-      //
-      //TODO TODO TODO 
-      //
-      console.log("test")
+
       navigate(`${ClientEndpoints.mainMenu}`);
+      return;
     }
 
     localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
     dispatch(updatedIsInRoom(true));
+    console.log(responseData)
+    setInitialChatMessages(responseData?.chatMessages as ChatMessage[]);
+    setInitialQueuedVideos(responseData?.queuedVideos as QueuedVideo[]);
+    setInitialUsers(responseData?.users as User[]);
+    setInitialRoomSettings(responseData?.roomSettings as RoomSettings);
+    setInitialVideoPlayerSettings(responseData?.videoPlayerSettings as VideoPlayerSettings);
   }
 
   const leaveRoom = async() => {
@@ -70,10 +79,15 @@ export default function RoomView() {
   useEffect(() => {
     console.log("test")
     joinRoom();
+    setIsDataLoaded(true);
     return () => {
       //TODO
     };
   }, []);
+
+  useEffect(() => {
+
+  }, [isDataLoaded]); 
 
   return (
     <>
