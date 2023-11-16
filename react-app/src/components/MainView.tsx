@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Room } from "../types/Room";
 import RoomList from "./RoomList";
 import { useNavigate } from "react-router-dom";
-import { ClientEndpoints } from "../classes/ClientEndpoints";
-import CreateRoomModal from "./CreateRoomModal";
+import { ClientEndpoints } from "../classes/ClientEndpoints"; 
 import { InputForm } from "./InputForm";
 import Switch from "./Switch";
 import { HttpManager } from "../classes/HttpManager";
@@ -14,7 +13,9 @@ import Header from "./Header";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
-import { NavigationState } from "../types/NavigationState";
+import { RoomNavigationState } from "../types/RoomNavigationState";
+import { animated, useSpring } from "@react-spring/web";
+import CreateRoomModal from "./CreateRoomModal";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -108,24 +109,34 @@ export default function MainView() {
   }, [displayOnlyAvailableRooms]);
 
   const handlePublicRoomListItemClick = (item: Room) => {
-    const navigationState: NavigationState = {
+    const roomNavigationState: RoomNavigationState = {
       roomName: item.roomName,
       roomType: item.roomType,
-      password: "",
+      password: ""
     };
 
-    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { ...navigationState } });
+    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { ...roomNavigationState } });
   };
 
   const handlePrivateRoomListItemClick = (item: Room, password: string) => {
-    const navigationState: NavigationState = {
+    const navigationState: RoomNavigationState = {
       roomName: item.roomName,
       roomType: item.roomType,
-      password: password,
+      password: password
     };
 
     navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { ...navigationState } });
   }
+
+  const springs = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+    config: {
+      mass: 1,
+      tension: 250,
+      friction:15
+    }
+  })
 
   return (
   <>
@@ -138,51 +149,56 @@ export default function MainView() {
       draggable={true}
       pauseOnHover={false}
       theme="dark"
+      style={{opacity: 0.9}}
     />
     <div className="container">
       <div className="row justify-content-center">
-        <div className="main-menu-panel col-xl-6 col-lg-6 col-md-8 col-10 bg-dark py-3 px-5 rounded-4">
+        <animated.div className="main-menu-panel mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
           <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
-            <div className="d-flex justify-content-center align-items-center">
-                <InputForm
-                  classNames="form-control rounded-3 disabled"
-                  placeholder="Search room name"
-                  value={searchText}
-                  trim={false}
-                  isEnabled={userState.username.length >= 3}
-                  onChange={(value: string) => setSearchText(value)}
-                />
-                <CreateRoomModal
-                  title="Create room"
-                  acceptText="Create"
-                  declineText="Go back"
-                />
-            </div>
-            <div className="mt-3 mb-3">
-              <Switch
-                label="Show only available rooms"
-                defaultIsChecked={displayOnlyAvailableRooms as boolean}
+          <div className="row d-flex justify-content-between align-items-center text-center">
+            <div className="col-7">
+              <InputForm
+                classNames="form-control rounded-3 disabled"
+                placeholder="Search room name"
+                value={searchText}
+                trim={false}
                 isEnabled={userState.username.length >= 3}
-                onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
+                onChange={(value: string) => setSearchText(value)}
               />
             </div>
-            {
-              displayedRooms.length === 0 &&
-                <h5 className="text-danger text-center mt-5 mb-5"><b><i>No rooms found</i></b></h5>
-            }
-            {
-              displayedRooms.length !== 0 &&
-              <div className="main-menu-list mb-3">
-                <RoomList
-                  list={displayedRooms}
-                  onPublicRoomClick={handlePublicRoomListItemClick}
-                  onPrivateRoomClick={handlePrivateRoomListItemClick}
-                />
-              </div>
-            }
+            <div className="col-5 text-end">
+            <CreateRoomModal
+              title="Create room"
+              acceptText="Create"
+              declineText="Go back"
+            />
+            </div>
           </div>
-        </div>
+          <div className="mt-3 mb-3">
+            <Switch
+              label="Show only available rooms"
+              defaultIsChecked={displayOnlyAvailableRooms as boolean}
+              isEnabled={userState.username.length >= 3}
+              onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
+            />
+          </div>
+          {
+            displayedRooms.length === 0 &&
+              <h5 className="text-danger text-center mt-5 mb-5"><b><i>No rooms found</i></b></h5>
+          }
+          {
+            displayedRooms.length !== 0 &&
+            <div className="main-menu-list mb-3">
+              <RoomList
+                list={displayedRooms}
+                onPublicRoomClick={handlePublicRoomListItemClick}
+                onPrivateRoomClick={handlePrivateRoomListItemClick}
+              />
+            </div>
+          }
+        </animated.div>
       </div>
-    </>
+    </div>
+  </>
   )
 }

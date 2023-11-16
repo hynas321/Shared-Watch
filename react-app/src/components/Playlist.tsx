@@ -6,11 +6,11 @@ import { useEffect, useRef, useState } from "react";
 import VideoIcon from './../assets/video-icon.png'
 
 export interface PlaylistProps {
-  initialQueuedVideos: QueuedVideo[];
+  queuedVideos: QueuedVideo[];
   onChange?: (queuedVideos: QueuedVideo[]) => void;
 }
 
-export default function Playlist({initialQueuedVideos, onChange}: PlaylistProps) {
+export default function Playlist({queuedVideos: initialQueuedVideos, onChange}: PlaylistProps) {
   const [queuedVideos, setQueuedVideos] = useState<QueuedVideo[]>(initialQueuedVideos);
   const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
   const queuedVideosRef = useRef<HTMLDivElement>(null);
@@ -98,7 +98,6 @@ export default function Playlist({initialQueuedVideos, onChange}: PlaylistProps)
                     <Button
                       text={<BsXCircle/>}
                       classNames="btn btn-outline-danger btn-sm"
-                      styles={{marginLeft: "5px", }}
                       onClick={() => handleRemoveQueuedVideoButtonClick(event, index)}
                     />
                   </div>

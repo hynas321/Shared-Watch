@@ -9,10 +9,7 @@ import Settings from "./Settings";
 import { ChatMessage } from "../types/ChatMessage";
 import { QueuedVideo } from "../types/QueuedVideo";
 import { User } from "../types/User";
-import { useNavigate } from "react-router-dom";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
-import { HttpManager } from "../classes/HttpManager";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomSettings } from "../types/RoomSettings";
 
 export interface ControlPanelProps {
@@ -29,10 +26,6 @@ export default function ControlPanel({initialChatMessages, initialQueuedVideos, 
   const [queuedVideosCount, setQueuedVideosCount] = useState<number>(initialQueuedVideos.length);
   const [usersCount, setUsersCount] = useState<number>(initialUsers.length);
   const [maxUsersCount] = useState<number>(initialRoomSettings.maxUsers);
-  const navigate = useNavigate();
-
-  const httpManager = new HttpManager();
-  const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
     //fetch number values
@@ -56,7 +49,7 @@ export default function ControlPanel({initialChatMessages, initialQueuedVideos, 
 
   return (
     <div>
-      <div className="rounded-top-5 bg-dark pt-3 pb-3 px-4">
+      <div className="rounded-top-5 bg-dark bg-opacity-50 pt-3 pb-3 px-4">
       <div className="d-flex align-items-center">
         <div className="text-center flex-grow-1">
           <h5 className="text-white">
@@ -97,11 +90,11 @@ export default function ControlPanel({initialChatMessages, initialQueuedVideos, 
           />
         </div>
       </div>
-      <div className="rounded-bottom-5 bg-dark pt-4 pb-4 px-4">
-        { activePanel === PanelsEnum.Chat && <Chat initialChatMessages={initialChatMessages} onChange={handleChatChange} /> }
-        { activePanel === PanelsEnum.Playlist && <Playlist initialQueuedVideos={initialQueuedVideos} onChange={handlePlaylistChange} /> }
-        { activePanel === PanelsEnum.Users && <Users initialUsers={initialUsers} onChange={handleUsers} /> }
-        { activePanel === PanelsEnum.Settings && <Settings initialRoomSettings={initialRoomSettings} /> }
+      <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-4 pb-4 px-4">
+        { activePanel === PanelsEnum.Chat && <Chat chatMessages={initialChatMessages} onChange={handleChatChange} /> }
+        { activePanel === PanelsEnum.Playlist && <Playlist queuedVideos={initialQueuedVideos} onChange={handlePlaylistChange} /> }
+        { activePanel === PanelsEnum.Users && <Users users={initialUsers} onChange={handleUsers} /> }
+        { activePanel === PanelsEnum.Settings && <Settings roomSettings={initialRoomSettings} /> }
       </div>
     </div>
   )

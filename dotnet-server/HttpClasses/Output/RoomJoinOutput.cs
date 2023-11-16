@@ -1,6 +1,7 @@
 public class RoomJoinOutput
 {
     public string AuthorizationToken { get; set; }
+    public string RoomName { get; set; }
     public List<ChatMessage> ChatMessages { get; set; }
     public List<QueuedVideo> QueuedVideos { get; set; }
     public List<UserDTO> Users { get; set; }

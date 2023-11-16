@@ -8,10 +8,10 @@ export interface VideoPlayerProps {
 export default function VideoPlayer({videoPlayerSettings}: VideoPlayerProps) {
   return (
     <>
-      <div className="rounded-top-5 bg-dark pt-2 text-center">
+      <div className="rounded-top-5 bg-dark bg-opacity-50 pt-2 text-center">
         <span className="text-white"><b>Video player</b></span>
       </div>
-      <div className="d-flex justify-content-center rounded-bottom-5 bg-dark pt-2 pb-5">
+      <div className="d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5">
         <ReactPlayer
           url={videoPlayerSettings.url}
           playing={videoPlayerSettings.isPlaying}

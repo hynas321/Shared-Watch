@@ -9,7 +9,7 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
-import { NavigationState } from "../types/NavigationState";
+import { RoomNavigationState } from "../types/RoomNavigationState";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -21,8 +21,9 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const [roomPassword, setRoomPassword] = useState<string>("");
   const [roomName, setRoomName] = useState<string>("");
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
-  const userState = useAppSelector((state) => state.userState);
+
   const navigate = useNavigate();
+  const userState = useAppSelector((state) => state.userState);
 
   const httpManager = new HttpManager();
 
@@ -53,10 +54,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       return;
     }
 
-    const navigationState: NavigationState = {
+    const navigationState: RoomNavigationState = {
       roomName: roomName,
       roomType: roomPassword.length === 0 ? RoomTypesEnum.public : RoomTypesEnum.private,
-      password: roomPassword,
+      password: roomPassword
     };
 
     navigate(`${ClientEndpoints.room}/${responseData?.roomHash}`, { state: { ...navigationState } });
@@ -65,13 +66,13 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   return (
     <>
       <div>
-        <button
-          className={`btn btn-success ms-3 ${userState.username.length < 3 && "disabled"}`}
-          data-bs-toggle="modal"
-          data-bs-target="#exampleModal"
-        >
-          {title}
-        </button>
+        <span className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
+          <Button
+            text={title}
+            classNames={`btn btn-success ms-3 ${userState.username.length < 3 && "disabled"}`}
+            onClick={() => {}}
+          />
+        </span>
       </div>
       <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog">
         <div className="modal-dialog" role="document">
@@ -80,28 +81,28 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
               <h5 className="modal-title">{title}</h5>
             </div>
             <div className="modal-body bg-light">
-            <div className="d-block">
-              <h6 className="text-dark text-center mb-3"><b>Room name</b></h6>
+              <div className="d-block">
+                <h6 className="text-dark text-center mb-3"><b>Room name</b></h6>
+                  <InputForm
+                    classNames="form-control rounded-0"
+                    placeholder="Enter room name (min 3 characters)"
+                    value={roomName}
+                    trim={false}
+                    isEnabled={true}
+                    onChange={(value: string) => setRoomName(value)}
+                  />
+              </div>
+              <div className="d-block mt-3">
+              <h6 className="text-dark text-center mb-3"><b>Room password (optional)</b></h6>
                 <InputForm
                   classNames="form-control rounded-0"
-                  placeholder="Enter room name (min 3 characters)"
-                  value={roomName}
-                  trim={false}
+                  placeholder={"Enter password (private room)"}
+                  value={roomPassword}
+                  trim={true}
                   isEnabled={true}
-                  onChange={(value: string) => setRoomName(value)}
+                  onChange={(value: string) => setRoomPassword(value)}
                 />
-            </div>
-            <div className="d-block mt-3">
-            <h6 className="text-dark text-center mb-3"><b>Room password (optional)</b></h6>
-              <InputForm
-                classNames="form-control rounded-0"
-                placeholder={"Enter password (private room)"}
-                value={roomPassword}
-                trim={true}
-                isEnabled={true}
-                onChange={(value: string) => setRoomPassword(value)}
-              />
-            </div>
+              </div>
             </div>
             <div className="modal-footer bg-light">
               <span className="rounded-1" {...(isAcceptButtonEnabled ? {'data-bs-dismiss': 'modal'} : {})}>

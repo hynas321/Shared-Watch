@@ -4,26 +4,12 @@ import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMin
 import Button from "./Button";
 
 export interface UsersProps {
-  initialUsers: User[]
+  users: User[]
   onChange?: (users: User[]) => void;
 }
 
-export default function Users({initialUsers, onChange}: UsersProps) {
+export default function Users({users: initialUsers, onChange}: UsersProps) {
   const [users, setUsers] = useState<User[]>(initialUsers);
-
-  useEffect(() => {
-    const user1 = {
-      username: "User1",
-      isAdmin: true
-    }
-
-    const user2 = {
-      username: "User2",
-      isAdmin: false
-    }
-
-    setUsers([user1, user2]);
-  }, []);
 
   useEffect(() => {
     if (onChange) {
@@ -60,22 +46,19 @@ export default function Users({initialUsers, onChange}: UsersProps) {
                   user.isAdmin ? 
                     <Button
                       text={<BsShieldFillMinus />}
-                      classNames="btn btn-outline-warning"
-                      styles={{marginLeft: "5px"}}
+                      classNames="btn btn-outline-warning me-2"
                       onClick={() => handleAdminStatusButtonClick(false, index)}
                     />
                   :
                   <Button
                     text={<BsShieldFillPlus />}
-                    classNames="btn btn-outline-warning"
-                    styles={{marginLeft: "5px"}}
+                    classNames="btn btn-outline-warning me-2"
                     onClick={() => handleAdminStatusButtonClick(true, index)}
                   />
                 }
                 <Button
                   text={<BsFillPersonXFill />}
                   classNames="btn btn-outline-danger"
-                  styles={{marginLeft: "5px"}}
                   onClick={() => handleRemoveUserButtonClick(event, index)}
                 />
               </div>

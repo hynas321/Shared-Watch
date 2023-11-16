@@ -6,12 +6,13 @@ import { HttpApiEndpoints } from "./HttpApiEndpoints";
 import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
 import { Room } from "../types/Room";
+import { RoomExistsOutput } from "../types/HttpTypes/Output/RoomExistsOutput";
 
 export class HttpManager {
   private httpServerUrl = "http://localhost:5050";
   private authorizationManager = new LocalStorageManager();
 
-  async getAllRooms(): Promise<[statusCode: number, rooms: Room[] | undefined]> {
+  async getAllRooms(): Promise<[number, Room[] | undefined]> {
     try {
       const response = await axios.get(
         `${this.httpServerUrl}/${HttpApiEndpoints.getAllRooms}`, {
@@ -49,6 +50,23 @@ export class HttpManager {
     }
     catch (error: any) {
       return [error.response.status, undefined]
+    }
+  }
+
+  async checkIfRoomExists(roomHash: string): Promise<[number, RoomExistsOutput | undefined]> {
+    try {
+      const response = await axios.get(
+        `${this.httpServerUrl}/${HttpApiEndpoints.roomExists}/${roomHash}`, {
+          headers: {
+            'Content-Type': 'application/json'
+          },
+        }
+      );
+  
+      return [response.status, response.data] as [number, RoomExistsOutput]
+    }
+    catch (error: any) {
+      return [error.response.status, undefined];
     }
   }
 

@@ -44,8 +44,8 @@ export default function Header() {
   }
 
   return (
-    <nav className="navbar navbar-dark bg-dark mb-3">
-      <div className="d-flex align-items-center">
+    <nav className="navbar navbar-dark mb-3">
+      <div className="d-flex align-items-center justify-content-center">
         <a className="navbar-brand ms-3" href="/"><i><b>SharedWatch</b></i> <BsFillCameraReelsFill /></a>
         {!userState.isInRoom &&
           <InputForm

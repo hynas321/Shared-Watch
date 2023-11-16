@@ -11,48 +11,70 @@ import Header from "./Header";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
-import { ChatMessage } from "../types/ChatMessage";
-import { QueuedVideo } from "../types/QueuedVideo";
 import { RoomSettings } from "../types/RoomSettings";
-import { User } from "../types/User";
 import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
-import { NavigationState } from "../types/NavigationState";
+import { RoomNavigationState as RoomNavigationState } from "../types/RoomNavigationState";
+import { ping } from "ldrs"
+import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
+import { animated, useSpring } from "@react-spring/web";
+import { JoinRoomNavigationState } from "../types/JoinRoomNavigationState";
+import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export default function RoomView() {
   const [roomHash, setRoomHash] = useState<string>("");
-  const [isDataLoaded, setIsDataLoaded] = useState<boolean>();
-  const [initialChatMessages, setInitialChatMessages] = useState<ChatMessage[]>([]);
-  const [initialQueuedVideos, setInitialQueuedVideos] = useState<QueuedVideo[]>([]);
-  const [initialUsers, setInitialUsers] = useState<User[]>([]);
-  const [initialRoomSettings, setInitialRoomSettings] = useState<RoomSettings>({} as RoomSettings);
-  const [initialVideoPlayerSettings, setInitialVideoPlayerSettings] = useState<VideoPlayerSettings>({} as VideoPlayerSettings);
-
-  const location = useLocation();
-  const { ...navigationState }: NavigationState = location.state ?? false;
+  const [roomJoinResponse, setRoomJoinResponse] = useState<RoomJoinOutput>({
+    authorizationToken: "",
+    chatMessages: [],
+    queuedVideos: [],
+    users: [],
+    roomSettings: {} as RoomSettings,
+    videoPlayerSettings: {} as VideoPlayerSettings
+  });
+  const [isViewLoading, setIsViewLoading] = useState<boolean>(true);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const userState = useAppSelector((state) => state.userState);
+
+  const { ...roomNavigationState }: RoomNavigationState = location.state ?? location.state == null;
 
   const httpManager = new HttpManager();
   const httpUrlHelper = new HttpUrlHelper();
   const localStorageManager = new LocalStorageManager();
   
-  useEffect(() => {
-    const hash: string = httpUrlHelper.getRoomHash(window.location.href);
-    console.log(navigationState);
-    console.log(hash);
-    if (hash || hash.length === 0) {
-      toast.error("Room not found");
+  const checkIfRoomExists = async (hash: string) => {
+    const [responseStatusCode, responseData] = await httpManager.checkIfRoomExists(hash);
+
+    if (responseStatusCode !== HttpStatusCodes.OK) {
+      navigate(`${ClientEndpoints.mainMenu}`);
     }
 
-    setRoomHash(hash);
+    const joinRoomNavigationState: JoinRoomNavigationState = {
+      roomType: responseData?.roomType as RoomTypesEnum
+    }
 
-    return () => {
-      //TODO
-    };
+    navigate(`${ClientEndpoints.joinRoom}/${hash}`, { state: { ...joinRoomNavigationState }, replace: true });
+  }
+
+  useEffect(() => {
+    ping.register();
+    const hash: string = httpUrlHelper.getRoomHash(window.location.href);
+
+    if (!hash || hash.length === 0) {
+      toast.error("Room not found");
+      navigate(`${ClientEndpoints.mainMenu}`);
+      return;
+    }
+
+    if (!location.state) {
+      checkIfRoomExists(hash);
+      return;
+    }
+    
+    setRoomHash(hash);
   }, []);
 
   useEffect(() => {
@@ -60,12 +82,26 @@ export default function RoomView() {
       return;
     }
 
+    const handleBeforeUnload = async () => {
+      httpManager.leaveRoom(roomHash);
+    }
+  
     joinRoom();
-    setIsDataLoaded(true);
+
+    setTimeout(() => {
+      setIsViewLoading(false);
+    }, 1000);
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      handleBeforeUnload();
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, [roomHash]);
 
   const joinRoom = async () => {
-    const [responseStatusCode, responseData] = await httpManager.joinRoom(roomHash, navigationState.password, userState.username);
+    const [responseStatusCode, responseData] = await httpManager.joinRoom(roomHash, roomNavigationState.password, userState.username);
 
     if (responseStatusCode !== HttpStatusCodes.OK) {
 
@@ -93,39 +129,51 @@ export default function RoomView() {
     localStorageManager.setAuthorizationToken(responseData?.authorizationToken as string);
     dispatch(updatedIsInRoom(true));
 
-    setInitialChatMessages(responseData?.chatMessages as ChatMessage[]);
-    setInitialQueuedVideos(responseData?.queuedVideos as QueuedVideo[]);
-    setInitialUsers(responseData?.users as User[]);
-    setInitialRoomSettings(responseData?.roomSettings as RoomSettings);
-    setInitialVideoPlayerSettings(responseData?.videoPlayerSettings as VideoPlayerSettings);
+    setRoomJoinResponse(responseData as RoomJoinOutput);
   }
 
-  /*const leaveRoom = async() => {
-    const leaveRoomOutput = await httpManager.leaveRoom(roomHash);
-    navigate(`${ClientEndpoints.mainMenu}`);
-  };
-*/
-
-  useEffect(() => {
-
-  }, [isDataLoaded]); 
+  const springs = useSpring({
+    from: { y: 200 },
+    to: { y: 0 },
+    config: {
+      mass: 1,
+      tension: 250,
+      friction:15
+    },
+    delay: 1000
+  })
 
   return (
     <>
       <Header />
       <div className="container">
         <div className="row">
-          <div className="col-xl-8 col-lg-12 mt-2">
-            <VideoPlayer videoPlayerSettings={{url: "abc", isPlaying: false}}/>
-          </div>
-          <div className="col-xl-4 col-lg-12 mt-2">
-            <ControlPanel
-              initialChatMessages={initialChatMessages ?? []}
-              initialQueuedVideos={initialQueuedVideos ?? []}
-              initialUsers={initialUsers ?? []}
-              initialRoomSettings={initialRoomSettings ?? {} as RoomSettings}
-            />
-          </div>
+          {
+            isViewLoading &&
+            <div className="d-flex align-items-center justify-content-center" style={{ height: "70vh" }}>
+            <l-ping
+              size="250"
+              speed="1.5" 
+              color="white" 
+            ></l-ping>
+            </div>
+          }
+          {
+            !isViewLoading &&
+            <>
+              <animated.div style={{...springs}} className="col-xl-8 col-lg-12 mt-2">
+                <VideoPlayer videoPlayerSettings={{url: "abc", isPlaying: false}}/>
+              </animated.div>
+              <animated.div style={{...springs}} className="col-xl-4 col-lg-12 mt-2">
+                <ControlPanel
+                  initialChatMessages={roomJoinResponse.chatMessages}
+                  initialQueuedVideos={roomJoinResponse.queuedVideos}
+                  initialUsers={roomJoinResponse.users}
+                  initialRoomSettings={roomJoinResponse.roomSettings}
+                />
+              </animated.div>
+            </>
+          }
         </div>
       </div>
     </>

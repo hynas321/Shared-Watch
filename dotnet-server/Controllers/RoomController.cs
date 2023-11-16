@@ -54,6 +54,29 @@ public class RoomController : ControllerBase
         }
     }
 
+    [HttpGet("Exists/{roomHash}")]
+    public IActionResult Exists([FromRoute] string roomHash)
+    {
+        if (roomHash == "")
+        {
+            return StatusCode(StatusCodes.Status400BadRequest);
+        }
+
+        Room room = _roomManager.GetRoom(roomHash);
+
+        if (room == null)
+        {
+            return StatusCode(StatusCodes.Status404NotFound);
+        }
+
+        RoomExistsOutput output = new RoomExistsOutput()
+        {
+            RoomType = room.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private
+        };
+
+        return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
+    }
+
     [HttpPost("Join/{roomHash}")]
     public IActionResult Join([FromBody] RoomJoinInput input, [FromRoute] string roomHash)
     {

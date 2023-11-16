@@ -7,10 +7,10 @@ import FormRange from "./FormRange";
 import { RoomSettings } from "../types/RoomSettings";
 
 export interface SettingsProps {
-  initialRoomSettings: RoomSettings;
+  roomSettings: RoomSettings;
 }
 
-export default function Settings({initialRoomSettings}: SettingsProps) {
+export default function Settings({roomSettings: initialRoomSettings}: SettingsProps) {
   const [roomPassword, setRoomPassword] = useState<string>("");
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
   const [, setMaxUsers] = useState<number>(initialRoomSettings.maxUsers);
