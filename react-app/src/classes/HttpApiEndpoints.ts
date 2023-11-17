@@ -4,4 +4,6 @@ export class HttpApiEndpoints {
   static roomExists = "api/Room/Exists";
   static joinRoom = "api/Room/Join";
   static leaveRoom = "api/Room/Leave";
+
+  static roomHubConnection = "/Hub/Room";
 }

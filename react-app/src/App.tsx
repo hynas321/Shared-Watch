@@ -6,6 +6,7 @@ import NotFoundView from './components/NotFoundView';
 import { useAppSelector } from './redux/hooks';
 import { useEffect } from 'react';
 import JoinRoomView from './components/JoinRoomView';
+import { RoomHubContext, roomHub } from './context/RoomHubContext';
 
 function App() {
   const userState = useAppSelector((state) => state.userState);
@@ -40,7 +41,9 @@ function App() {
   ]);
 
   return (
-    <RouterProvider router={router}/>
+    <RoomHubContext.Provider value={roomHub}>
+      <RouterProvider router={router}/>
+    </RoomHubContext.Provider>
   )
 }
 

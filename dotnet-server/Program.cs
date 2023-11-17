@@ -1,3 +1,5 @@
+using Dotnet.Server.Hubs;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -20,6 +22,7 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
     });
+builder.Services.AddSignalR(); 
 
 var app = builder.Build();
 
@@ -30,6 +33,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapHub<RoomHub>("/Hub/Room");
 app.UseCors("AllowReactApplication");
 app.UseHttpsRedirection();
 app.UseAuthorization();

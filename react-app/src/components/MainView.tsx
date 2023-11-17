@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Room } from "../types/Room";
 import RoomList from "./RoomList";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,8 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { RoomNavigationState } from "../types/RoomNavigationState";
 import { animated, useSpring } from "@react-spring/web";
 import CreateRoomModal from "./CreateRoomModal";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { RoomHubContext } from "../context/RoomHubContext";
 
 export default function MainView() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -25,8 +27,10 @@ export default function MainView() {
   const userState = useAppSelector((state) => state.userState);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const roomHub = useContext(RoomHubContext);
 
   const httpManager: HttpManager = new HttpManager();
+  const localStorageManager = new LocalStorageManager();
 
   const fetchRooms = async () => {
     const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();
@@ -50,6 +54,12 @@ export default function MainView() {
     }
   
     dispatch(updatedUsername(username));
+
+    const startRoomHubConnection = async () => {
+      await roomHub.start();
+    }
+
+    startRoomHubConnection();
   }, []);
 
   useEffect(() => {
@@ -110,22 +120,53 @@ export default function MainView() {
 
   const handlePublicRoomListItemClick = (item: Room) => {
     const roomNavigationState: RoomNavigationState = {
+      roomHash: item.roomHash,
       roomName: item.roomName,
       roomType: item.roomType,
       password: ""
     };
 
-    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { ...roomNavigationState } });
+    console.log()
+    joinRoom(roomNavigationState);
   };
 
   const handlePrivateRoomListItemClick = (item: Room, password: string) => {
-    const navigationState: RoomNavigationState = {
+    const roomNavigationState: RoomNavigationState = {
+      roomHash: item.roomHash,
       roomName: item.roomName,
       roomType: item.roomType,
       password: password
     };
 
-    navigate(`${ClientEndpoints.room}/${item.roomHash}`, { state: { ...navigationState } });
+    joinRoom(roomNavigationState);
+  }
+
+  const joinRoom = async (roomNavigationState: RoomNavigationState) => {
+    const [responseStatusCode, roomInformation] = await httpManager.joinRoom(roomNavigationState.roomHash, roomNavigationState.password, userState.username);
+    if (responseStatusCode !== HttpStatusCodes.OK) {
+
+      switch(responseStatusCode) {
+        case HttpStatusCodes.UNAUTHORIZED:
+          toast.error("Wrong room password");
+          break;
+        case HttpStatusCodes.FORBIDDEN:
+          toast.error("Room full");
+          break;
+        case HttpStatusCodes.NOT_FOUND:
+          toast.error("Room not found");
+          break;
+        case HttpStatusCodes.CONFLICT:
+          toast.error("The user is already in the room");
+          break;
+        default:
+          toast.error("Could not join the room");
+      }
+
+      return;
+    }
+
+    localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
+    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`, { state: { roomNavigationState, roomInformation } });
   }
 
   const springs = useSpring({
@@ -134,7 +175,7 @@ export default function MainView() {
     config: {
       mass: 1,
       tension: 250,
-      friction:15
+      friction: 15
     }
   })
 

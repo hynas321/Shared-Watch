@@ -10,6 +10,7 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { RoomNavigationState } from "../types/RoomNavigationState";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -26,6 +27,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const userState = useAppSelector((state) => state.userState);
 
   const httpManager = new HttpManager();
+  const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
     if (roomName.length >= 3) {
@@ -38,7 +40,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   }, [roomName]);
 
   const handleCreateRoomButtonClick = async () => {
-    const [responseStatusCode, responseData]: [number, RoomCreateOutput | undefined] = await httpManager.createRoom(roomName, roomPassword, userState.username);
+    const [responseStatusCode, roomInformation]: [number, RoomCreateOutput | undefined] = await httpManager.createRoom(roomName, roomPassword, userState.username);
     
     if (responseStatusCode !== HttpStatusCodes.CREATED) {
 
@@ -55,12 +57,41 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     }
 
     const navigationState: RoomNavigationState = {
+      roomHash: roomInformation?.roomHash as string,
       roomName: roomName,
       roomType: roomPassword.length === 0 ? RoomTypesEnum.public : RoomTypesEnum.private,
       password: roomPassword
     };
+    
+    joinRoom(navigationState);
+  }
 
-    navigate(`${ClientEndpoints.room}/${responseData?.roomHash}`, { state: { ...navigationState } });
+  const joinRoom = async (roomNavigationState: RoomNavigationState) => {
+    const [responseStatusCode, roomInformation] = await httpManager.joinRoom(roomNavigationState.roomHash, roomNavigationState.password, userState.username);
+    if (responseStatusCode !== HttpStatusCodes.OK) {
+
+      switch(responseStatusCode) {
+        case HttpStatusCodes.UNAUTHORIZED:
+          toast.error("Wrong room password");
+          break;
+        case HttpStatusCodes.FORBIDDEN:
+          toast.error("Room full");
+          break;
+        case HttpStatusCodes.NOT_FOUND:
+          toast.error("Room not found");
+          break;
+        case HttpStatusCodes.CONFLICT:
+          toast.error("The user is already in the room");
+          break;
+        default:
+          toast.error("Could not join the room");
+      }
+
+      return;
+    }
+
+    localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
+    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`, { state: { roomNavigationState, roomInformation } });
   }
 
   return (

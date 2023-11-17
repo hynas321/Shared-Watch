@@ -1,5 +1,7 @@
 using Dotnet.Server.Configuration;
+using Dotnet.Server.Hubs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Net.Http.Headers;
 
 namespace dotnet_server.Controllers;
@@ -10,12 +12,18 @@ public class RoomController : ControllerBase
 {
     private readonly ILogger<RoomController> _logger;
     private readonly IConfiguration _configuration;
+    private readonly IHubContext<RoomHub> _roomHubContext;
     private readonly RoomManager _roomManager = new RoomManager();
 
-    public RoomController(ILogger<RoomController> logger, IConfiguration configuration)
+    public RoomController(
+        ILogger<RoomController> logger,
+        IConfiguration configuration,
+        IHubContext<RoomHub> roomHubContext
+    )
     {
         _logger = logger;
         _configuration = configuration;
+        _roomHubContext = roomHubContext;
     }
 
     [HttpPost("Create")]
@@ -137,8 +145,19 @@ public class RoomController : ControllerBase
                 isInRoom: true,
                 isAdmin: isUserFirstAdmin
             );
+
+            UserDTO newUserDTO = new UserDTO(
+                newUser.Username,
+                newUser.IsAdmin
+            );
             
-            room.QueuedVideos.Add(new QueuedVideo("youtube.com"));
+            bool isNewUserAdded = _roomManager.AddUser(roomHash, newUser);
+
+            if (!isNewUserAdded)
+            {
+                _logger.LogInformation($"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
 
             RoomJoinOutput output = new RoomJoinOutput()
             {
@@ -149,15 +168,11 @@ public class RoomController : ControllerBase
                 RoomSettings = room.RoomSettings,
                 VideoPlayerSettings = room.VideoPlayerSettings
             };
-
-            bool isNewUserAdded = _roomManager.AddUser(roomHash, newUser);
-
-            if (!isNewUserAdded)
-            {
-                _logger.LogInformation($"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
-                return StatusCode(StatusCodes.Status500InternalServerError);
-            }
-
+            
+            var hubContext = _roomHubContext.Groups.AddToGroupAsync(HttpContext.Connection.Id, roomHash);
+            _roomHubContext.Clients.GroupExcept(roomHash, HttpContext.Connection.Id).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
+            //To remove later \/
+            _roomHubContext.Clients.All.SendAsync(HubEvents.OnJoinRoom, new UserDTO("Join test", false));
             _logger.LogInformation($"{roomHash} Join: Status 200. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
         }
@@ -206,13 +221,17 @@ public class RoomController : ControllerBase
             }
 
             Room updatedRoom = _roomManager.GetRoom(roomHash);
-            //Remove room if no user is inside
-            _logger.LogInformation(updatedRoom.Users.Count(u => u.IsInRoom == true).ToString());
+
             if (updatedRoom.Users.Count(u => u.IsInRoom == true) == 0)
             {
                 _logger.LogInformation($"Room {roomHash} has been removed");
                 _roomManager.RemoveRoom(roomHash);
-            }
+            }   
+
+            var hubContext = _roomHubContext.Groups.RemoveFromGroupAsync(HttpContext.Connection.Id, roomHash);
+            _roomHubContext.Clients.GroupExcept(roomHash, HttpContext.Connection.Id).SendAsync(HubEvents.OnLeaveRoom);
+            //To remove later \/
+            _roomHubContext.Clients.All.SendAsync(HubEvents.OnLeaveRoom, new UserDTO("Leave test", false));
 
             _logger.LogInformation($"{roomHash} Leave: Status 200. AuthorizationToken: {authorizationToken}");
             return StatusCode(StatusCodes.Status200OK);

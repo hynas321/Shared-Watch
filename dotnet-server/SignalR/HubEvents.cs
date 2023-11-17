@@ -1,4 +1,4 @@
-public static class HubMethods {
+public static class HubEvents {
     //Room
     public const string JoinRoom = "JoinRoom";
     public const string LeaveRoom = "LeaveRoom";

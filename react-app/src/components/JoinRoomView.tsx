@@ -18,7 +18,7 @@ export default function JoinRoomView() {
   const initializeView = async () => {
     if (!location.state) {
       const [responseStatus, responseData] = await httpManager.checkIfRoomExists(window.location.href);
-      console.log(responseStatus);
+
       if (responseStatus !== HttpStatusCodes.OK) {
         navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
         return;
