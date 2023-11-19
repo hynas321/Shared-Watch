@@ -1,36 +1,31 @@
 import { BsDoorOpenFill, BsFillCameraReelsFill } from "react-icons/bs";
 import { InputForm } from "./InputForm";
-import { useAppSelector } from "../redux/hooks";
-import { useDispatch } from "react-redux";
-import { updatedIsInRoom, updatedUsername } from "../redux/slices/userState-slice";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { HttpManager } from "../classes/HttpManager";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
+import { AppStateContext } from "../context/RoomHubContext";
+import { useEffect, useContext } from "react";
 
 export default function Header() {
-  const [roomHash, setRoomHash] = useState<string>("");
-  const userState = useAppSelector((state) => state.userState);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
   const httpUrlHelper = new HttpUrlHelper();
-
-  useEffect(() => {
-    dispatch(updatedUsername(localStorageManager.getUsername()));
-    setRoomHash(httpUrlHelper.getRoomHash(window.location.href));
-  }, []);
-
+  const appState = useContext(AppStateContext);
+  const navigate = useNavigate();
+  
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
 
+  useEffect(() => {
+    appState.username.value = localStorageManager.getUsername();
+    appState.roomHash.value = httpUrlHelper.getRoomHash(window.location.href);
+  }, []);
+
   const handleLeaveRoomButtonClick = async () => {
-    const responseStatusCode: number = await httpManager.leaveRoom(roomHash);
+    const responseStatusCode: number = await httpManager.leaveRoom(appState.roomHash.value);
 
     if (responseStatusCode === HttpStatusCodes.OK) {
       toast.success("You have left the room");
@@ -39,7 +34,7 @@ export default function Header() {
       toast.warning("You have left the room");
     }
 
-    dispatch(updatedIsInRoom(false));
+    appState.isInRoom.value = false;
     navigate(ClientEndpoints.mainMenu);
   }
 
@@ -47,22 +42,22 @@ export default function Header() {
     <nav className="navbar navbar-dark mb-3">
       <div className="d-flex align-items-center justify-content-center">
         <a className="navbar-brand ms-3" href="/"><i><b>SharedWatch</b></i> <BsFillCameraReelsFill /></a>
-        {!userState.isInRoom &&
+        {!appState.isInRoom.value &&
           <InputForm
-            classNames={`form-control form-control-sm rounded-3 ms-3 ${userState.username.length < 3 ? "is-invalid" : "is-valid"}`}
+            classNames={`form-control form-control-sm rounded-3 ms-3 ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
             placeholder={"Enter your username"}
-            value={userState.username}
+            value={appState.username.value}
             trim={true}
             isEnabled={true}
-            onChange={(value: string) => dispatch(updatedUsername(value))}
+            onChange={(value: string) => appState.username.value = value}
           />
         }
-        {userState.isInRoom &&
-          <span className="text-white ms-3">Your username: <b>{userState.username}</b></span>
+        {appState.isInRoom.value &&
+          <span className="text-white ms-3">Your username: <b>{appState.username.value}</b></span>
         }
       </div>
       {
-        userState.isInRoom &&
+        appState.isInRoom.value &&
         <div className="justify-content-end me-3">
           <Button
             text={<><BsDoorOpenFill /> Leave room</>}

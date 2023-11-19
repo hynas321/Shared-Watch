@@ -4,6 +4,7 @@ namespace Dotnet.Server.Hubs;
 
 public partial class RoomHub : Hub
 {
+    //Unused
     [HubMethodName(HubEvents.JoinRoom)]
     public async Task JoinRoom(string roomHash, string username)
     {   
@@ -20,9 +21,8 @@ public partial class RoomHub : Hub
             UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
 
             _roomManager.AddUser(room.RoomHash, user);
-            
-            await Clients.GroupExcept(roomHash, Context.ConnectionId).SendAsync(HubEvents.OnJoinRoom, JsonHelper.Serialize(userDTO));
-            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnJoinRoom, JsonHelper.Serialize(userDTO));
+
+            await Clients.Groups(roomHash).SendAsync(HubEvents.OnJoinRoom, JsonHelper.Serialize(userDTO));
         }
         catch (Exception ex)
         {
@@ -42,10 +42,23 @@ public partial class RoomHub : Hub
                 return;
             }
 
-            User deletedUser = _roomManager.DeleteUser(roomHash, authorizationToken);
-            UserDTO deletedUserDTO = new UserDTO(deletedUser.Username, deletedUser.IsAdmin);
+            User user = _roomManager.GetUser(roomHash, authorizationToken);
 
-            await Clients.GroupExcept(roomHash, Context.ConnectionId).SendAsync(HubEvents.OnJoinRoom, JsonHelper.Serialize(deletedUserDTO));
+            if (user != null)
+            {
+                return;
+            }
+
+            User deletedUser = _roomManager.DeleteUser(roomHash, authorizationToken);
+
+            if (deletedUser == null)
+            {
+                return;
+            }
+
+            UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
+
+            await Clients.Groups(roomHash).SendAsync(HubEvents.OnJoinRoom, JsonHelper.Serialize(userDTO));
         }
         catch (Exception ex)
         {

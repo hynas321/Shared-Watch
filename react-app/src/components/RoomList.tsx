@@ -4,7 +4,7 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { useEffect, useState } from "react";
-import { useAppSelector } from "../redux/hooks";
+import { appState } from "../context/RoomHubContext";
 
 export interface RoomListProps {
   list: Room[];
@@ -15,7 +15,6 @@ export interface RoomListProps {
 export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }: RoomListProps) {
   const [privateRoomPassword, setPrivateRoomPassword] = useState<string>("");
   const [isEnterPrivateRoomButtonEnabled, setIsEnterPrivateRoomButtonEnabled] = useState<boolean>(false);
-  const userState = useAppSelector((state) => state.userState);
 
   useEffect(() => {
     if (privateRoomPassword.length > 0) {
@@ -32,9 +31,9 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
         list.map((room, index) => (
           <li
             key={index}
-            className={`list-group-item mt-1 py-2 ${(room.occupiedSlots === room.totalSlots || userState.username.length < 3) ? "unavailable-element" : "available-element"}`}
-            style={(room.occupiedSlots === room.totalSlots || userState.username.length < 3) ? {color: "darkgray"} : {}}
-            onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public && userState.username.length >= 3) ? () => onPublicRoomClick(room) : undefined}
+            className={`list-group-item mt-1 py-2 ${(room.occupiedSlots === room.totalSlots || appState.username.value.length < 3) ? "unavailable-element" : "available-element"}`}
+            style={(room.occupiedSlots === room.totalSlots || appState.username.value.length < 3) ? {color: "darkgray"} : {}}
+            onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public && appState.username.value.length >= 3) ? () => onPublicRoomClick(room) : undefined}
           >
             <div
             {
@@ -49,7 +48,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
               <h6><BsFillPeopleFill /> {`${room.occupiedSlots}/${room.totalSlots}`}</h6>
             </div>
             {
-              (room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.private && userState.username.length >= 3) &&
+              (room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.private && appState.username.value.length >= 3) &&
                 <div className="collapse" id={`collapseExample-${room.roomHash}`}>
                   <div className="d-flex">
                     <InputForm

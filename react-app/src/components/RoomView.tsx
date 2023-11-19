@@ -1,9 +1,8 @@
-import { useDispatch } from "react-redux";
 import ControlPanel from "./ControlPanel";
 import VideoPlayer from "./VideoPlayer";
 import { useContext, useEffect, useState } from "react";
 import { HttpManager } from "../classes/HttpManager";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import Header from "./Header";
 import { toast } from 'react-toastify';
@@ -12,24 +11,16 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
 import { ping } from "ldrs"
 import { animated, useSpring } from "@react-spring/web";
-import { JoinRoomNavigationState } from "../types/JoinRoomNavigationState";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
-import { updatedIsInRoom } from "../redux/slices/userState-slice";
-import { RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import * as signalR from "@microsoft/signalr";
-import { HubEvents } from "../classes/HubEvents";
-import { User } from "../types/User";
+import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
-export default function RoomView() {  
-  const [roomHash, setRoomHash] = useState<string>("");
-  const [isViewLoading, setIsViewLoading] = useState<boolean>(false);
-
+export default function RoomView() {
   const roomHub = useContext(RoomHubContext);
-  const dispatch = useDispatch();
+  const appState = useContext(AppStateContext);
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const { roomNavigationState, roomInformation } = location.state ?? location.state === null;
+  const [isViewLoading] = useState<boolean>(false);
 
   const httpManager = new HttpManager();
   const httpUrlHelper = new HttpUrlHelper();
@@ -40,17 +31,14 @@ export default function RoomView() {
     if (responseStatusCode !== HttpStatusCodes.OK) {
       navigate(`${ClientEndpoints.mainMenu}`);
     }
+    
+    appState.roomType.value = responseData?.roomType as RoomTypesEnum;
 
-    const joinRoomNavigationState: JoinRoomNavigationState = {
-      roomType: responseData?.roomType as RoomTypesEnum
-    }
-
-    navigate(`${ClientEndpoints.joinRoom}/${hash}`, { state: { ...joinRoomNavigationState }, replace: true });
+    navigate(`${ClientEndpoints.joinRoom}/${hash}`, { replace: true });
   }
 
   useEffect(() => {
-    console.log("hello");
-    dispatch(updatedIsInRoom(true));
+    appState.isInRoom.value = true;
     ping.register();
   
     const hash: string = httpUrlHelper.getRoomHash(window.location.href);
@@ -61,26 +49,34 @@ export default function RoomView() {
       return;
     }
 
-    if (!roomNavigationState || !roomInformation) {
-      checkIfRoomExists(hash);
-      return;
-    }
-    
-    setRoomHash(hash);
+    //if (!roomNavigationState || !roomInformation) {
+      //checkIfRoomExists(hash);
+      //return;
+    //}
+
+    appState.roomHash.value = hash;
   }, []);
 
   useEffect(() => {
-    if (!roomHash) {
+    if (roomHub.getState() === signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    const startRoomHubConnection = async () => {
+      await roomHub.start();
+    }
+
+    startRoomHubConnection();
+  }, [roomHub.getState()]);
+
+  useEffect(() => {
+    if (!appState.roomHash.value) {
       return;
     }
 
     const handleBeforeUnload = async () => {
-      httpManager.leaveRoom(roomHash);
+      httpManager.leaveRoom(appState.roomHash.value);
     }
-
-    //setTimeout(() => {
-      //setIsViewLoading(false);
-    //}, 1000);
 
     window.addEventListener('beforeunload', handleBeforeUnload);
 
@@ -88,27 +84,7 @@ export default function RoomView() {
       handleBeforeUnload();
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [roomHash]);
-
-  useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
-    roomHub.on(HubEvents.OnJoinRoom, (newUser: User) => {
-      console.log(newUser);
-    });
-
-    roomHub.on(HubEvents.OnLeaveRoom, (removedUser: User) => {
-      console.log(removedUser);
-    });
-
-    return () => {
-      roomHub.off(HubEvents.OnJoinRoom);
-      roomHub.off(HubEvents.OnLeaveRoom);
-    }
-    }, [roomHub.getState()]);
-
+  }, [appState.roomHash.value]);
 
   const springs = useSpring({
     from: { y: 200 },
@@ -140,15 +116,10 @@ export default function RoomView() {
             !isViewLoading &&
             <>
               <animated.div style={{...springs}} className="col-xl-8 col-lg-12 mt-2">
-                <VideoPlayer videoPlayerSettings={{url: "abc", isPlaying: false}}/>
+                <VideoPlayer />
               </animated.div>
               <animated.div style={{...springs}} className="col-xl-4 col-lg-12 mt-2">
-                <ControlPanel
-                  initialChatMessages={roomInformation.chatMessages ?? []}
-                  initialQueuedVideos={roomInformation.queuedVideos ?? []}
-                  initialUsers={roomInformation.users ?? []}
-                  initialRoomSettings={roomInformation.roomSettings ?? {}}
-                />
+                <ControlPanel />
               </animated.div>
             </>
           }

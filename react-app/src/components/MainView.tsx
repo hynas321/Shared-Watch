@@ -6,9 +6,6 @@ import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { InputForm } from "./InputForm";
 import Switch from "./Switch";
 import { HttpManager } from "../classes/HttpManager";
-import { useDispatch } from "react-redux";
-import { updatedIsInRoom, updatedUsername } from "../redux/slices/userState-slice";
-import { useAppSelector } from "../redux/hooks";
 import Header from "./Header";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -17,20 +14,26 @@ import { RoomNavigationState } from "../types/RoomNavigationState";
 import { animated, useSpring } from "@react-spring/web";
 import CreateRoomModal from "./CreateRoomModal";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import * as signalR from "@microsoft/signalr";
+import { ChatMessage } from "../types/ChatMessage";
+import { QueuedVideo } from "../types/QueuedVideo";
+import { RoomSettings } from "../types/RoomSettings";
+import { User } from "../types/User";
+import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
 
 export default function MainView() {
+  const appState = useContext(AppStateContext);
+  const roomHub = useContext(RoomHubContext);
+  const navigate = useNavigate();
+
   const [rooms, setRooms] = useState<Room[]>([]);
   const [displayedRooms, setDisplayedRooms] = useState<Room[]>([]);
   const [displayOnlyAvailableRooms, setDisplayOnlyAvailableRooms] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
-  const userState = useAppSelector((state) => state.userState);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const roomHub = useContext(RoomHubContext);
 
   const httpManager: HttpManager = new HttpManager();
-  const localStorageManager = new LocalStorageManager();
+  const localStorageManager: LocalStorageManager = new LocalStorageManager();
 
   const fetchRooms = async () => {
     const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();
@@ -44,7 +47,7 @@ export default function MainView() {
   }
   
   useEffect(() => {
-    dispatch(updatedIsInRoom(false));
+    appState.isInRoom.value = false;
     fetchRooms();
 
     const username = localStorage.getItem("username");
@@ -52,15 +55,21 @@ export default function MainView() {
     if (!username) {
       return;
     }
-  
-    dispatch(updatedUsername(username));
+    
+    appState.username.value = username;
+  }, []);
+
+  useEffect(() => {
+    if (roomHub.getState() === signalR.HubConnectionState.Connected) {
+      return;
+    }
 
     const startRoomHubConnection = async () => {
       await roomHub.start();
     }
 
     startRoomHubConnection();
-  }, []);
+  }, [roomHub.getState()]);
 
   useEffect(() => {
     if (rooms.length === 0) {
@@ -126,7 +135,6 @@ export default function MainView() {
       password: ""
     };
 
-    console.log()
     joinRoom(roomNavigationState);
   };
 
@@ -142,7 +150,11 @@ export default function MainView() {
   }
 
   const joinRoom = async (roomNavigationState: RoomNavigationState) => {
-    const [responseStatusCode, roomInformation] = await httpManager.joinRoom(roomNavigationState.roomHash, roomNavigationState.password, userState.username);
+    const [responseStatusCode, roomInformation] = await httpManager.joinRoom(
+      roomNavigationState.roomHash,
+      roomNavigationState.password,
+      appState.username.value
+    );
     if (responseStatusCode !== HttpStatusCodes.OK) {
 
       switch(responseStatusCode) {
@@ -165,8 +177,20 @@ export default function MainView() {
       return;
     }
 
+    appState.roomHash.value = roomNavigationState.roomHash;
+    appState.roomName.value = roomNavigationState.roomName;
+    appState.roomType.value = roomNavigationState.roomType;
+    appState.password.value = roomNavigationState.password;
+
     localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
-    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`, { state: { roomNavigationState, roomInformation } });
+  
+    appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
+    appState.playlistVideos.value =  roomInformation?.queuedVideos as QueuedVideo[];
+    appState.roomSettings.value = roomInformation?.roomSettings as RoomSettings;
+    appState.users.value = roomInformation?.users as User[];
+    appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerSettings;
+
+    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`);
   }
 
   const springs = useSpring({
@@ -203,7 +227,7 @@ export default function MainView() {
                 placeholder="Search room name"
                 value={searchText}
                 trim={false}
-                isEnabled={userState.username.length >= 3}
+                isEnabled={appState.username.value.length >= 3}
                 onChange={(value: string) => setSearchText(value)}
               />
             </div>
@@ -219,7 +243,7 @@ export default function MainView() {
             <Switch
               label="Show only available rooms"
               defaultIsChecked={displayOnlyAvailableRooms as boolean}
-              isEnabled={userState.username.length >= 3}
+              isEnabled={appState.username.value.length >= 3}
               onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
             />
           </div>

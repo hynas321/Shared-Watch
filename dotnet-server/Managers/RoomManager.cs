@@ -22,7 +22,7 @@ public class RoomManager {
         }
     }
 
-    public Room RemoveRoom(string roomHash)
+    public Room DeleteRoom(string roomHash)
     {
         try
         {
@@ -61,7 +61,7 @@ public class RoomManager {
                 room.RoomHash,
                 room.RoomName,
                 room.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private,
-                room.Users.Count(u => u.IsInRoom == true),
+                room.Users.Count,
                 room.RoomSettings.MaxUsers
             );
 
@@ -156,34 +156,6 @@ public class RoomManager {
         catch (Exception)
         {
             return null;
-        }
-    }
-
-    public bool UpdateUserInRoom(string roomHash, string authorizationToken, bool isInRoom)
-    {
-      try
-        {
-            Room room = GetRoom(roomHash);
-
-            if (room == null)
-            {
-                return false;
-            }
-
-            User user = room.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
-
-            if (user == null)
-            {
-                return false;
-            }
-
-            user.IsInRoom = isInRoom;
-
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
         }
     }
 }

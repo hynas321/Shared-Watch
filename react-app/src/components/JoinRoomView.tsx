@@ -1,17 +1,15 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { JoinRoomNavigationState } from "../types/JoinRoomNavigationState";
-import { useEffect, useState } from "react";
+import { useEffect, useContext } from "react";
 import { HttpManager } from "../classes/HttpManager";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
+import { AppStateContext } from "../context/RoomHubContext";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export default function JoinRoomView() {
+  const appState = useContext(AppStateContext);
   const location = useLocation();
-  const navigate = useNavigate();
-  const { ...joinRoomNavigationState }: JoinRoomNavigationState = location.state ?? location.state === null;
-
-  const [roomType, setRoomType] = useState<RoomTypesEnum>(RoomTypesEnum.public);
+  const navigate = useNavigate()
 
   const httpManager = new HttpManager();
 
@@ -24,7 +22,7 @@ export default function JoinRoomView() {
         return;
       }
 
-      setRoomType(responseData?.roomType as RoomTypesEnum);
+      appState.roomType.value = responseData?.roomType as RoomTypesEnum;
     }
   }
 
@@ -33,6 +31,6 @@ export default function JoinRoomView() {
   }, []);
 
   return (
-    <div>JoinRoomView {location.state === null ? `Type: ${roomType}` : `Type: ${joinRoomNavigationState.roomType}`}</div>
+    <div>JoinRoomView {appState.roomType.value}</div>
   )
 }

@@ -1,24 +1,23 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { ChatMessage } from "../types/ChatMessage";
 import { InputForm } from "./InputForm";
 import { BsSendFill } from "react-icons/bs";
+import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { HubEvents } from "../classes/HubEvents";
 
-export interface ChatProps {
-  chatMessages: ChatMessage[];
-  onChange?: (chatMessages: ChatMessage[]) => void;
-}
+export default function Chat() {
+  const appState = useContext(AppStateContext);
+  const roomHub = useContext(RoomHubContext);
 
-export default function Chat({chatMessages: initialChatMessages, onChange}: ChatProps) {
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>(initialChatMessages);
-  const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
   const messagesRef = useRef<HTMLDivElement>(null);
+  const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
 
   useEffect(() => {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
-  }, [chatMessages]);
+  }, [appState.chatMessages.value]);
 
   const handleTextInputChange = (text: string) => {
     setCurrentChatMessageText(text);
@@ -33,20 +32,15 @@ export default function Chat({chatMessages: initialChatMessages, onChange}: Chat
     const currentDate: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 
     const newChatMessage: ChatMessage = {
-      username: "User1",
+      username: appState.username.value,
       text: currentChatMessageText,
       date: currentDate
     }
 
-    setChatMessages([...chatMessages, newChatMessage])
+    roomHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, newChatMessage);
+
     setCurrentChatMessageText("");
   };
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(chatMessages);
-    }
-  }, [chatMessages]);
 
   const handleEnterPress = (key: string) => {
     if (key === "Enter") {
@@ -74,8 +68,8 @@ export default function Chat({chatMessages: initialChatMessages, onChange}: Chat
       </div>
       <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
       {
-        chatMessages.length !== 0 ? (
-          chatMessages.map((chatMessage, index) => (
+        appState.chatMessages.value.length !== 0 ? (
+          appState.chatMessages.value.map((chatMessage, index) => (
             <li 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2"

@@ -1,3 +1,4 @@
+using dotnet_server.Controllers;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
@@ -7,20 +8,18 @@ public partial class RoomHub : Hub
     private readonly ILogger<RoomHub> _logger;
     private readonly RoomManager _roomManager = new RoomManager();
 
-    public RoomHub(ILogger<RoomHub> _logger)
+    public RoomHub(ILogger<RoomHub> logger)
     {
-        this._logger = _logger;
+        _logger = logger;
     }
 
     public override async Task OnConnectedAsync()
-    {   
-        await Clients.All.SendAsync(HubEvents.OnLeaveRoom, new UserDTO("Sudden user leave", false));
+    {
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {   
-        await Clients.All.SendAsync(HubEvents.OnLeaveRoom, new UserDTO("Sudden user leave", false));
         await base.OnDisconnectedAsync(exception);
     }
 }

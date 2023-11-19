@@ -115,19 +115,13 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            if (room.RoomSettings.MaxUsers == room.Users.Count(u => u.IsInRoom == true))
+            if (room.RoomSettings.MaxUsers == room.Users.Count)
             {
                 _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status403Forbidden);
             }
 
-            if (room.Users.Any(u => u.IsInRoom == true && authorizationToken == u.AuthorizationToken))
-            {
-                _logger.LogInformation($"{roomHash} Join: Status 403. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
-                return StatusCode(StatusCodes.Status409Conflict);
-            }
-
-            if (room.Users.Any(u => u.Username == input.Username && u.AuthorizationToken != authorizationToken))
+            if (room.Users.Any(u => u.Username == input.Username))
             {
                 _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status409Conflict);
@@ -140,17 +134,9 @@ public class RoomController : ControllerBase
                 isUserFirstAdmin = true;
             }
 
-            User newUser = new User(
-                input.Username,
-                isInRoom: true,
-                isAdmin: isUserFirstAdmin
-            );
+            User newUser = new User(input.Username, isUserFirstAdmin);
+            UserDTO newUserDTO = new UserDTO(newUser.Username, newUser.IsAdmin);
 
-            UserDTO newUserDTO = new UserDTO(
-                newUser.Username,
-                newUser.IsAdmin
-            );
-            
             bool isNewUserAdded = _roomManager.AddUser(roomHash, newUser);
 
             if (!isNewUserAdded)
@@ -158,7 +144,7 @@ public class RoomController : ControllerBase
                 _logger.LogInformation($"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
+            
             RoomJoinOutput output = new RoomJoinOutput()
             {
                 AuthorizationToken = newUser.AuthorizationToken,
@@ -170,9 +156,9 @@ public class RoomController : ControllerBase
             };
             
             var hubContext = _roomHubContext.Groups.AddToGroupAsync(HttpContext.Connection.Id, roomHash);
-            _roomHubContext.Clients.GroupExcept(roomHash, HttpContext.Connection.Id).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
-            //To remove later \/
-            _roomHubContext.Clients.All.SendAsync(HubEvents.OnJoinRoom, new UserDTO("Join test", false));
+
+            _roomHubContext.Clients.All.SendAsync(HubEvents.OnJoinRoom, newUserDTO);
+
             _logger.LogInformation($"{roomHash} Join: Status 200. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
         }
@@ -212,9 +198,9 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            bool isUserInRoomUpdated = _roomManager.UpdateUserInRoom(roomHash, authorizationToken, false);
+            User deletedUser = _roomManager.DeleteUser(roomHash, authorizationToken);
 
-            if (!isUserInRoomUpdated)
+            if (deletedUser == null)
             {
                 _logger.LogInformation($"{roomHash} Leave: Status 500. AuthorizationToken: {authorizationToken}");
                 return StatusCode(StatusCodes.Status500InternalServerError);
@@ -222,16 +208,17 @@ public class RoomController : ControllerBase
 
             Room updatedRoom = _roomManager.GetRoom(roomHash);
 
-            if (updatedRoom.Users.Count(u => u.IsInRoom == true) == 0)
+            if (updatedRoom.Users.Count == 0)
             {
                 _logger.LogInformation($"Room {roomHash} has been removed");
-                _roomManager.RemoveRoom(roomHash);
-            }   
+                _roomManager.DeleteRoom(roomHash);
+            }
 
-            var hubContext = _roomHubContext.Groups.RemoveFromGroupAsync(HttpContext.Connection.Id, roomHash);
-            _roomHubContext.Clients.GroupExcept(roomHash, HttpContext.Connection.Id).SendAsync(HubEvents.OnLeaveRoom);
-            //To remove later \/
-            _roomHubContext.Clients.All.SendAsync(HubEvents.OnLeaveRoom, new UserDTO("Leave test", false));
+            UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
+
+            var hubContext = _roomHubContext.Groups.AddToGroupAsync(HttpContext.Connection.Id, roomHash);
+
+            _roomHubContext.Clients.All.SendAsync(HubEvents.OnLeaveRoom, userDTO);
 
             _logger.LogInformation($"{roomHash} Leave: Status 200. AuthorizationToken: {authorizationToken}");
             return StatusCode(StatusCodes.Status200OK);

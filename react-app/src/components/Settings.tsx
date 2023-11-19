@@ -4,40 +4,29 @@ import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 import FormRange from "./FormRange";
-import { RoomSettings } from "../types/RoomSettings";
+import { AppStateContext } from "../context/RoomHubContext";
+import { useContext } from "react";
 
-export interface SettingsProps {
-  roomSettings: RoomSettings;
-}
-
-export default function Settings({roomSettings: initialRoomSettings}: SettingsProps) {
-  const [roomPassword, setRoomPassword] = useState<string>("");
+export default function Settings() {
+  const appState = useContext(AppStateContext);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
-  const [, setMaxUsers] = useState<number>(initialRoomSettings.maxUsers);
-  const [isSendingChatMessagesAllowed, setIsSendingChatMessagesAllowed] = useState<boolean>(initialRoomSettings.isSendingChatMessagesAllowed);
-  const [isAddingVideosAllowed, setIsAddingVideosAllowed] = useState<boolean>(initialRoomSettings.isAddingVideosAllowed);
-  const [isRemovingVideosAllowed, setIsRemovingVideosAllowed] = useState<boolean>(initialRoomSettings.isRemovingVideosAllowed);
-  const [isPlayingVideosOutsideOfPlaylistAllowed, setIsPlayingVideosOutsideOfPlaylistAllowed] = useState<boolean>(initialRoomSettings.isPlayingVideosOutsideOfPlaylistAllowed);
-  const [isStartingPausingVideosAllowed, setIsStartingPausingVideosAllowed] = useState<boolean>(initialRoomSettings.isStartingPausingVideosAllowed);
-  const [isSkippingVideosAllowed, setIsSkippingVideosAllowed] = useState<boolean>(initialRoomSettings.isSkippingVideosAllowed);
-  const [userIsAdmin] = useState<boolean>(false);
 
   const handleSetRoomPrivateButtonClick = () => {
-    if (inputFormPassword === roomPassword) {
+    if (inputFormPassword === appState.password.value) {
       return;
     }
 
     if (inputFormPassword.length > 0) {
-      setRoomPassword(inputFormPassword);
+      appState.password.value = inputFormPassword;
       setInputFormPassword("");
     }
     else {
-      setRoomPassword("");
+      appState.password.value = "";
     }
   }
 
   const handleRemovePasswordButtonClick = () => {
-    setRoomPassword("");
+    appState.password.value = "";
     setInputFormPassword("");
   }
 
@@ -47,11 +36,39 @@ export default function Settings({roomSettings: initialRoomSettings}: SettingsPr
     }
   }
 
+  const setMaxUsers = (value: number) => {
+    appState.roomSettings.value!.maxUsers = value;
+  }
+
+  const setIsSendingChatMessagesAllowed = (checked: boolean) => {
+    appState.roomSettings.value!.isSendingChatMessagesAllowed = checked;
+  };
+
+  const setIsAddingVideosAllowed = (checked: boolean) => {
+    appState.roomSettings.value!.isAddingVideosAllowed = checked;
+  };
+
+  const setIsRemovingVideosAllowed = (checked: boolean) => {
+    appState.roomSettings.value!.isRemovingVideosAllowed = checked;
+  };
+
+  const setIsPlayingVideosOutsideOfPlaylistAllowed = (checked: boolean) => {
+    appState.roomSettings.value!.isPlayingVideosOutsideOfPlaylistAllowed = checked;
+  };
+
+  const setIsStartingPausingVideosAllowed = (checked: boolean) => {
+    appState.roomSettings.value!.isStartingPausingVideosAllowed = checked;
+  };
+
+  const setIsSkippingVideosAllowed = (checked: boolean) => {
+    appState.roomSettings.value!.isSkippingVideosAllowed = checked;
+  };
+
   return (
     <>
       <div className="d-block">
           {
-            userIsAdmin &&
+            appState.isAdmin.value &&
             <>
               <h6 className="text-info text-center mb-3">Room settings</h6>
               <div className="d-flex">
@@ -71,9 +88,9 @@ export default function Settings({roomSettings: initialRoomSettings}: SettingsPr
                 />
               </div>
               { 
-                (roomPassword.length > 0) && 
+                (appState.password.value.length > 0) && 
                 <div className="mt-2">
-                  <span className="text-white room-password">Current password: {roomPassword} </span>
+                  <span className="text-white room-password">Current password: {appState.password.value} </span>
                   <Button
                     text={"Remove password"}
                     classNames="text-primary button-text"
@@ -85,7 +102,7 @@ export default function Settings({roomSettings: initialRoomSettings}: SettingsPr
           }
         <div className="text-white text-center">
           {
-            userIsAdmin &&
+            appState.isAdmin.value &&
             <FormRange
               label={"Max users"}
               labelClassNames={"mt-3"}
@@ -103,42 +120,42 @@ export default function Settings({roomSettings: initialRoomSettings}: SettingsPr
         <div className="mt-3">
           <Switch 
             label={"Send chat messages"}
-            defaultIsChecked={isSendingChatMessagesAllowed}
-            isEnabled={userIsAdmin}
+            defaultIsChecked={appState.roomSettings.value?.isSendingChatMessagesAllowed as boolean}
+            isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setIsSendingChatMessagesAllowed(checked)} 
           />
         </div>
         <div className="mt-3"> 
           <Switch 
             label={"Add videos to the playlist"}
-            defaultIsChecked={isAddingVideosAllowed}
-            isEnabled={userIsAdmin}
+            defaultIsChecked={appState.roomSettings.value?.isAddingVideosAllowed as boolean}
+            isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setIsAddingVideosAllowed(checked)} 
           />
           <Switch 
             label={"Remove videos from the playlist"}
-            defaultIsChecked={isRemovingVideosAllowed}
-            isEnabled={userIsAdmin}
+            defaultIsChecked={appState.roomSettings.value?.isRemovingVideosAllowed as boolean}
+            isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setIsRemovingVideosAllowed(checked)} 
           />
           <Switch
             label={"Play videos outside of the playlist"}
-            defaultIsChecked={isPlayingVideosOutsideOfPlaylistAllowed}
-            isEnabled={userIsAdmin}
+            defaultIsChecked={appState.roomSettings.value?.isPlayingVideosOutsideOfPlaylistAllowed as boolean}
+            isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setIsPlayingVideosOutsideOfPlaylistAllowed(checked)} 
           />
         </div>
         <div className="mt-3">
           <Switch 
             label={"Start/Pause videos"}
-            defaultIsChecked={isStartingPausingVideosAllowed}
-            isEnabled={userIsAdmin}
+            defaultIsChecked={appState.roomSettings.value?.isStartingPausingVideosAllowed as boolean}
+            isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setIsStartingPausingVideosAllowed(checked)} 
           />
           <Switch 
             label={"Skip videos"}
-            defaultIsChecked={isSkippingVideosAllowed}
-            isEnabled={userIsAdmin}
+            defaultIsChecked={appState.roomSettings.value?.isSkippingVideosAllowed as boolean}
+            isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setIsSkippingVideosAllowed(checked)} 
           />
         </div>

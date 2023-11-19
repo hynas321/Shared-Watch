@@ -2,29 +2,29 @@ import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
 import { QueuedVideo } from "../types/QueuedVideo";
 import Button from "./Button";
 import { InputForm } from "./InputForm";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import VideoIcon from './../assets/video-icon.png'
+import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import * as signalR from "@microsoft/signalr";
+import { HubEvents } from "../classes/HubEvents";
 
-export interface PlaylistProps {
-  queuedVideos: QueuedVideo[];
-  onChange?: (queuedVideos: QueuedVideo[]) => void;
-}
-
-export default function Playlist({queuedVideos: initialQueuedVideos, onChange}: PlaylistProps) {
-  const [queuedVideos, setQueuedVideos] = useState<QueuedVideo[]>(initialQueuedVideos);
-  const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
+export default function Playlist() {
+  const roomHub = useContext(RoomHubContext);
+  const appState = useContext(AppStateContext);
   const queuedVideosRef = useRef<HTMLDivElement>(null);
+
+  const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
 
   const videoThumbnailStyle = {
     width: "40px",
     height: "40px"
   };
-
+  
   useEffect(() => {
     if (queuedVideosRef.current) {
       queuedVideosRef.current.scrollTop = queuedVideosRef.current.scrollHeight;
     }
-  }, [queuedVideos]);
+  }, [appState.playlistVideos.value]);
 
   const handleTextInputChange = (text: string) => {
     setCurrentVideoUrlText(text);
@@ -39,15 +39,9 @@ export default function Playlist({queuedVideos: initialQueuedVideos, onChange}: 
       url: currentVideoUrlText,
     };
 
-    setQueuedVideos([...queuedVideos, newQueuedVideo])
+    roomHub.invoke(HubEvents.AddQueuedVideo, appState.roomHash.value, newQueuedVideo);
     setCurrentVideoUrlText("");
   }
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(queuedVideos);
-    }
-  }, [queuedVideos]);
 
   const handleEnterPress = (key: string) => {
     if (key === "Enter") {
@@ -56,8 +50,8 @@ export default function Playlist({queuedVideos: initialQueuedVideos, onChange}: 
   }
 
   const handleRemoveQueuedVideoButtonClick = (event: any, index: number) => {
-    event.preventDefault();
-    setQueuedVideos(queuedVideos.filter((_, i) => i !== index));
+    event.preventDefault();    
+    roomHub.invoke(HubEvents.DeleteQueuedVideo, appState.roomHash.value, appState.playlistVideos.value[index]);
   }
 
   return (
@@ -80,8 +74,8 @@ export default function Playlist({queuedVideos: initialQueuedVideos, onChange}: 
       </div>
       <div className="list-group rounded-3 control-panel-list" ref={queuedVideosRef}>
       {
-        queuedVideos.length !== 0 ? (
-          queuedVideos.map((queuedVideo, index) => (
+        appState.playlistVideos.value.length !== 0 ? (
+          appState.playlistVideos.value.map((queuedVideo, index) => (
             <a 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"

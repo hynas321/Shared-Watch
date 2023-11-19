@@ -1,39 +1,33 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { User } from "../types/User";
 import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMinus, BsShieldFillPlus } from "react-icons/bs";
 import Button from "./Button";
+import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import * as signalR from "@microsoft/signalr";
+import { HubEvents } from "../classes/HubEvents";
 
-export interface UsersProps {
-  users: User[]
-  onChange?: (users: User[]) => void;
-}
-
-export default function Users({users: initialUsers, onChange}: UsersProps) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(users);
-    }
-  }, [users]);
+export default function Users() {
+  const appState = useContext(AppStateContext);
+  const roomHub = useContext(RoomHubContext);
 
   const handleAdminStatusButtonClick = (adminStatus: boolean, index: number) => {
-    const updatedUsers = [...users];
-  
-    updatedUsers[index].isAdmin = adminStatus;
-    setUsers(updatedUsers);
+    if (appState.users.value === null) {
+      return;
+    }
+
+    appState.users.value[index].isAdmin = adminStatus;
   }
 
   const handleRemoveUserButtonClick = (event: any, index: number) => {
     event.preventDefault();
-    setUsers(users.filter((_, i) => i !== index));
+     appState.users.value?.filter((_, i) => i !== index);
   }
 
     return (
       <ul className="list-group rounded-3">
       {
-        users.length !== 0 ? (
-          users.map((user, index) => (
+        appState.users.value?.length !== 0 ? (
+          appState.users.value?.map((user, index) => (
             <li 
               key={index}
               className="d-flex justify-content-between align-items-center border border-secondary list-group-item bg-muted border-2"

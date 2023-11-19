@@ -3,23 +3,20 @@ import './App.css'
 import MainView from './components/MainView'
 import RoomView from './components/RoomView';
 import NotFoundView from './components/NotFoundView';
-import { useAppSelector } from './redux/hooks';
 import { useEffect } from 'react';
 import JoinRoomView from './components/JoinRoomView';
-import { RoomHubContext, roomHub } from './context/RoomHubContext';
+import { AppStateContext, RoomHubContext, appState, roomHub } from './context/RoomHubContext';
 
 function App() {
-  const userState = useAppSelector((state) => state.userState);
-
   useEffect(() => {
-    const backgroundClass = userState.isInRoom ? 'background-gradient' : 'background-gradient';
+    const backgroundClass = appState.isInRoom.value ? 'background-gradient' : 'background-gradient';
 
     document.body.className = backgroundClass;
 
     return () => {
       document.body.className = '';
     };
-  }, [userState.isInRoom]);
+  }, [appState.isInRoom]);
   
   const router = createBrowserRouter([
     {
@@ -41,9 +38,11 @@ function App() {
   ]);
 
   return (
-    <RoomHubContext.Provider value={roomHub}>
-      <RouterProvider router={router}/>
-    </RoomHubContext.Provider>
+    <AppStateContext.Provider value={appState}>
+      <RoomHubContext.Provider value={roomHub}>
+        <RouterProvider router={router}/>
+      </RoomHubContext.Provider>
+    </AppStateContext.Provider>
   )
 }
 
