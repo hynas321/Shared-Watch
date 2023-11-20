@@ -29,29 +29,34 @@ export default function Users() {
               key={index}
               className="d-flex justify-content-between align-items-center border border-secondary list-group-item bg-muted border-2"
             >
-              <span className="text-dark">
+              <span className={appState.username.value == user.username ? "text-orange" : "text-dark"}>
                 { user.isAdmin ? <BsShieldFillCheck /> : <BsFillPersonFill /> } {user.username}
               </span>
               <div>
                 {
-                  user.isAdmin ? 
+                  (user.isAdmin && appState.isAdmin.value === true &&appState.username.value != user.username) &&
                     <Button
                       text={<BsShieldFillMinus />}
                       classNames="btn btn-outline-warning me-2"
                       onClick={() => handleAdminStatusButtonClick(false, index)}
                     />
-                  :
+                }
+                {
+                  (!user.isAdmin && appState.isAdmin.value === true && appState.username.value != user.username) &&
                   <Button
                     text={<BsShieldFillPlus />}
                     classNames="btn btn-outline-warning me-2"
                     onClick={() => handleAdminStatusButtonClick(true, index)}
                   />
                 }
-                <Button
-                  text={<BsFillPersonXFill />}
-                  classNames="btn btn-outline-danger"
-                  onClick={() => handleRemoveUserButtonClick(event, index)}
-                />
+                {
+                  (appState.isAdmin.value === true && appState.username.value != user.username) &&
+                  <Button
+                    text={<BsFillPersonXFill />}
+                    classNames="btn btn-outline-danger"
+                    onClick={() => handleRemoveUserButtonClick(event, index)}
+                  />
+                }
               </div>
           </li>
           ))

@@ -17,6 +17,12 @@ export default function Chat() {
   const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
+    if (appState.unreadChatMessagesCount.value !== 0) {
+      appState.unreadChatMessagesCount.value = 0;
+    }
+  }, []);
+
+  useEffect(() => {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
@@ -79,7 +85,7 @@ export default function Chat() {
             >
               <div className="d-block chat-message">
                 <small className="text-muted">{`(${chatMessage.date})`} </small>
-                <span className="text-primary"><b>{chatMessage.username}: </b> </span>
+                <span className={`${appState.username.value == chatMessage.username ? "text-orange" : "text-primary" } `}><b>{chatMessage.username}: </b> </span>
                 <span className="text-dark">{chatMessage.text}</span>
               </div>
             </li>

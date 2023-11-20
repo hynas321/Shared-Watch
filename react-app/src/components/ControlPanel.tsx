@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { PanelsEnum } from "../enums/PanelsEnum";
 import Button from "./Button";
 import { BsFillChatTextFill, BsFillLockFill, BsGearFill } from 'react-icons/bs';
@@ -15,10 +15,9 @@ import { User } from "../types/User";
 
 export default function ControlPanel() {
   const roomHub = useContext(RoomHubContext);
-  const [activePanel, setActivePanel] = useState<PanelsEnum>(PanelsEnum.Chat);
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
-    setActivePanel(panelsEnumValue);
+    appState.activePanel.value = panelsEnumValue;
   }
 
   useEffect(() => {
@@ -30,6 +29,10 @@ export default function ControlPanel() {
       const chatMessage = JSON.parse(chatMessageSerialized);
 
       appState.chatMessages.value = [...appState.chatMessages.value, chatMessage];
+
+      if (appState.activePanel.value !== PanelsEnum.Chat) {
+        appState.unreadChatMessagesCount.value = appState.unreadChatMessagesCount.value + 1;
+      }
     });
 
     return () => {
@@ -48,11 +51,10 @@ export default function ControlPanel() {
       appState.queuedVideos.value = [...appState.queuedVideos.value, queuedVideo];
     });
 
-    roomHub.on(HubEvents.OnDeleteQueuedVideo, (removedQueuedVideoSerialized: string) => {
-      const removedQueuedVideo: QueuedVideo = JSON.parse(removedQueuedVideoSerialized);
+    roomHub.on(HubEvents.OnDeleteQueuedVideo, (removedIndex: number) => {
 
       appState.queuedVideos.value = appState.queuedVideos.value.filter(
-        (queuedVideo) => queuedVideo.url !== removedQueuedVideo.url
+        (_, index) => index !== removedIndex
       );
     });
 
@@ -98,39 +100,39 @@ export default function ControlPanel() {
         <div className="btn-group" role="group">
           <Button 
             text={
-              appState.chatMessages.value.length !== 0 ? (
-                <><span className="badge rounded-pill bg-danger mt-2">{appState.chatMessages.value?.length}</span> Chat</>
+              appState.unreadChatMessagesCount.value !== 0 ? (
+                <><span className="badge rounded-pill bg-danger mt-2">{appState.unreadChatMessagesCount.value}</span> Chat</>
               ) : (
                 <><BsFillChatTextFill /> Chat</>
               )
             }
-            classNames={activePanel === PanelsEnum.Chat ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
+            classNames={appState.activePanel.value === PanelsEnum.Chat ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Chat)} 
           />
           <Button 
             text={<><span className="badge rounded-pill bg-success mt-2">{appState.queuedVideos.value?.length}</span> Playlist</>}
-            classNames={activePanel === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
+            classNames={appState.activePanel.value === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
           />
           <Button 
             text={<><span className="badge rounded-pill bg-success mt-2">{appState.users.value?.length}/{appState.roomSettings.value?.maxUsers}</span> Users</>}
-            classNames={activePanel === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
+            classNames={appState.activePanel.value === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Users)} 
           />
           <Button 
             text={
               <><BsGearFill /> Settings</>
             }
-            classNames={activePanel === PanelsEnum.Settings ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
+            classNames={appState.activePanel.value === PanelsEnum.Settings ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Settings)} 
           />
         </div>
       </div>
       <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-4 pb-4 px-4">
-        { activePanel === PanelsEnum.Chat && <Chat /> }
-        { activePanel === PanelsEnum.Playlist && <Playlist /> }
-        { activePanel === PanelsEnum.Users && <Users  /> }
-        { activePanel === PanelsEnum.Settings && <Settings /> }
+        { appState.activePanel.value === PanelsEnum.Chat && <Chat /> }
+        { appState.activePanel.value === PanelsEnum.Playlist && <Playlist /> }
+        { appState.activePanel.value === PanelsEnum.Users && <Users  /> }
+        { appState.activePanel.value === PanelsEnum.Settings && <Settings /> }
       </div>
     </div>
   )

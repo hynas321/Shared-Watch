@@ -74,6 +74,6 @@ public partial class RoomHub : Hub
     
         _logger.LogInformation($"{roomHash} DeleteQueuedVideo: {deletedQueuedVideo.Url}. Authorization Token: {authorizationToken}, QueuedVideoIndex: {queuedVideoIndex}");
 
-        await Clients.Group(roomHash).SendAsync(HubEvents.OnDeleteQueuedVideo, JsonHelper.Serialize(deletedQueuedVideo));
+        await Clients.Group(roomHash).SendAsync(HubEvents.OnDeleteQueuedVideo, queuedVideoIndex);
     }
 }

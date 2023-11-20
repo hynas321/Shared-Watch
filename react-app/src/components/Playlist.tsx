@@ -53,7 +53,7 @@ export default function Playlist() {
 
   const handleRemoveQueuedVideoButtonClick = (event: any, index: number) => {
     event.preventDefault();    
-    roomHub.invoke(HubEvents.DeleteQueuedVideo, appState.roomHash.value, appState.queuedVideos.value[index]);
+    roomHub.invoke(HubEvents.DeleteQueuedVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), index);
   }
 
   return (

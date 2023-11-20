@@ -42,6 +42,10 @@
     1px  1px 0px #000;
 }
 
+.text-orange {
+  color: orange;
+}
+
 .video-player {
   height: 500px;
   width: 100%;

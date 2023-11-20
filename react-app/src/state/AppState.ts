@@ -5,6 +5,7 @@ import { RoomSettings } from "../types/RoomSettings";
 import { signal } from "@preact/signals-react";
 import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
+import { PanelsEnum } from "../enums/PanelsEnum";
 
 export function createAppState() {
   //signalR
@@ -28,11 +29,16 @@ export function createAppState() {
   const roomSettings = signal<RoomSettings | null>(null);
   const videoPlayerSettings = signal<VideoPlayerSettings | null>(null);
 
+  //Auxilary control panel data
+  const unreadChatMessagesCount = signal<number>(0);
+  const activePanel = signal<PanelsEnum>(PanelsEnum.Chat);
+
   return {
     connectionId,
     username, isAdmin, isInRoom,
     roomHash, roomName, roomType, password,
-    chatMessages, queuedVideos, users, roomSettings, videoPlayerSettings
+    chatMessages, queuedVideos, users, roomSettings, videoPlayerSettings,
+    unreadChatMessagesCount, activePanel
   }
 }
 
