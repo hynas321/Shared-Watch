@@ -16,7 +16,6 @@ import { User } from "../types/User";
 export default function ControlPanel() {
   const roomHub = useContext(RoomHubContext);
   const [activePanel, setActivePanel] = useState<PanelsEnum>(PanelsEnum.Chat);
-  const [roomType] = useState<RoomTypesEnum>(RoomTypesEnum.private);
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     setActivePanel(panelsEnumValue);
@@ -46,13 +45,13 @@ export default function ControlPanel() {
     roomHub.on(HubEvents.OnAddQueuedVideo, (queuedVideoSerialized: string) => {
       const queuedVideo: QueuedVideo = JSON.parse(queuedVideoSerialized);
 
-      appState.playlistVideos.value = [...appState.playlistVideos.value, queuedVideo];
+      appState.queuedVideos.value = [...appState.queuedVideos.value, queuedVideo];
     });
 
     roomHub.on(HubEvents.OnDeleteQueuedVideo, (removedQueuedVideoSerialized: string) => {
       const removedQueuedVideo: QueuedVideo = JSON.parse(removedQueuedVideoSerialized);
-      console.log("test")
-      appState.playlistVideos.value = appState.playlistVideos.value.filter(
+
+      appState.queuedVideos.value = appState.queuedVideos.value.filter(
         (queuedVideo) => queuedVideo.url !== removedQueuedVideo.url
       );
     });
@@ -67,13 +66,15 @@ export default function ControlPanel() {
     if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
       return;
     }
-
+    
     roomHub.on(HubEvents.OnJoinRoom, (newUser: User) => {
       appState.users.value = [...appState.users.value, newUser];
     });
 
     roomHub.on(HubEvents.OnLeaveRoom, (removedUser: User) => {
-      appState.users.value?.filter((user) => user.username !== removedUser.username);
+      appState.users.value = appState.users.value.filter(
+        (user) => user.username !== removedUser.username
+      );
     });
 
     return () => {
@@ -88,8 +89,8 @@ export default function ControlPanel() {
       <div className="d-flex align-items-center">
         <div className="text-center flex-grow-1">
           <h5 className="text-white">
-          {roomType === RoomTypesEnum.private && <BsFillLockFill />} Test room
-          </h5>
+          {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />}{appState.roomName.value}
+          </h5> 
         </div>
       </div>
       </div>
@@ -107,7 +108,7 @@ export default function ControlPanel() {
             onClick={() => handlePanelButtonClick(PanelsEnum.Chat)} 
           />
           <Button 
-            text={<><span className="badge rounded-pill bg-success mt-2">{appState.playlistVideos.value?.length}</span> Playlist</>}
+            text={<><span className="badge rounded-pill bg-success mt-2">{appState.queuedVideos.value?.length}</span> Playlist</>}
             classNames={activePanel === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
           />

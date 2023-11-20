@@ -5,8 +5,8 @@ import { InputForm } from "./InputForm";
 import { useContext, useEffect, useRef, useState } from "react";
 import VideoIcon from './../assets/video-icon.png'
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
-import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Playlist() {
   const roomHub = useContext(RoomHubContext);
@@ -15,6 +15,8 @@ export default function Playlist() {
 
   const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
 
+  const localStorageManager = new LocalStorageManager();
+  
   const videoThumbnailStyle = {
     width: "40px",
     height: "40px"
@@ -24,7 +26,7 @@ export default function Playlist() {
     if (queuedVideosRef.current) {
       queuedVideosRef.current.scrollTop = queuedVideosRef.current.scrollHeight;
     }
-  }, [appState.playlistVideos.value]);
+  }, [appState.queuedVideos.value]);
 
   const handleTextInputChange = (text: string) => {
     setCurrentVideoUrlText(text);
@@ -39,7 +41,7 @@ export default function Playlist() {
       url: currentVideoUrlText,
     };
 
-    roomHub.invoke(HubEvents.AddQueuedVideo, appState.roomHash.value, newQueuedVideo);
+    roomHub.invoke(HubEvents.AddQueuedVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newQueuedVideo);
     setCurrentVideoUrlText("");
   }
 
@@ -51,7 +53,7 @@ export default function Playlist() {
 
   const handleRemoveQueuedVideoButtonClick = (event: any, index: number) => {
     event.preventDefault();    
-    roomHub.invoke(HubEvents.DeleteQueuedVideo, appState.roomHash.value, appState.playlistVideos.value[index]);
+    roomHub.invoke(HubEvents.DeleteQueuedVideo, appState.roomHash.value, appState.queuedVideos.value[index]);
   }
 
   return (
@@ -74,8 +76,8 @@ export default function Playlist() {
       </div>
       <div className="list-group rounded-3 control-panel-list" ref={queuedVideosRef}>
       {
-        appState.playlistVideos.value.length !== 0 ? (
-          appState.playlistVideos.value.map((queuedVideo, index) => (
+        appState.queuedVideos.value.length !== 0 ? (
+          appState.queuedVideos.value.map((queuedVideo, index) => (
             <a 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"

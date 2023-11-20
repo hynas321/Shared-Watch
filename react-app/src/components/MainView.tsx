@@ -14,8 +14,7 @@ import { RoomNavigationState } from "../types/RoomNavigationState";
 import { animated, useSpring } from "@react-spring/web";
 import CreateRoomModal from "./CreateRoomModal";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
-import * as signalR from "@microsoft/signalr";
+import { AppStateContext } from "../context/RoomHubContext";
 import { ChatMessage } from "../types/ChatMessage";
 import { QueuedVideo } from "../types/QueuedVideo";
 import { RoomSettings } from "../types/RoomSettings";
@@ -24,7 +23,6 @@ import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
-  const roomHub = useContext(RoomHubContext);
   const navigate = useNavigate();
 
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -58,18 +56,6 @@ export default function MainView() {
     
     appState.username.value = username;
   }, []);
-
-  useEffect(() => {
-    if (roomHub.getState() === signalR.HubConnectionState.Connected) {
-      return;
-    }
-
-    const startRoomHubConnection = async () => {
-      await roomHub.start();
-    }
-
-    startRoomHubConnection();
-  }, [roomHub.getState()]);
 
   useEffect(() => {
     if (rooms.length === 0) {
@@ -183,9 +169,10 @@ export default function MainView() {
     appState.password.value = roomNavigationState.password;
 
     localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
-  
+    appState.isAdmin.value = roomInformation?.isAdmin as boolean;
+
     appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
-    appState.playlistVideos.value =  roomInformation?.queuedVideos as QueuedVideo[];
+    appState.queuedVideos.value =  roomInformation?.queuedVideos as QueuedVideo[];
     appState.roomSettings.value = roomInformation?.roomSettings as RoomSettings;
     appState.users.value = roomInformation?.users as User[];
     appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerSettings;

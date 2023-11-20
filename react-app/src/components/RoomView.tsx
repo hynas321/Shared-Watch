@@ -11,12 +11,10 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
 import { ping } from "ldrs"
 import { animated, useSpring } from "@react-spring/web";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
-import * as signalR from "@microsoft/signalr";
+import { AppStateContext } from "../context/RoomHubContext";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export default function RoomView() {
-  const roomHub = useContext(RoomHubContext);
   const appState = useContext(AppStateContext);
   const navigate = useNavigate();
 
@@ -56,18 +54,6 @@ export default function RoomView() {
 
     appState.roomHash.value = hash;
   }, []);
-
-  useEffect(() => {
-    if (roomHub.getState() === signalR.HubConnectionState.Connected) {
-      return;
-    }
-
-    const startRoomHubConnection = async () => {
-      await roomHub.start();
-    }
-
-    startRoomHubConnection();
-  }, [roomHub.getState()]);
 
   useEffect(() => {
     if (!appState.roomHash.value) {

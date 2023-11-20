@@ -7,6 +7,9 @@ import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export function createAppState() {
+  //signalR
+  const connectionId = signal<string | null>("");
+
   //User state
   const username = signal<string>("");
   const isAdmin = signal<boolean>(false);
@@ -20,15 +23,16 @@ export function createAppState() {
 
   //Control panel data
   const chatMessages = signal<ChatMessage[]>([]);
-  const playlistVideos = signal<QueuedVideo[]>([]);
+  const queuedVideos = signal<QueuedVideo[]>([]);
   const users = signal<User[]>([]);
   const roomSettings = signal<RoomSettings | null>(null);
   const videoPlayerSettings = signal<VideoPlayerSettings | null>(null);
 
   return {
+    connectionId,
     username, isAdmin, isInRoom,
     roomHash, roomName, roomType, password,
-    chatMessages, playlistVideos, users, roomSettings, videoPlayerSettings
+    chatMessages, queuedVideos, users, roomSettings, videoPlayerSettings
   }
 }
 

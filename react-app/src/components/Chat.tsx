@@ -5,6 +5,7 @@ import { InputForm } from "./InputForm";
 import { BsSendFill } from "react-icons/bs";
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { HubEvents } from "../classes/HubEvents";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Chat() {
   const appState = useContext(AppStateContext);
@@ -12,6 +13,8 @@ export default function Chat() {
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
+
+  const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -37,7 +40,7 @@ export default function Chat() {
       date: currentDate
     }
 
-    roomHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, newChatMessage);
+    roomHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
 
     setCurrentChatMessageText("");
   };

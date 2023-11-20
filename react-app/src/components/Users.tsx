@@ -1,9 +1,7 @@
-import { useContext, useEffect } from "react";
-import { User } from "../types/User";
+import { useContext } from "react";
 import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMinus, BsShieldFillPlus } from "react-icons/bs";
 import Button from "./Button";
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
-import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
 
 export default function Users() {
@@ -20,7 +18,6 @@ export default function Users() {
 
   const handleRemoveUserButtonClick = (event: any, index: number) => {
     event.preventDefault();
-     appState.users.value?.filter((_, i) => i !== index);
   }
 
     return (

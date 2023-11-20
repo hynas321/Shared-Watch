@@ -6,6 +6,7 @@ import { VideoPlayerSettings } from "../../VideoPlayerSettings";
 
 export type RoomJoinOutput = {
   authorizationToken: string,
+  isAdmin: boolean,
   chatMessages: ChatMessage[],
   queuedVideos: QueuedVideo[],
   users: User[],

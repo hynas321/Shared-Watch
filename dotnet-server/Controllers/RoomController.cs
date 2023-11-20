@@ -85,15 +85,15 @@ public class RoomController : ControllerBase
         return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
     }
 
-    [HttpPost("Join/{roomHash}")]
-    public IActionResult Join([FromBody] RoomJoinInput input, [FromRoute] string roomHash)
+    [HttpPost("JoinRoom/{roomHash}")]
+    public IActionResult JoinRoom([FromBody] RoomJoinInput input, [FromRoute] string roomHash)
     {
         try
         {
             string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
-            _logger.LogInformation("Authorization token: " + authorizationToken);
+            string signalRConnectionId = Request.Headers["X-SignalR-ConnectionId"];
 
-            if (!ModelState.IsValid || roomHash == "")
+            if (!ModelState.IsValid || roomHash == "" || signalRConnectionId == "")
             {   
                 _logger.LogInformation($"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status400BadRequest);
@@ -148,16 +148,17 @@ public class RoomController : ControllerBase
             RoomJoinOutput output = new RoomJoinOutput()
             {
                 AuthorizationToken = newUser.AuthorizationToken,
+                IsAdmin = newUser.IsAdmin,
                 ChatMessages = room.ChatMessages,
                 QueuedVideos = room.QueuedVideos,
                 Users = _roomManager.GetUsersDTO(roomHash).ToList(),
                 RoomSettings = room.RoomSettings,
                 VideoPlayerSettings = room.VideoPlayerSettings
             };
-            
-            var hubContext = _roomHubContext.Groups.AddToGroupAsync(HttpContext.Connection.Id, roomHash);
 
-            _roomHubContext.Clients.All.SendAsync(HubEvents.OnJoinRoom, newUserDTO);
+            var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
+
+            _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
 
             _logger.LogInformation($"{roomHash} Join: Status 200. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
@@ -175,8 +176,9 @@ public class RoomController : ControllerBase
         try
         {
             string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
+            string signalRConnectionId = Request.Headers["X-SignalR-ConnectionId"];
 
-            if (roomHash == "" || authorizationToken == "")
+            if (roomHash == "" || authorizationToken == "" || signalRConnectionId == "")
             {
                 _logger.LogInformation($"{roomHash} Leave: Status 400. AuthorizationToken: {authorizationToken}");
                 return StatusCode(StatusCodes.Status400BadRequest);
@@ -216,9 +218,9 @@ public class RoomController : ControllerBase
 
             UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
 
-            var hubContext = _roomHubContext.Groups.AddToGroupAsync(HttpContext.Connection.Id, roomHash);
+            var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
 
-            _roomHubContext.Clients.All.SendAsync(HubEvents.OnLeaveRoom, userDTO);
+            _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
 
             _logger.LogInformation($"{roomHash} Leave: Status 200. AuthorizationToken: {authorizationToken}");
             return StatusCode(StatusCodes.Status200OK);

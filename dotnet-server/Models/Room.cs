@@ -20,6 +20,11 @@ public class Room
         RoomSettings = new RoomSettings();
         VideoPlayerSettings = new VideoPlayerSettings();
     }
+
+    public User GetUser(string authorizationToken)
+    {
+        return Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
+    }
 }
 
 public enum RoomTypesEnum

@@ -15,6 +15,7 @@ public partial class RoomHub : Hub
 
     public override async Task OnConnectedAsync()
     {
+        await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnReceiveConnectionId, Context.ConnectionId);
         await base.OnConnectedAsync();
     }
 

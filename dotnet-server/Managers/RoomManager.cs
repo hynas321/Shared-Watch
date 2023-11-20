@@ -158,4 +158,74 @@ public class RoomManager {
             return null;
         }
     }
+
+    public bool AddChatMessage(string roomHash, ChatMessage chatMessage)
+    {
+        try
+        {
+            Room room = rooms.FirstOrDefault(r => r.RoomHash == roomHash);
+
+            if (room == null)
+            {
+                return false;
+            }
+
+            room.ChatMessages.Add(chatMessage);
+
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public bool AddQueuedVideo(string roomHash, QueuedVideo queuedVideo)
+    {
+        try
+        {
+            Room room = rooms.FirstOrDefault(r => r.RoomHash == roomHash);
+
+            if (room == null)
+            {
+                return false;
+            }
+
+            room.QueuedVideos.Add(queuedVideo);
+
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
+    public QueuedVideo DeleteQueuedVideo(string roomHash, int queuedVideoIndex)
+    {
+        try
+        {
+            Room room = rooms.FirstOrDefault(r => r.RoomHash == roomHash);
+
+            if (room == null)
+            {
+                return null;
+            }
+
+            QueuedVideo queuedVideo = room.QueuedVideos[queuedVideoIndex];
+
+            if (queuedVideo == null)
+            {
+                return null;
+            }
+
+            room.QueuedVideos.RemoveAt(queuedVideoIndex);
+
+            return queuedVideo;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
 }

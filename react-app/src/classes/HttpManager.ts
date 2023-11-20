@@ -7,6 +7,7 @@ import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
 import { Room } from "../types/Room";
 import { RoomExistsOutput } from "../types/HttpTypes/Output/RoomExistsOutput";
+import { appState } from "../context/RoomHubContext";
 
 export class HttpManager {
   private httpServerUrl = "http://localhost:5050";
@@ -84,7 +85,8 @@ export class HttpManager {
         requestBody, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authorizationToken}`
+            'Authorization': `Bearer ${authorizationToken}`,
+            'X-SignalR-ConnectionId': appState.connectionId.value
           },
         }
       );
@@ -105,7 +107,8 @@ export class HttpManager {
         `${this.httpServerUrl}/${HttpApiEndpoints.leaveRoom}/${roomHash}`, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authorizationToken}`
+            'Authorization': `Bearer ${authorizationToken}`,
+            'X-SignalR-ConnectionId': appState.connectionId.value
           }
         }
       );

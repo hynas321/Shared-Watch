@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./Button"
 import { InputForm } from "./InputForm";
 import { HttpManager } from "../classes/HttpManager";
@@ -10,8 +10,7 @@ import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { RoomNavigationState } from "../types/RoomNavigationState";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { RoomHubContext, appState } from "../context/RoomHubContext";
-import * as signalR from "@microsoft/signalr";
+import { appState } from "../context/RoomHubContext";
 import { ChatMessage } from "../types/ChatMessage";
 import { QueuedVideo } from "../types/QueuedVideo";
 import { RoomSettings } from "../types/RoomSettings";
@@ -28,7 +27,6 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
 
   const navigate = useNavigate();
-  const roomHub = useContext(RoomHubContext);
 
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
@@ -42,18 +40,6 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     }
 
   }, [appState.roomName.value]);
-
-  useEffect(() => {
-    if (roomHub.getState() === signalR.HubConnectionState.Connected) {
-      return;
-    }
-    console.log(roomHub.getState());
-    const startRoomHubConnection = async () => {
-      await roomHub.start();
-    }
-
-    startRoomHubConnection();
-  }, [roomHub.getState()]);
 
   const handleCreateRoomButtonClick = async () => {
     const [responseStatusCode, roomInformation]: [number, RoomCreateOutput | undefined] =
@@ -84,10 +70,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       password: appState.password.value
     };
     
-    joinRoom(navigationState);
+    accessRoom(navigationState);
   }
 
-  const joinRoom = async (roomNavigationState: RoomNavigationState) => {
+  const accessRoom = async (roomNavigationState: RoomNavigationState) => {
     const [responseStatusCode, roomInformation] = await httpManager.joinRoom(
       roomNavigationState.roomHash,
       roomNavigationState.password,
@@ -121,14 +107,15 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     appState.password.value = roomNavigationState.password;
 
     localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
+    appState.isAdmin.value = roomInformation?.isAdmin as boolean;
   
     appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
-    appState.playlistVideos.value =  roomInformation?.queuedVideos as QueuedVideo[];
+    appState.queuedVideos.value =  roomInformation?.queuedVideos as QueuedVideo[];
     appState.roomSettings.value = roomInformation?.roomSettings as RoomSettings;
     appState.users.value = roomInformation?.users as User[];
     appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerSettings;
 
-    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`);
+    navigate(`${ClientEndpoints.room}/${appState.roomHash.value}`);
   }
 
   return (
