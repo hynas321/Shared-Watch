@@ -3,10 +3,14 @@ import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMin
 import Button from "./Button";
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { HubEvents } from "../classes/HubEvents";
+import { User } from "../types/User";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Users() {
   const appState = useContext(AppStateContext);
   const roomHub = useContext(RoomHubContext);
+
+  const localStorageManager = new LocalStorageManager();
 
   const handleAdminStatusButtonClick = (adminStatus: boolean, index: number) => {
     if (appState.users.value === null) {
@@ -16,7 +20,8 @@ export default function Users() {
     appState.users.value[index].isAdmin = adminStatus;
   }
 
-  const handleRemoveUserButtonClick = (event: any, index: number) => {
+  const handleKickOutUserButtonClick = async (event: any, username: string) => {
+    await roomHub.invoke(HubEvents.KickOut, appState.roomHash.value, localStorageManager.getAuthorizationToken(), username);
     event.preventDefault();
   }
 
@@ -54,7 +59,7 @@ export default function Users() {
                   <Button
                     text={<BsFillPersonXFill />}
                     classNames="btn btn-outline-danger"
-                    onClick={() => handleRemoveUserButtonClick(event, index)}
+                    onClick={() => handleKickOutUserButtonClick(event, user.username)}
                   />
                 }
               </div>

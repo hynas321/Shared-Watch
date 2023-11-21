@@ -69,7 +69,7 @@ public class RoomManager {
         }
     }
 
-    public User GetUser(string roomHash, string authorizationToken)
+    public User GetUserByAuthorizationToken(string roomHash, string authorizationToken)
     {
         try
         {
@@ -81,6 +81,32 @@ public class RoomManager {
             }
 
             User user = room.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            return user;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+        public User GetUserByUsername(string roomHash, string username)
+    {
+        try
+        {
+            Room room = GetRoom(roomHash);
+
+            if (room == null)
+            {
+                return null;
+            }
+
+            User user = room.Users.FirstOrDefault(u => u.Username == username);
 
             if (user == null)
             {

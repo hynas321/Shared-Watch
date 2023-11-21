@@ -192,7 +192,7 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            User user = _roomManager.GetUser(roomHash, authorizationToken);
+            User user = _roomManager.GetUserByAuthorizationToken(roomHash, authorizationToken);
 
             if (user == null)
             {

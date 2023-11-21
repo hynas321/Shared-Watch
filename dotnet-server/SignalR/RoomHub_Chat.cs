@@ -26,6 +26,7 @@ public partial class RoomHub : Hub
         if (user.IsAdmin == false && room.RoomSettings.IsSendingChatMessagesAllowed == false)
         {
             _logger.LogInformation($"{roomHash} AddChatMessage: User does not have the permission. Authorization Token: {authorizationToken}");
+            return;
         }
 
 
@@ -36,6 +37,7 @@ public partial class RoomHub : Hub
         if (!isChatMessageAdded)
         {
             _logger.LogInformation($"{roomHash} AddChatMessage: Error when adding a chat message. Authorization Token: {authorizationToken}");
+            return;
         }
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnAddChatMessage, JsonHelper.Serialize(chatMessage));

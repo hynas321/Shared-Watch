@@ -12,9 +12,16 @@ import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
 import { QueuedVideo } from "../types/QueuedVideo";
 import { User } from "../types/User";
+import { toast } from "react-toastify";
+import { ClientEndpoints } from "../classes/ClientEndpoints";
+import { useNavigate } from "react-router-dom";
+import { HttpManager } from "../classes/HttpManager";
 
 export default function ControlPanel() {
   const roomHub = useContext(RoomHubContext);
+  const navigate = useNavigate();
+
+  const httpManager = new HttpManager();
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     appState.activePanel.value = panelsEnumValue;
@@ -82,6 +89,32 @@ export default function ControlPanel() {
     return () => {
       roomHub.off(HubEvents.OnJoinRoom);
       roomHub.off(HubEvents.OnLeaveRoom);
+    }
+  }, [roomHub.getState()]);
+
+  useEffect(() => {
+    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    roomHub.on(HubEvents.OnKickOut, (removedUserSerialized: string) => {
+      const removedUser: User = JSON.parse(removedUserSerialized);
+      const isCurrentUser = removedUser.username === appState.username.value;
+
+      if (isCurrentUser) {
+        toast.error("You have been kicked out");
+        httpManager.leaveRoom(appState.roomHash.value);
+        navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
+        return;
+      }
+
+      appState.users.value = appState.users.value.filter(
+        (user) => user.username !== removedUser.username
+      );
+    });
+
+    return () => {
+      roomHub.off(HubEvents.OnKickOut);
     }
   }, [roomHub.getState()]);
   

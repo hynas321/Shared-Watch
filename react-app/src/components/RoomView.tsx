@@ -27,7 +27,7 @@ export default function RoomView() {
     const [responseStatusCode, responseData] = await httpManager.checkIfRoomExists(hash);
 
     if (responseStatusCode !== HttpStatusCodes.OK) {
-      navigate(`${ClientEndpoints.mainMenu}`);
+      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
     }
     
     appState.roomType.value = responseData?.roomType as RoomTypesEnum;
