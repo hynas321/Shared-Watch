@@ -177,7 +177,7 @@ export default function MainView() {
     appState.users.value = roomInformation?.users as User[];
     appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerSettings;
 
-    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`);
+    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`, { replace: true });
   }
 
   const springs = useSpring({
@@ -196,7 +196,7 @@ export default function MainView() {
     <ToastContainer
       position="top-right"
       autoClose={3000}
-      hideProgressBar={false}
+      hideProgressBar={true}
       closeOnClick={true}
       draggable={true}
       pauseOnHover={false}

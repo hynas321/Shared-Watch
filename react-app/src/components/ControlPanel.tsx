@@ -117,6 +117,43 @@ export default function ControlPanel() {
       roomHub.off(HubEvents.OnKickOut);
     }
   }, [roomHub.getState()]);
+
+  useEffect(() => {
+    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    roomHub.on(HubEvents.OnSetAdminStatus, (updatedUserSerialized: string) => {
+      const updatedUser: User = JSON.parse(updatedUserSerialized);
+      const isCurrentUser = updatedUser.username === appState.username.value;
+
+      if (isCurrentUser) {
+        appState.isAdmin.value = updatedUser.isAdmin;
+
+        if (updatedUser.isAdmin) {
+          //toast.success("You have become an admin");
+        }
+        else {
+          //toast.success("You are no longer an admin");
+        }
+      }
+    
+      const userIndex = appState.users.value.findIndex(
+        (user) => user.username === updatedUser.username
+      );
+    
+      if (userIndex !== -1) {
+        const updatedUsers = [...appState.users.value];
+        updatedUsers[userIndex] = { ...updatedUser };
+    
+        appState.users.value = updatedUsers;
+      }
+    });
+
+    return () => {
+      roomHub.off(HubEvents.OnSetAdminStatus);
+    }
+  }, [roomHub.getState()]);
   
   return (
     <div>

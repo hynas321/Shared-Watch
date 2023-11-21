@@ -3,7 +3,6 @@ import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMin
 import Button from "./Button";
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { HubEvents } from "../classes/HubEvents";
-import { User } from "../types/User";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Users() {
@@ -12,16 +11,28 @@ export default function Users() {
 
   const localStorageManager = new LocalStorageManager();
 
-  const handleAdminStatusButtonClick = (adminStatus: boolean, index: number) => {
+  const handleAdminStatusButtonClick = async (adminStatus: boolean, username: string) => {
     if (appState.users.value === null) {
       return;
     }
 
-    appState.users.value[index].isAdmin = adminStatus;
+    await roomHub.invoke(
+      HubEvents.SetAdminStatus,
+      appState.roomHash.value,
+      localStorageManager.getAuthorizationToken(),
+      username,
+      adminStatus
+    );
   }
 
   const handleKickOutUserButtonClick = async (event: any, username: string) => {
-    await roomHub.invoke(HubEvents.KickOut, appState.roomHash.value, localStorageManager.getAuthorizationToken(), username);
+    await roomHub.invoke(
+      HubEvents.KickOut,
+      appState.roomHash.value,
+      localStorageManager.getAuthorizationToken(),
+      username
+    );
+
     event.preventDefault();
   }
 
@@ -43,7 +54,7 @@ export default function Users() {
                     <Button
                       text={<BsShieldFillMinus />}
                       classNames="btn btn-outline-warning me-2"
-                      onClick={() => handleAdminStatusButtonClick(false, index)}
+                      onClick={() => handleAdminStatusButtonClick(false, user.username)}
                     />
                 }
                 {
@@ -51,7 +62,7 @@ export default function Users() {
                   <Button
                     text={<BsShieldFillPlus />}
                     classNames="btn btn-outline-warning me-2"
-                    onClick={() => handleAdminStatusButtonClick(true, index)}
+                    onClick={() => handleAdminStatusButtonClick(true, user.username)}
                   />
                 }
                 {
