@@ -5,7 +5,7 @@ import { HttpManager } from "../classes/HttpManager";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import Header from "./Header";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
@@ -17,8 +17,6 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 export default function RoomView() {
   const appState = useContext(AppStateContext);
   const navigate = useNavigate();
-
-  const [isViewLoading] = useState<boolean>(false);
 
   const httpManager = new HttpManager();
   const httpUrlHelper = new HttpUrlHelper();
@@ -43,7 +41,7 @@ export default function RoomView() {
 
     if (!hash || hash.length === 0) {
       toast.error("Room not found");
-      navigate(`${ClientEndpoints.mainMenu}`);
+      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
 
@@ -88,27 +86,12 @@ export default function RoomView() {
       <Header />
       <div className="container">
         <div className="row">
-          {
-            isViewLoading &&
-            <div className="d-flex align-items-center justify-content-center" style={{ height: "70vh" }}>
-            <l-ping
-              size="250"
-              speed="1.5" 
-              color="white" 
-            ></l-ping>
-            </div>
-          }
-          {
-            !isViewLoading &&
-            <>
-              <animated.div style={{...springs}} className="col-xl-8 col-lg-12 mt-2">
-                <VideoPlayer />
-              </animated.div>
-              <animated.div style={{...springs}} className="col-xl-4 col-lg-12 mt-2">
-                <ControlPanel />
-              </animated.div>
-            </>
-          }
+          <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-2">
+            <VideoPlayer />
+          </animated.div>
+          <animated.div style={{ ...springs }} className="col-xl-4 col-lg-12 col-xs-6 mt-2">
+            <ControlPanel />
+          </animated.div>
         </div>
       </div>
     </>

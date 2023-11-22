@@ -115,7 +115,7 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            if (room.RoomSettings.MaxUsers == room.Users.Count)
+            if (room.UserPermissions.MaxUsers == room.Users.Count)
             {
                 _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status403Forbidden);
@@ -150,10 +150,10 @@ public class RoomController : ControllerBase
                 AuthorizationToken = newUser.AuthorizationToken,
                 IsAdmin = newUser.IsAdmin,
                 ChatMessages = room.ChatMessages,
-                QueuedVideos = room.QueuedVideos,
+                PlaylistVideos = room.PlaylistVideos,
                 Users = _roomManager.GetUsersDTO(roomHash).ToList(),
-                RoomSettings = room.RoomSettings,
-                VideoPlayerSettings = room.VideoPlayerSettings
+                RoomSettings = room.UserPermissions,
+                VideoPlayerSettings = room.VideoPlayerState
             };
 
             var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
@@ -212,7 +212,7 @@ public class RoomController : ControllerBase
 
             if (updatedRoom.Users.Count == 0)
             {
-                _logger.LogInformation($"Room {roomHash} has been removed");
+                _logger.LogInformation($"Room {roomHash} has been deleted");
                 _roomManager.DeleteRoom(roomHash);
             }
 

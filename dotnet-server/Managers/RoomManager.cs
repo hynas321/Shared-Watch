@@ -62,7 +62,7 @@ public class RoomManager {
                 room.RoomName,
                 room.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private,
                 room.Users.Count,
-                room.RoomSettings.MaxUsers
+                room.UserPermissions.MaxUsers
             );
 
             yield return roomDTO;
@@ -206,7 +206,7 @@ public class RoomManager {
         }
     }
 
-    public bool AddQueuedVideo(string roomHash, QueuedVideo queuedVideo)
+    public bool AddPlaylistVideo(string roomHash, PlaylistVideo playlistVideo)
     {
         try
         {
@@ -217,7 +217,7 @@ public class RoomManager {
                 return false;
             }
 
-            room.QueuedVideos.Add(queuedVideo);
+            room.PlaylistVideos.Add(playlistVideo);
 
             return true;
         }
@@ -227,7 +227,7 @@ public class RoomManager {
         }
     }
 
-    public QueuedVideo DeleteQueuedVideo(string roomHash, int queuedVideoIndex)
+    public PlaylistVideo DeletePlaylistVideo(string roomHash, int playlistVideoIndex)
     {
         try
         {
@@ -238,16 +238,16 @@ public class RoomManager {
                 return null;
             }
 
-            QueuedVideo queuedVideo = room.QueuedVideos[queuedVideoIndex];
+            PlaylistVideo playlistVideo = room.PlaylistVideos[playlistVideoIndex];
 
-            if (queuedVideo == null)
+            if (playlistVideo == null)
             {
                 return null;
             }
 
-            room.QueuedVideos.RemoveAt(queuedVideoIndex);
+            room.PlaylistVideos.RemoveAt(playlistVideoIndex);
 
-            return queuedVideo;
+            return playlistVideo;
         }
         catch (Exception)
         {

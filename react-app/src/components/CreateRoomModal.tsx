@@ -12,9 +12,9 @@ import { RoomNavigationState } from "../types/RoomNavigationState";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { appState } from "../context/RoomHubContext";
 import { ChatMessage } from "../types/ChatMessage";
-import { QueuedVideo } from "../types/QueuedVideo";
-import { RoomSettings } from "../types/RoomSettings";
-import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
+import { PlaylistVideo } from "../types/PlaylistVideo";
+import { UserPermissions } from "../types/UserPermissions";
+import { VideoPlayerState } from "../types/VideoPlayerSettings";
 import { User } from "../types/User";
 
 export interface CreateRoomModalProps {
@@ -110,10 +110,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     appState.isAdmin.value = roomInformation?.isAdmin as boolean;
   
     appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
-    appState.queuedVideos.value =  roomInformation?.queuedVideos as QueuedVideo[];
-    appState.roomSettings.value = roomInformation?.roomSettings as RoomSettings;
+    appState.playlistVideos.value =  roomInformation?.playlistVideos as PlaylistVideo[];
+    appState.roomSettings.value = roomInformation?.roomSettings as UserPermissions;
     appState.users.value = roomInformation?.users as User[];
-    appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerSettings;
+    appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerState;
 
     navigate(`${ClientEndpoints.room}/${appState.roomHash.value}`);
   }

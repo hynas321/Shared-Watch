@@ -1,5 +1,5 @@
 import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
-import { QueuedVideo } from "../types/QueuedVideo";
+import { PlaylistVideo } from "../types/PlaylistVideo";
 import Button from "./Button";
 import { InputForm } from "./InputForm";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -11,7 +11,7 @@ import { LocalStorageManager } from "../classes/LocalStorageManager";
 export default function Playlist() {
   const roomHub = useContext(RoomHubContext);
   const appState = useContext(AppStateContext);
-  const queuedVideosRef = useRef<HTMLDivElement>(null);
+  const playlistVideosRef = useRef<HTMLDivElement>(null);
 
   const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
 
@@ -23,10 +23,10 @@ export default function Playlist() {
   };
   
   useEffect(() => {
-    if (queuedVideosRef.current) {
-      queuedVideosRef.current.scrollTop = queuedVideosRef.current.scrollHeight;
+    if (playlistVideosRef.current) {
+      playlistVideosRef.current.scrollTop = playlistVideosRef.current.scrollHeight;
     }
-  }, [appState.queuedVideos.value]);
+  }, [appState.playlistVideos.value]);
 
   const handleTextInputChange = (text: string) => {
     setCurrentVideoUrlText(text);
@@ -37,11 +37,11 @@ export default function Playlist() {
       return;
     }
 
-    const newQueuedVideo: QueuedVideo = {
+    const newPlaylistVideo: PlaylistVideo = {
       url: currentVideoUrlText,
     };
 
-    roomHub.invoke(HubEvents.AddQueuedVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newQueuedVideo);
+    roomHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");
   }
 
@@ -51,9 +51,9 @@ export default function Playlist() {
     }
   }
 
-  const handleRemoveQueuedVideoButtonClick = (event: any, index: number) => {
+  const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
     event.preventDefault();    
-    roomHub.invoke(HubEvents.DeleteQueuedVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), index);
+    roomHub.invoke(HubEvents.DeletePlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), index);
   }
 
   return (
@@ -74,14 +74,14 @@ export default function Playlist() {
           onClick={handleAddVideoUrlButtonClick}
         />
       </div>
-      <div className="list-group rounded-3 control-panel-list" ref={queuedVideosRef}>
+      <div className="list-group rounded-3 control-panel-list" ref={playlistVideosRef}>
       {
-        appState.queuedVideos.value.length !== 0 ? (
-          appState.queuedVideos.value.map((queuedVideo, index) => (
+        appState.playlistVideos.value.length !== 0 ? (
+          appState.playlistVideos.value.map((playlistVideo, index) => (
             <a 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"
-              href={queuedVideo.url.startsWith('http') ? queuedVideo.url : `http://${queuedVideo.url}`}
+              href={playlistVideo.url.startsWith('http') ? playlistVideo.url : `http://${playlistVideo.url}`}
               target={"_blank"}
             >
               <div className="row">
@@ -89,12 +89,12 @@ export default function Playlist() {
                   <img src={VideoIcon} alt="Video Icon" style={videoThumbnailStyle} />
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
-                 <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>{queuedVideo.url}</small>
+                 <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>{playlistVideo.url}</small>
                   <div>
                     <Button
                       text={<BsXCircle/>}
                       classNames="btn btn-outline-danger btn-sm"
-                      onClick={() => handleRemoveQueuedVideoButtonClick(event, index)}
+                      onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
                     />
                   </div>
                 </div>

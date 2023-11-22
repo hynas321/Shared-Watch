@@ -4,14 +4,14 @@ namespace Dotnet.Server.Hubs;
 
 public partial class RoomHub : Hub
 {
-    [HubMethodName(HubEvents.AddQueuedVideo)]
-    public async Task AddQueuedVideo(string roomHash, string authorizationToken, QueuedVideo queuedVideo)
+    [HubMethodName(HubEvents.AddPlaylistVideo)]
+    public async Task AddPlaylistVideo(string roomHash, string authorizationToken, PlaylistVideo playlistVideo)
     {
         Room room = _roomManager.GetRoom(roomHash);
 
         if (room == null)
         {
-            _logger.LogInformation($"{roomHash} AddQueuedVideo: Room does not exist. Authorization Token: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}");
             return;
         }
 
@@ -19,35 +19,35 @@ public partial class RoomHub : Hub
 
         if (user == null)
         {
-            _logger.LogInformation($"{roomHash} AddQueuedVideo: User does not exist. Authorization Token: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not exist. Authorization Token: {authorizationToken}");
             return;
         }
 
-        if (user.IsAdmin == false && room.RoomSettings.IsAddingVideosAllowed == false)
+        if (user.IsAdmin == false && room.UserPermissions.IsAddingVideosAllowed == false)
         {
-            _logger.LogInformation($"{roomHash} AddQueuedVideo: User does not have the permission. Authorization Token: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}");
         }
 
-        _logger.LogInformation($"{roomHash} AddQueuedVideo: {queuedVideo.Url}. Authorization Token: {authorizationToken}");
+        _logger.LogInformation($"{roomHash} AddPlaylistVideo: {playlistVideo.Url}. Authorization Token: {authorizationToken}");
 
-        bool isQueuedVideoAdded = _roomManager.AddQueuedVideo(roomHash, queuedVideo);
+        bool isPlaylistVideoAdded = _roomManager.AddPlaylistVideo(roomHash, playlistVideo);
 
-        if (!isQueuedVideoAdded)
+        if (!isPlaylistVideoAdded)
         {
-            _logger.LogInformation($"{roomHash} AddQueuedVideo: Error when adding a queued video. Authorization Token: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a queued video. Authorization Token: {authorizationToken}");
         }
 
-        await Clients.Group(roomHash).SendAsync(HubEvents.OnAddQueuedVideo, JsonHelper.Serialize(queuedVideo));
+        await Clients.Group(roomHash).SendAsync(HubEvents.OnAddPlaylistVideo, JsonHelper.Serialize(playlistVideo));
     }
 
-    [HubMethodName(HubEvents.DeleteQueuedVideo)]
-    public async Task DeleteQueuedVideo(string roomHash, string authorizationToken, int queuedVideoIndex)
+    [HubMethodName(HubEvents.DeletePlaylistVideo)]
+    public async Task DeletePlaylistVideo(string roomHash, string authorizationToken, int playlistVideoIndex)
     {
         Room room = _roomManager.GetRoom(roomHash);
 
         if (room == null)
         {
-            _logger.LogInformation($"{roomHash} DeleteQueuedVideo: Room does not exist. Authorization Token: {authorizationToken}, QueuedVideoIndex: {queuedVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
             return;
         }
 
@@ -55,25 +55,25 @@ public partial class RoomHub : Hub
 
         if (user == null)
         {
-            _logger.LogInformation($"{roomHash} DeleteQueuedVideo: User does not exist. Authorization Token: {authorizationToken}, QueuedVideoIndex: {queuedVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not exist. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
             return;
         }
 
-        if (user.IsAdmin == false && room.RoomSettings.IsRemovingVideosAllowed == false)
+        if (user.IsAdmin == false && room.UserPermissions.IsRemovingVideosAllowed == false)
         {
-            _logger.LogInformation($"{roomHash} DeleteQueuedVideo: User does not have the permission. Authorization Token: {authorizationToken}, QueuedVideoIndex: {queuedVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
         }
 
-        QueuedVideo deletedQueuedVideo = _roomManager.DeleteQueuedVideo(roomHash, queuedVideoIndex);
+        PlaylistVideo deletePlaylistVideo = _roomManager.DeletePlaylistVideo(roomHash, playlistVideoIndex);
 
-        if (deletedQueuedVideo == null)
+        if (deletePlaylistVideo == null)
         {
-            _logger.LogInformation($"{roomHash} DeleteQueuedVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, QueuedVideoIndex: {queuedVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
         }
 
     
-        _logger.LogInformation($"{roomHash} DeleteQueuedVideo: {deletedQueuedVideo.Url}. Authorization Token: {authorizationToken}, QueuedVideoIndex: {queuedVideoIndex}");
+        _logger.LogInformation($"{roomHash} DeletePlaylistVideo: {deletePlaylistVideo.Url}. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
 
-        await Clients.Group(roomHash).SendAsync(HubEvents.OnDeleteQueuedVideo, queuedVideoIndex);
+        await Clients.Group(roomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, playlistVideoIndex);
     }
 }

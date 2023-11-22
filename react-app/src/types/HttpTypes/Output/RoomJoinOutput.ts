@@ -1,15 +1,15 @@
 import { ChatMessage } from "../../ChatMessage";
-import { QueuedVideo } from "../../QueuedVideo";
-import { RoomSettings } from "../../RoomSettings";
+import { PlaylistVideo } from "../../PlaylistVideo";
+import { UserPermissions } from "../../UserPermissions";
 import { User } from "../../User";
-import { VideoPlayerSettings } from "../../VideoPlayerSettings";
+import { VideoPlayerState } from "../../VideoPlayerSettings";
 
 export type RoomJoinOutput = {
   authorizationToken: string,
   isAdmin: boolean,
   chatMessages: ChatMessage[],
-  queuedVideos: QueuedVideo[],
+  playlistVideos: PlaylistVideo[],
   users: User[],
-  roomSettings: RoomSettings,
-  videoPlayerSettings: VideoPlayerSettings
+  roomSettings: UserPermissions,
+  videoPlayerSettings: VideoPlayerState
 }

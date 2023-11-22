@@ -1,8 +1,8 @@
-public class QueuedVideo
+public class PlaylistVideo
 {
     public string Url { get; set; }
 
-    public QueuedVideo(string url)
+    public PlaylistVideo(string url)
     {
         Url = url;
     }

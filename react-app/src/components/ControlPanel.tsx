@@ -10,7 +10,7 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { RoomHubContext, appState } from "../context/RoomHubContext";
 import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
-import { QueuedVideo } from "../types/QueuedVideo";
+import { PlaylistVideo } from "../types/PlaylistVideo";
 import { User } from "../types/User";
 import { toast } from "react-toastify";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
@@ -52,22 +52,22 @@ export default function ControlPanel() {
       return;
     }
 
-    roomHub.on(HubEvents.OnAddQueuedVideo, (queuedVideoSerialized: string) => {
-      const queuedVideo: QueuedVideo = JSON.parse(queuedVideoSerialized);
+    roomHub.on(HubEvents.OnAddPlaylistVideo, (playlistVideoSerialized: string) => {
+      const playlistVideo: PlaylistVideo = JSON.parse(playlistVideoSerialized);
 
-      appState.queuedVideos.value = [...appState.queuedVideos.value, queuedVideo];
+      appState.playlistVideos.value = [...appState.playlistVideos.value, playlistVideo];
     });
 
-    roomHub.on(HubEvents.OnDeleteQueuedVideo, (removedIndex: number) => {
+    roomHub.on(HubEvents.OnDeletePlaylistVideo, (removedIndex: number) => {
 
-      appState.queuedVideos.value = appState.queuedVideos.value.filter(
+      appState.playlistVideos.value = appState.playlistVideos.value.filter(
         (_, index) => index !== removedIndex
       );
     });
 
     return () => {
-      roomHub.off(HubEvents.OnAddQueuedVideo);
-      roomHub.off(HubEvents.OnDeleteQueuedVideo);
+      roomHub.off(HubEvents.OnAddPlaylistVideo);
+      roomHub.off(HubEvents.OnDeletePlaylistVideo);
     }
   }, [roomHub.getState()]);
 
@@ -180,7 +180,7 @@ export default function ControlPanel() {
             onClick={() => handlePanelButtonClick(PanelsEnum.Chat)} 
           />
           <Button 
-            text={<><span className="badge rounded-pill bg-success mt-2">{appState.queuedVideos.value?.length}</span> Playlist</>}
+            text={<><span className="badge rounded-pill bg-success mt-2">{appState.playlistVideos.value?.length}</span> Playlist</>}
             classNames={appState.activePanel.value === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
           />

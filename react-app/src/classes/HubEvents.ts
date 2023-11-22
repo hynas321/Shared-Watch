@@ -15,8 +15,8 @@ export class HubEvents {
   static OnAddChatMessage: string = "OnAddChatMessage";
 
   //Playlist
-  static AddQueuedVideo: string = "AddQueuedVideo";
-  static DeleteQueuedVideo: string = "DeleteQueuedVideo";
-  static OnAddQueuedVideo: string = "OnAddQueuedVideo";
-  static OnDeleteQueuedVideo: string = "OnDeleteQueuedVideo";
+  static AddPlaylistVideo: string = "AddPlaylistVideo";
+  static DeletePlaylistVideo: string = "DeletePlaylistVideo";
+  static OnAddPlaylistVideo: string = "OnAddPlaylistVideo";
+  static OnDeletePlaylistVideo: string = "OnDeletePlaylistVideo";
 }

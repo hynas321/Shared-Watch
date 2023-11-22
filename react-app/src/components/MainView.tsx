@@ -16,10 +16,10 @@ import CreateRoomModal from "./CreateRoomModal";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { AppStateContext } from "../context/RoomHubContext";
 import { ChatMessage } from "../types/ChatMessage";
-import { QueuedVideo } from "../types/QueuedVideo";
-import { RoomSettings } from "../types/RoomSettings";
+import { PlaylistVideo } from "../types/PlaylistVideo";
+import { UserPermissions } from "../types/UserPermissions";
 import { User } from "../types/User";
-import { VideoPlayerSettings } from "../types/VideoPlayerSettings";
+import { VideoPlayerState } from "../types/VideoPlayerSettings";
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
@@ -172,10 +172,10 @@ export default function MainView() {
     appState.isAdmin.value = roomInformation?.isAdmin as boolean;
 
     appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
-    appState.queuedVideos.value =  roomInformation?.queuedVideos as QueuedVideo[];
-    appState.roomSettings.value = roomInformation?.roomSettings as RoomSettings;
+    appState.playlistVideos.value =  roomInformation?.playlistVideos as PlaylistVideo[];
+    appState.roomSettings.value = roomInformation?.roomSettings as UserPermissions;
     appState.users.value = roomInformation?.users as User[];
-    appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerSettings;
+    appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerState;
 
     navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`, { replace: true });
   }

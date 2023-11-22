@@ -4,10 +4,10 @@ public class Room
     public string RoomName { get; set; }
     public string RoomPassword { get; set; }
     public List<ChatMessage> ChatMessages { get; set; }
-    public List<QueuedVideo> QueuedVideos { get; set; }
+    public List<PlaylistVideo> PlaylistVideos { get; set; }
     public List<User> Users { get; set; }
-    public RoomSettings RoomSettings { get; set; }
-    public VideoPlayerSettings VideoPlayerSettings { get; set; }
+    public UserPermissions UserPermissions { get; set; }
+    public VideoPlayerState VideoPlayerState { get; set; }
 
     public Room(string roomName, string roomPassword)
     {
@@ -15,10 +15,10 @@ public class Room
         RoomName = roomName;
         RoomPassword = roomPassword;
         ChatMessages = new List<ChatMessage>();
-        QueuedVideos = new List<QueuedVideo>();
+        PlaylistVideos = new List<PlaylistVideo>();
         Users = new List<User>();
-        RoomSettings = new RoomSettings();
-        VideoPlayerSettings = new VideoPlayerSettings();
+        UserPermissions = new UserPermissions();
+        VideoPlayerState = new VideoPlayerState();
     }
 
     public User GetUser(string authorizationToken)

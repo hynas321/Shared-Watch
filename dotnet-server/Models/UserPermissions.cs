@@ -1,4 +1,4 @@
-public class RoomSettings {
+public class UserPermissions {
     public int MaxUsers { get; set; }
 
     //User settings
@@ -9,7 +9,7 @@ public class RoomSettings {
     public bool IsStartingPausingVideosAllowed { get; set; }
     public bool IsSkippingVideosAllowed { get; set; }
 
-    public RoomSettings()
+    public UserPermissions()
     {
         MaxUsers = 6;
         IsSendingChatMessagesAllowed = true;

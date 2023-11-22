@@ -15,10 +15,10 @@ public static class HubEvents {
     public const string OnAddChatMessage = "OnAddChatMessage";
 
     //Playlist
-    public const string AddQueuedVideo = "AddQueuedVideo";
-    public const string DeleteQueuedVideo = "DeleteQueuedVideo";
-    public const string OnAddQueuedVideo = "OnAddQueuedVideo";
-    public const string OnDeleteQueuedVideo = "OnDeleteQueuedVideo";
+    public const string AddPlaylistVideo = "AddPlaylistVideo";
+    public const string DeletePlaylistVideo = "DeletePlaylistVideo";
+    public const string OnAddPlaylistVideo = "OnAddPlaylistVideo";
+    public const string OnDeletePlaylistVideo = "OnDeletePlaylistVideo";
 
     //Settings
 }

@@ -1,4 +1,4 @@
-export type RoomSettings = {
+export type UserPermissions = {
   maxUsers: number,
   isSendingChatMessagesAllowed: boolean,
   isAddingVideosAllowed: boolean,
