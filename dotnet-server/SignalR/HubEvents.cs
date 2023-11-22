@@ -10,6 +10,10 @@ public static class HubEvents {
     public const string OnKickOut = "OnKickOut";
     public const string OnSetAdminStatus = "OnSetAdminStatus";
 
+    //VideoPlayer
+    public const string SetIsVideoPlaying = "SetIsVideoPlaying";
+    public const string OnSetIsVideoPlaying = "OnSetIsVideoPlaying";
+
     //Chat
     public const string AddChatMessage = "AddChatMessage";
     public const string OnAddChatMessage = "OnAddChatMessage";
@@ -20,5 +24,7 @@ public static class HubEvents {
     public const string OnAddPlaylistVideo = "OnAddPlaylistVideo";
     public const string OnDeletePlaylistVideo = "OnDeletePlaylistVideo";
 
-    //Settings
+    //UserPermissions
+    public const string SetUserPermissions = "SetUserPermissions";
+    public const string OnSetUserPermissions = "OnSetUserPermissions";
 }

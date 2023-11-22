@@ -58,22 +58,26 @@ export default function Playlist() {
 
   return (
     <>
-      <div className="d-flex mb-3">
-        <InputForm
-          classNames="form-control rounded-0"
-          value={currentVideoUrlText}
-          trim={true}
-          placeholder="Paste video URL"
-          isEnabled={true}
-          onChange={handleTextInputChange}
-          onKeyDown={handleEnterPress}
-        />
-        <Button
-          text={<BsPlusCircleFill />}
-          classNames="btn btn-primary rounded-0"
-          onClick={handleAddVideoUrlButtonClick}
-        />
-      </div>
+      
+      {
+        appState.userPermissions.value?.canAddVideo &&
+        <div className="d-flex mb-3">
+          <InputForm
+            classNames="form-control rounded-0"
+            value={currentVideoUrlText}
+            trim={true}
+            placeholder="Paste video URL"
+            isEnabled={true}
+            onChange={handleTextInputChange}
+            onKeyDown={handleEnterPress}
+          />
+          <Button
+            text={<BsPlusCircleFill />}
+            classNames="btn btn-primary rounded-0"
+            onClick={handleAddVideoUrlButtonClick}
+          />
+        </div>
+      }
       <div className="list-group rounded-3 control-panel-list" ref={playlistVideosRef}>
       {
         appState.playlistVideos.value.length !== 0 ? (
@@ -90,13 +94,16 @@ export default function Playlist() {
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
                  <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>{playlistVideo.url}</small>
-                  <div>
-                    <Button
-                      text={<BsXCircle/>}
-                      classNames="btn btn-outline-danger btn-sm"
-                      onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
-                    />
-                  </div>
+                 {
+                    appState.userPermissions.value?.canRemoveVideo &&
+                    <div>
+                      <Button
+                        text={<BsXCircle/>}
+                        classNames="btn btn-outline-danger btn-sm"
+                        onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
+                      />
+                    </div>
+                  }
                 </div>
               </div>
             </a>

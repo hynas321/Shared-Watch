@@ -3,7 +3,6 @@ public class UserPermissions {
     public bool canAddChatMessage { get; set; }
     public bool canAddVideo { get; set; }
     public bool canRemoveVideo { get; set; }
-    public bool canPlayVideoOutsideOfPlaylist { get; set; }
     public bool canStartOrPauseVideo { get; set; }
     public bool canSkipVideo { get; set; }
 
@@ -12,8 +11,7 @@ public class UserPermissions {
         canAddChatMessage = true;
         canAddVideo = true;
         canRemoveVideo = true;
-        canPlayVideoOutsideOfPlaylist = false;
-        canStartOrPauseVideo = false;
+        canStartOrPauseVideo = true;
         canSkipVideo = false;
     }
 }

@@ -59,22 +59,25 @@ export default function Chat() {
 
   return (
     <>
-      <div className="d-flex mb-3">
-        <InputForm
-          classNames="form-control rounded-0"
-          value={currentChatMessageText}
-          trim={false}
-          placeholder="Enter your message"
-          isEnabled={true}
-          onChange={handleTextInputChange}
-          onKeyDown={handleEnterPress}
-        />
-        <Button
-          text={<BsSendFill />}
-          classNames="btn btn-primary rounded-0"
-          onClick={handleSendMessage}
-        />
-      </div>
+        {
+          appState.userPermissions.value?.canAddChatMessage &&
+          <div className="d-flex mb-3">
+            <InputForm
+              classNames="form-control rounded-0"
+              value={currentChatMessageText}
+              trim={false}
+              placeholder="Enter your message"
+              isEnabled={true}
+              onChange={handleTextInputChange}
+              onKeyDown={handleEnterPress}
+            />
+            <Button
+              text={<BsSendFill />}
+              classNames="btn btn-primary rounded-0"
+              onClick={handleSendMessage}
+            />
+          </div>
+        }
       <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
       {
         appState.chatMessages.value.length !== 0 ? (

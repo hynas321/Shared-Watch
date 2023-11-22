@@ -4,12 +4,16 @@ import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 import FormRange from "./FormRange";
-import { AppStateContext } from "../context/RoomHubContext";
+import { AppStateContext, roomHub } from "../context/RoomHubContext";
 import { useContext } from "react";
+import { HubEvents } from "../classes/HubEvents";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Settings() {
   const appState = useContext(AppStateContext);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
+
+  const localStorageManager = new LocalStorageManager();
 
   const handleSetRoomPrivateButtonClick = () => {
     if (inputFormPassword === appState.roomPassword.value) {
@@ -36,32 +40,38 @@ export default function Settings() {
     }
   }
 
+  const invokeChange = () => {
+    roomHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
+  };
+
   const setMaxUsers = (value: number) => {
     appState.maxUsers.value = value;
+    invokeChange();
   }
 
   const setCanAddChatMessage = (checked: boolean) => {
     appState.userPermissions.value!.canAddChatMessage = checked;
+    invokeChange();
   };
 
   const setCanAddVideo = (checked: boolean) => {
     appState.userPermissions.value!.canAddVideo = checked;
+    invokeChange();
   };
 
   const setCanRemoveVideo = (checked: boolean) => {
     appState.userPermissions.value!.canRemoveVideo = checked;
-  };
-
-  const setCanPlayVideoOutsideOfPlaylist = (checked: boolean) => {
-    appState.userPermissions.value!.canPlayVideoOutsideOfPlaylist = checked;
+    invokeChange();
   };
 
   const setCanStartOrPauseVideo = (checked: boolean) => {
     appState.userPermissions.value!.canStartOrPauseVideo = checked;
+    invokeChange();
   };
 
   const setCanSkipVideo = (checked: boolean) => {
     appState.userPermissions.value!.canSkipVideo = checked;
+    invokeChange();
   };
 
   return (
@@ -115,7 +125,7 @@ export default function Settings() {
           }
         </div>
       </div>
-      <div className="d-block mt-3">
+      <div className="d-block">
         <h6 className="text-info text-center">User permissions</h6>
         <div className="mt-3">
           <Switch 
@@ -137,12 +147,6 @@ export default function Settings() {
             defaultIsChecked={appState.userPermissions.value?.canRemoveVideo as boolean}
             isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setCanRemoveVideo(checked)} 
-          />
-          <Switch
-            label={"Play videos outside of the playlist"}
-            defaultIsChecked={appState.userPermissions.value?.canPlayVideoOutsideOfPlaylist as boolean}
-            isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setCanPlayVideoOutsideOfPlaylist(checked)} 
           />
         </div>
         <div className="mt-3">

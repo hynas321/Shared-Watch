@@ -26,6 +26,7 @@ public partial class RoomHub : Hub
         if (user.IsAdmin == false && room.UserPermissions.canAddVideo == false)
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}");
+            return;
         }
 
         _logger.LogInformation($"{roomHash} AddPlaylistVideo: {playlistVideo.Url}. Authorization Token: {authorizationToken}");
@@ -35,6 +36,7 @@ public partial class RoomHub : Hub
         if (!isPlaylistVideoAdded)
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a queued video. Authorization Token: {authorizationToken}");
+            return;
         }
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnAddPlaylistVideo, JsonHelper.Serialize(playlistVideo));

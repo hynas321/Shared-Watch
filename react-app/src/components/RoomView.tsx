@@ -60,6 +60,7 @@ export default function RoomView() {
 
     const handleBeforeUnload = async () => {
       httpManager.leaveRoom(appState.roomHash.value);
+      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
     }
 
     window.addEventListener('beforeunload', handleBeforeUnload);

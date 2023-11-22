@@ -10,6 +10,10 @@ export class HubEvents {
   static OnKickOut: string = "OnKickOut";
   static OnSetAdminStatus: string = "OnSetAdminStatus";
 
+  //VideoPlayer
+  static SetIsVideoPlaying = "SetIsVideoPlaying";
+  static OnSetIsVideoPlaying = "OnSetIsVideoPlaying";
+
   //Chat
   static AddChatMessage: string = "AddChatMessage";
   static OnAddChatMessage: string = "OnAddChatMessage";
@@ -19,4 +23,9 @@ export class HubEvents {
   static DeletePlaylistVideo: string = "DeletePlaylistVideo";
   static OnAddPlaylistVideo: string = "OnAddPlaylistVideo";
   static OnDeletePlaylistVideo: string = "OnDeletePlaylistVideo";
+
+  //UserPermissions
+  static SetUserPermissions: string = "SetUserPermissions";
+  static OnSetUserPermissions: string = "OnSetUserPermissions";
+
 }

@@ -16,6 +16,7 @@ import { toast } from "react-toastify";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { useNavigate } from "react-router-dom";
 import { HttpManager } from "../classes/HttpManager";
+import { UserPermissions } from "../types/UserPermissions";
 
 export default function ControlPanel() {
   const roomHub = useContext(RoomHubContext);
@@ -152,6 +153,24 @@ export default function ControlPanel() {
 
     return () => {
       roomHub.off(HubEvents.OnSetAdminStatus);
+    }
+  }, [roomHub.getState()]);
+
+  useEffect(() => {
+    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    roomHub.on(HubEvents.OnSetUserPermissions, (userPermissionsSerialized: string) => {
+      const userPermissions: UserPermissions = JSON.parse(userPermissionsSerialized);
+
+      if (appState.userPermissions.value != null) {
+        appState.userPermissions.value = userPermissions;
+      }
+    });
+
+    return () => {
+      roomHub.off(HubEvents.OnSetUserPermissions);
     }
   }, [roomHub.getState()]);
   
