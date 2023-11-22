@@ -89,6 +89,11 @@ export default function Header() {
         appState.isInRoom.value &&
         <div className="justify-content-end me-3">
           <Button
+            text={<><BsDoorOpenFill /> Copy URL</>}
+            classNames={"btn btn-primary btn-sm me-4 ms-sm-3"}
+            onClick={() => {}}
+          />
+          <Button
             text={<><BsDoorOpenFill /> Leave room</>}
             classNames={"btn btn-danger btn-sm"}
             onClick={handleLeaveRoomButtonClick}

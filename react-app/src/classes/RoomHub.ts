@@ -46,10 +46,8 @@ export class RoomHub {
     this.connection.off(name);
   }
 
-  async onclose() {
-    if (this.connection.state === signalR.HubConnectionState.Connected) {
-      await this.onclose();
-    }
+  async onclose(callback: (...args: any[]) => any) {
+    await this.connection.onclose(callback);
   }
 
   onreconnected(callback: (...args: any[]) => any) {

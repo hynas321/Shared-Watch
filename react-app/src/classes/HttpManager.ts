@@ -42,7 +42,8 @@ export class HttpManager {
         `${this.httpServerUrl}/${HttpApiEndpoints.createRoom}`,
         requestBody, {
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'X-SignalR-ConnectionId': appState.connectionId.value
           },
         }
       );

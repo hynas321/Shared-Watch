@@ -31,7 +31,9 @@ public class RoomController : ControllerBase
     {
         try
         {
-            if (!ModelState.IsValid)
+            string signalRConnectionId = Request.Headers["X-SignalR-ConnectionId"];
+
+            if (!ModelState.IsValid || signalRConnectionId == null)
             {   
                 _logger.LogInformation($"Create: Status 400. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status400BadRequest);
@@ -127,15 +129,23 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
-            bool isUserFirstAdmin = false;
+            bool isUserAdmin = false;
 
             if (room.Users.Count == 0)
             {
-                isUserFirstAdmin = true;
+                isUserAdmin = true;
+                room.AdminTokens.Add(authorizationToken);
             }
 
-            User newUser = new User(input.Username, isUserFirstAdmin);
+            if (room.AdminTokens.Any(o => o == authorizationToken))
+            {
+                isUserAdmin = true;
+            }
+
+            User newUser = new User(input.Username, isUserAdmin);
             UserDTO newUserDTO = new UserDTO(newUser.Username, newUser.IsAdmin);
+
+            var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
 
             bool isNewUserAdded = _roomManager.AddUser(roomHash, newUser);
 
@@ -144,12 +154,11 @@ public class RoomController : ControllerBase
                 _logger.LogInformation($"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
-            
+
             RoomJoinOutput output = new RoomJoinOutput()
             {
                 AuthorizationToken = newUser.AuthorizationToken,
                 IsAdmin = newUser.IsAdmin,
-
                 ChatMessages = room.ChatMessages,
                 PlaylistVideos = room.PlaylistVideos,
                 Users = _roomManager.GetUsersDTO(roomHash).ToList(),
@@ -157,8 +166,6 @@ public class RoomController : ControllerBase
                 UserPermissions = room.UserPermissions,
                 VideoPlayerState = room.VideoPlayerState
             };
-
-            var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
 
             _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
 

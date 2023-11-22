@@ -16,7 +16,6 @@ import { PlaylistVideo } from "../types/PlaylistVideo";
 import { UserPermissions } from "../types/UserPermissions";
 import { VideoPlayerState } from "../types/VideoPlayerState";
 import { User } from "../types/User";
-import { PanelsEnum } from "../enums/PanelsEnum";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -33,7 +32,11 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
-    appState.activePanel.value = PanelsEnum.Chat;
+    
+
+    return () => {
+      
+    }
   }, []);
 
   useEffect(() => {
@@ -108,6 +111,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     appState.roomHash.value = roomState.roomHash;
     appState.roomName.value = roomState.roomName;
     appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
+    appState.maxUsers.value = roomInformation?.roomSettings.maxUsers as number;
     appState.roomPassword.value = roomState.password;
 
     localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);

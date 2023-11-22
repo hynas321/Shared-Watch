@@ -62,7 +62,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
                     <Button
                       text={"Enter"}
                       classNames={`btn btn-primary mx-1 ${!isEnterPrivateRoomButtonEnabled && "disabled"}`}
-                      onClick={(room: Room) => onPrivateRoomClick(room, privateRoomPassword)}
+                      onClick={() => onPrivateRoomClick(room, privateRoomPassword)}
                     />
                   </div>
                 </div>

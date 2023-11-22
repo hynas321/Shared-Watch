@@ -60,7 +60,7 @@ export default function Chat() {
   return (
     <>
         {
-          appState.userPermissions.value?.canAddChatMessage &&
+          (appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) &&
           <div className="d-flex mb-3">
             <InputForm
               classNames="form-control rounded-0"

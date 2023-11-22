@@ -10,13 +10,6 @@ public class RoomSettings
         RoomName = roomName;
         RoomPassword = roomPassword;
         RoomType = roomType;
-        MaxUsers = 6;
-    }
-
-    public RoomSettings(string roomName, string roomPassword, int maxUsers)
-    {
-        RoomName = roomName;
-        RoomPassword = roomPassword;
-        MaxUsers = maxUsers;
+        MaxUsers = 10;
     }
 }

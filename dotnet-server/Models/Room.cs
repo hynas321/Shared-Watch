@@ -1,6 +1,7 @@
 public class Room
 {
     public string RoomHash { get; set; }
+    public List<string> AdminTokens { get; set; }
     public List<ChatMessage> ChatMessages { get; set; }
     public List<PlaylistVideo> PlaylistVideos { get; set; }
     public List<User> Users { get; set; }
@@ -11,6 +12,7 @@ public class Room
     public Room(string roomName, string roomPassword, RoomTypesEnum roomType)
     {
         RoomHash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+        AdminTokens = new List<string>();
         ChatMessages = new List<ChatMessage>();
         PlaylistVideos = new List<PlaylistVideo>();
         Users = new List<User>();

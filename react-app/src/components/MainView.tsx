@@ -165,6 +165,7 @@ export default function MainView() {
     appState.roomHash.value = roomState.roomHash;
     appState.roomName.value = roomState.roomName;
     appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
+    appState.maxUsers.value = roomInformation?.roomSettings.maxUsers as number;
     appState.roomPassword.value = roomState.password;
 
     localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);

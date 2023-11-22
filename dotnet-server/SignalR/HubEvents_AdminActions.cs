@@ -85,11 +85,20 @@ public partial class RoomHub : Hub
             return;
         }
 
-        _logger.LogInformation($"{roomHash} SetAdminStatus: {updatedUser.Username} {updatedUser.IsAdmin} {updatedUser.AuthorizationToken}. Authorization Token: {authorizationToken}");
-
         updatedUser.IsAdmin = isAdmin;
 
+        if (isAdmin)
+        {
+            room.AdminTokens.Add(updatedUser.AuthorizationToken);
+        }
+        else
+        {
+            room.AdminTokens.Remove(updatedUser.AuthorizationToken);
+        }
+
         UserDTO updatedUserDTO = new UserDTO(updatedUser.Username, updatedUser.IsAdmin);
+
+        _logger.LogInformation($"{roomHash} SetAdminStatus: {updatedUser.Username} {updatedUser.IsAdmin} {updatedUser.AuthorizationToken}. Authorization Token: {authorizationToken}");
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnSetAdminStatus, JsonHelper.Serialize(updatedUserDTO));
     }

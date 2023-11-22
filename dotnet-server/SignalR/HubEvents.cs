@@ -2,6 +2,11 @@ public static class HubEvents {
     //Connection
     public const string OnReceiveConnectionId = "OnReceiveConnectionId";
 
+    //Menu
+    //public const string OnAddRoom = "OnAddRoom";
+    //public const string OnRemoveRoom = "OnRemoveRoom";
+    //public const string OnChangePlayerCount = "OnChangePlayerCount";
+
     //Room
     public const string KickOut = "KickOut";
     public const string SetAdminStatus = "SetAdminStatus";

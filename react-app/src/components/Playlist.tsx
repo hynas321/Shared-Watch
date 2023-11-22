@@ -60,7 +60,7 @@ export default function Playlist() {
     <>
       
       {
-        appState.userPermissions.value?.canAddVideo &&
+        (appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) &&
         <div className="d-flex mb-3">
           <InputForm
             classNames="form-control rounded-0"
@@ -95,7 +95,7 @@ export default function Playlist() {
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
                  <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>{playlistVideo.url}</small>
                  {
-                    appState.userPermissions.value?.canRemoveVideo &&
+                    (appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) &&
                     <div>
                       <Button
                         text={<BsXCircle/>}

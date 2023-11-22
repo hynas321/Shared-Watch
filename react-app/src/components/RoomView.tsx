@@ -11,8 +11,9 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
 import { ping } from "ldrs"
 import { animated, useSpring } from "@react-spring/web";
-import { AppStateContext } from "../context/RoomHubContext";
+import { AppStateContext, roomHub } from "../context/RoomHubContext";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
+import { PanelsEnum } from "../enums/PanelsEnum";
 
 export default function RoomView() {
   const appState = useContext(AppStateContext);
@@ -51,6 +52,10 @@ export default function RoomView() {
     //}
 
     appState.roomHash.value = hash;
+  
+    return () => {
+      appState.activePanel.value = PanelsEnum.Chat;
+    }
   }, []);
 
   useEffect(() => {
@@ -61,7 +66,12 @@ export default function RoomView() {
     const handleBeforeUnload = async () => {
       httpManager.leaveRoom(appState.roomHash.value);
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
+      return;
     }
+
+    roomHub.onclose(() => {
+      toast.error("Connection lost")
+    })
 
     window.addEventListener('beforeunload', handleBeforeUnload);
 

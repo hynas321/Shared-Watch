@@ -44,11 +44,6 @@ export default function Settings() {
     roomHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
   };
 
-  const setMaxUsers = (value: number) => {
-    appState.maxUsers.value = value;
-    invokeChange();
-  }
-
   const setCanAddChatMessage = (checked: boolean) => {
     appState.userPermissions.value!.canAddChatMessage = checked;
     invokeChange();
@@ -76,10 +71,9 @@ export default function Settings() {
 
   return (
     <>
-      <div className="d-block">
           {
             appState.isAdmin.value &&
-            <>
+            <div className="d-block mb-3">
               <h6 className="text-info text-center mb-3">Room settings</h6>
               <div className="d-flex">
                 <InputForm
@@ -103,28 +97,13 @@ export default function Settings() {
                   <span className="text-white room-password">Current password: {appState.roomPassword.value} </span>
                   <Button
                     text={"Remove password"}
-                    classNames="text-primary button-text"
+                    classNames="text-info button-text"
                     onClick={handleRemovePasswordButtonClick}
                   />
                 </div>
               }
-            </>
+            </div>
           }
-        <div className="text-white text-center">
-          {
-            appState.isAdmin.value &&
-            <FormRange
-              label={"Max users"}
-              labelClassNames={"mt-3"}
-              minValue={2}
-              maxValue={10}
-              defaultValue={6}
-              step={1}
-              onChange={(value: number) => setMaxUsers(value)}
-            />
-          }
-        </div>
-      </div>
       <div className="d-block">
         <h6 className="text-info text-center">User permissions</h6>
         <div className="mt-3">
