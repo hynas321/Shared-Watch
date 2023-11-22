@@ -36,8 +36,8 @@ public class RoomController : ControllerBase
                 _logger.LogInformation($"Create: Status 400. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
-    
-            Room room = new Room(input.RoomName, input.RoomPassword);
+            RoomTypesEnum roomType= input.RoomPassword.Length == 0 ? RoomTypesEnum.Public : RoomTypesEnum.Private;
+            Room room = new Room(input.RoomName, input.RoomPassword, roomType);
 
             bool roomAdded = _roomManager.AddRoom(room);
 
@@ -79,7 +79,7 @@ public class RoomController : ControllerBase
 
         RoomExistsOutput output = new RoomExistsOutput()
         {
-            RoomType = room.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private
+            RoomType = room.RoomSettings.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private
         };
 
         return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
@@ -109,13 +109,13 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            if (room.RoomPassword != input.RoomPassword)
+            if (room.RoomSettings.RoomPassword != input.RoomPassword)
             {
                 _logger.LogInformation($"{roomHash} Join: Status 401. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            if (room.UserPermissions.MaxUsers == room.Users.Count)
+            if (room.RoomSettings.MaxUsers == room.Users.Count)
             {
                 _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status403Forbidden);
@@ -149,11 +149,13 @@ public class RoomController : ControllerBase
             {
                 AuthorizationToken = newUser.AuthorizationToken,
                 IsAdmin = newUser.IsAdmin,
+
                 ChatMessages = room.ChatMessages,
                 PlaylistVideos = room.PlaylistVideos,
                 Users = _roomManager.GetUsersDTO(roomHash).ToList(),
-                RoomSettings = room.UserPermissions,
-                VideoPlayerSettings = room.VideoPlayerState
+                RoomSettings = room.RoomSettings,
+                UserPermissions = room.UserPermissions,
+                VideoPlayerState = room.VideoPlayerState
             };
 
             var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);

@@ -185,7 +185,7 @@ export default function ControlPanel() {
             onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
           />
           <Button 
-            text={<><span className="badge rounded-pill bg-success mt-2">{appState.users.value?.length}/{appState.roomSettings.value?.maxUsers}</span> Users</>}
+            text={<><span className="badge rounded-pill bg-success mt-2">{appState.users.value?.length}/{appState.maxUsers.value}</span> Users</>}
             classNames={appState.activePanel.value === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Users)} 
           />

@@ -2,10 +2,10 @@ import { ChatMessage } from "../types/ChatMessage";
 import { User } from "../types/User";
 import { UserPermissions } from "../types/UserPermissions";
 import { signal } from "@preact/signals-react";
-import { VideoPlayerState } from "../types/VideoPlayerSettings";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
+import { VideoPlayerState } from "../types/VideoPlayerState";
 import { PanelsEnum } from "../enums/PanelsEnum";
 import { PlaylistVideo } from "../types/PlaylistVideo";
+import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export function createAppState() {
   //signalR
@@ -18,16 +18,19 @@ export function createAppState() {
 
   //Room
   const roomHash = signal<string>("");
+
+  //Room settings
   const roomName = signal<string>("");
+  const roomPassword = signal<string>("");
   const roomType = signal<RoomTypesEnum>(RoomTypesEnum.public);
-  const password = signal<string>("");
+  const maxUsers = signal<number>(6);
 
   //Control panel data
   const chatMessages = signal<ChatMessage[]>([]);
   const playlistVideos = signal<PlaylistVideo[]>([]);
   const users = signal<User[]>([]);
-  const roomSettings = signal<UserPermissions | null>(null);
-  const videoPlayerSettings = signal<VideoPlayerState | null>(null);
+  const userPermissions = signal<UserPermissions | null>(null);
+  const videoPlayerState = signal<VideoPlayerState | null>(null);
 
   //Auxilary control panel data
   const unreadChatMessagesCount = signal<number>(0);
@@ -36,8 +39,8 @@ export function createAppState() {
   return {
     connectionId,
     username, isAdmin, isInRoom,
-    roomHash, roomName, roomType, password,
-    chatMessages, playlistVideos: playlistVideos, users, roomSettings, videoPlayerSettings,
+    roomHash, roomName, roomPassword, roomType, maxUsers,
+    chatMessages, playlistVideos, users, userPermissions, videoPlayerState,
     unreadChatMessagesCount, activePanel
   }
 }

@@ -8,14 +8,15 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
-import { RoomNavigationState } from "../types/RoomNavigationState";
+import { RoomState } from "../types/RoomState";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { appState } from "../context/RoomHubContext";
 import { ChatMessage } from "../types/ChatMessage";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import { UserPermissions } from "../types/UserPermissions";
-import { VideoPlayerState } from "../types/VideoPlayerSettings";
+import { VideoPlayerState } from "../types/VideoPlayerState";
 import { User } from "../types/User";
+import { PanelsEnum } from "../enums/PanelsEnum";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -32,6 +33,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
+    appState.activePanel.value = PanelsEnum.Chat;
+  }, []);
+
+  useEffect(() => {
     if (appState.roomName.value.length >= 3) {
       setIsAcceptButtonEnabled(true);
     }
@@ -45,7 +50,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     const [responseStatusCode, roomInformation]: [number, RoomCreateOutput | undefined] =
       await httpManager.createRoom(
         appState.roomName.value,
-        appState.password.value,
+        appState.roomPassword.value,
         appState.username.value
       );
     
@@ -63,20 +68,19 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       return;
     }
 
-    const navigationState: RoomNavigationState = {
+    const roomState: RoomState = {
       roomHash: roomInformation?.roomHash as string,
-      roomName: appState.roomName.value,
-      roomType: appState.password.value.length === 0 ? RoomTypesEnum.public : RoomTypesEnum.private,
-      password: appState.password.value
+      roomName: appState.roomName.value as string,
+      password: appState.roomPassword.value as string
     };
     
-    accessRoom(navigationState);
+    joinRoom(roomState);
   }
 
-  const accessRoom = async (roomNavigationState: RoomNavigationState) => {
+  const joinRoom = async (roomState: RoomState) => {
     const [responseStatusCode, roomInformation] = await httpManager.joinRoom(
-      roomNavigationState.roomHash,
-      roomNavigationState.password,
+      roomState.roomHash,
+      roomState.password,
       appState.username.value
     );
     if (responseStatusCode !== HttpStatusCodes.OK) {
@@ -101,21 +105,21 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       return;
     }
 
-    appState.roomHash.value = roomNavigationState.roomHash;
-    appState.roomName.value = roomNavigationState.roomName;
-    appState.roomType.value = roomNavigationState.roomType;
-    appState.password.value = roomNavigationState.password;
+    appState.roomHash.value = roomState.roomHash;
+    appState.roomName.value = roomState.roomName;
+    appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
+    appState.roomPassword.value = roomState.password;
 
     localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
     appState.isAdmin.value = roomInformation?.isAdmin as boolean;
-  
+
     appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
     appState.playlistVideos.value =  roomInformation?.playlistVideos as PlaylistVideo[];
-    appState.roomSettings.value = roomInformation?.roomSettings as UserPermissions;
+    appState.userPermissions.value = roomInformation?.userPermissions as UserPermissions;
     appState.users.value = roomInformation?.users as User[];
-    appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerState;
+    appState.videoPlayerState.value = roomInformation?.videoPlayerState as VideoPlayerState;
 
-    navigate(`${ClientEndpoints.room}/${appState.roomHash.value}`);
+    navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
   }
 
   return (
@@ -144,7 +148,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
                     value={appState.roomName.value}
                     trim={false}
                     isEnabled={true}
-                    onChange={(value: string) => { appState.roomName!.value = value }}
+                    onChange={(value: string) => {appState.roomName.value = value}}
                   />
               </div>
               <div className="d-block mt-3">
@@ -152,10 +156,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
                 <InputForm
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
-                  value={appState.password.value}
+                  value={appState.roomPassword.value}
                   trim={true}
                   isEnabled={true}
-                  onChange={(value: string) => { appState.password!.value = value }}
+                  onChange={(value: string) => {appState.roomPassword.value = value}}
                 />
               </div>
             </div>

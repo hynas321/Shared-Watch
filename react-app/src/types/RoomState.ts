@@ -1,8 +1,7 @@
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
-export type RoomNavigationState = {
+export type RoomState = {
   roomHash: string;
   roomName: string;
-  roomType: RoomTypesEnum;
   password: string;
 }

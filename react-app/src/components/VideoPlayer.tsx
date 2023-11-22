@@ -12,8 +12,8 @@ export default function VideoPlayer() {
       </div>
       <div className="d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5">
         <ReactPlayer
-          url={appState.videoPlayerSettings.value?.url}
-          playing={appState.videoPlayerSettings.value?.isPlaying}
+          url={appState.videoPlayerState.value?.url}
+          playing={appState.videoPlayerState.value?.isPlaying}
           controls={true}
           width={"854px"}
           height={"480px"}

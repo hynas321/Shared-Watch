@@ -23,7 +23,7 @@ public partial class RoomHub : Hub
             return;
         }
 
-        if (user.IsAdmin == false && room.UserPermissions.IsAddingVideosAllowed == false)
+        if (user.IsAdmin == false && room.UserPermissions.canAddVideo == false)
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}");
         }
@@ -59,7 +59,7 @@ public partial class RoomHub : Hub
             return;
         }
 
-        if (user.IsAdmin == false && room.UserPermissions.IsRemovingVideosAllowed == false)
+        if (user.IsAdmin == false && room.UserPermissions.canRemoveVideo == false)
         {
             _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
         }

@@ -1,22 +1,19 @@
 public class UserPermissions {
-    public int MaxUsers { get; set; }
-
-    //User settings
-    public bool IsSendingChatMessagesAllowed { get; set; }
-    public bool IsAddingVideosAllowed { get; set; }
-    public bool IsRemovingVideosAllowed { get; set; }
-    public bool IsPlayingVideosOutsideOfPlaylistAllowed { get; set; }
-    public bool IsStartingPausingVideosAllowed { get; set; }
-    public bool IsSkippingVideosAllowed { get; set; }
+ 
+    public bool canAddChatMessage { get; set; }
+    public bool canAddVideo { get; set; }
+    public bool canRemoveVideo { get; set; }
+    public bool canPlayVideoOutsideOfPlaylist { get; set; }
+    public bool canStartOrPauseVideo { get; set; }
+    public bool canSkipVideo { get; set; }
 
     public UserPermissions()
     {
-        MaxUsers = 6;
-        IsSendingChatMessagesAllowed = true;
-        IsAddingVideosAllowed = true;
-        IsRemovingVideosAllowed = true;
-        IsPlayingVideosOutsideOfPlaylistAllowed = false;
-        IsStartingPausingVideosAllowed = false;
-        IsSkippingVideosAllowed = false;
+        canAddChatMessage = true;
+        canAddVideo = true;
+        canRemoveVideo = true;
+        canPlayVideoOutsideOfPlaylist = false;
+        canStartOrPauseVideo = false;
+        canSkipVideo = false;
     }
 }

@@ -10,7 +10,7 @@ import Header from "./Header";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
-import { RoomNavigationState } from "../types/RoomNavigationState";
+import { RoomState } from "../types/RoomState";
 import { animated, useSpring } from "@react-spring/web";
 import CreateRoomModal from "./CreateRoomModal";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
@@ -19,7 +19,8 @@ import { ChatMessage } from "../types/ChatMessage";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import { UserPermissions } from "../types/UserPermissions";
 import { User } from "../types/User";
-import { VideoPlayerState } from "../types/VideoPlayerSettings";
+import { VideoPlayerState } from "../types/VideoPlayerState";
+import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
@@ -114,31 +115,29 @@ export default function MainView() {
   }, [displayOnlyAvailableRooms]);
 
   const handlePublicRoomListItemClick = (item: Room) => {
-    const roomNavigationState: RoomNavigationState = {
+    const roomState: RoomState = {
       roomHash: item.roomHash,
       roomName: item.roomName,
-      roomType: item.roomType,
       password: ""
     };
 
-    joinRoom(roomNavigationState);
+    joinRoom(roomState);
   };
 
   const handlePrivateRoomListItemClick = (item: Room, password: string) => {
-    const roomNavigationState: RoomNavigationState = {
+    const roomState: RoomState = {
       roomHash: item.roomHash,
       roomName: item.roomName,
-      roomType: item.roomType,
       password: password
     };
 
-    joinRoom(roomNavigationState);
+    joinRoom(roomState);
   }
 
-  const joinRoom = async (roomNavigationState: RoomNavigationState) => {
+  const joinRoom = async (roomState: RoomState) => {
     const [responseStatusCode, roomInformation] = await httpManager.joinRoom(
-      roomNavigationState.roomHash,
-      roomNavigationState.password,
+      roomState.roomHash,
+      roomState.password,
       appState.username.value
     );
     if (responseStatusCode !== HttpStatusCodes.OK) {
@@ -163,21 +162,21 @@ export default function MainView() {
       return;
     }
 
-    appState.roomHash.value = roomNavigationState.roomHash;
-    appState.roomName.value = roomNavigationState.roomName;
-    appState.roomType.value = roomNavigationState.roomType;
-    appState.password.value = roomNavigationState.password;
+    appState.roomHash.value = roomState.roomHash;
+    appState.roomName.value = roomState.roomName;
+    appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
+    appState.roomPassword.value = roomState.password;
 
     localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
     appState.isAdmin.value = roomInformation?.isAdmin as boolean;
 
     appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
     appState.playlistVideos.value =  roomInformation?.playlistVideos as PlaylistVideo[];
-    appState.roomSettings.value = roomInformation?.roomSettings as UserPermissions;
+    appState.userPermissions.value = roomInformation?.userPermissions as UserPermissions;
     appState.users.value = roomInformation?.users as User[];
-    appState.videoPlayerSettings.value = roomInformation?.videoPlayerSettings as VideoPlayerState;
+    appState.videoPlayerState.value = roomInformation?.videoPlayerState as VideoPlayerState;
 
-    navigate(`${ClientEndpoints.room}/${roomNavigationState.roomHash}`, { replace: true });
+    navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
   }
 
   const springs = useSpring({

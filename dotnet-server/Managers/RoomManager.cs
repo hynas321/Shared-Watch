@@ -5,7 +5,7 @@ public class RoomManager {
     {
         try
         {
-            bool roomExists = rooms.Any(r => r.RoomName == room.RoomName);
+            bool roomExists = rooms.Any(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
 
             if (roomExists)
             {
@@ -59,10 +59,10 @@ public class RoomManager {
         {
             RoomDTO roomDTO = new RoomDTO(
                 room.RoomHash,
-                room.RoomName,
-                room.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private,
+                room.RoomSettings.RoomName,
+                room.RoomSettings.RoomPassword == "" ? RoomTypesEnum.Public : RoomTypesEnum.Private,
                 room.Users.Count,
-                room.UserPermissions.MaxUsers
+                room.RoomSettings.MaxUsers
             );
 
             yield return roomDTO;

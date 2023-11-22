@@ -1,22 +1,20 @@
 public class Room
 {
     public string RoomHash { get; set; }
-    public string RoomName { get; set; }
-    public string RoomPassword { get; set; }
     public List<ChatMessage> ChatMessages { get; set; }
     public List<PlaylistVideo> PlaylistVideos { get; set; }
     public List<User> Users { get; set; }
+    public RoomSettings RoomSettings { get; set; }
     public UserPermissions UserPermissions { get; set; }
     public VideoPlayerState VideoPlayerState { get; set; }
 
-    public Room(string roomName, string roomPassword)
+    public Room(string roomName, string roomPassword, RoomTypesEnum roomType)
     {
         RoomHash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
-        RoomName = roomName;
-        RoomPassword = roomPassword;
         ChatMessages = new List<ChatMessage>();
         PlaylistVideos = new List<PlaylistVideo>();
         Users = new List<User>();
+        RoomSettings = new RoomSettings(roomName, roomPassword, roomType);
         UserPermissions = new UserPermissions();
         VideoPlayerState = new VideoPlayerState();
     }

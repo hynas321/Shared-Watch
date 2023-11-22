@@ -1,9 +1,8 @@
 export type UserPermissions = {
-  maxUsers: number,
-  isSendingChatMessagesAllowed: boolean,
-  isAddingVideosAllowed: boolean,
-  isRemovingVideosAllowed: boolean,
-  isPlayingVideosOutsideOfPlaylistAllowed: boolean,
-  isStartingPausingVideosAllowed: boolean,
-  isSkippingVideosAllowed: boolean
+  canAddChatMessage: boolean,
+  canAddVideo: boolean,
+  canRemoveVideo: boolean,
+  canPlayVideoOutsideOfPlaylist: boolean,
+  canStartOrPauseVideo: boolean,
+  canSkipVideo: boolean
 }

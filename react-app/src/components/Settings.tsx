@@ -12,21 +12,21 @@ export default function Settings() {
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
 
   const handleSetRoomPrivateButtonClick = () => {
-    if (inputFormPassword === appState.password.value) {
+    if (inputFormPassword === appState.roomPassword.value) {
       return;
     }
 
     if (inputFormPassword.length > 0) {
-      appState.password.value = inputFormPassword;
+      appState.roomPassword.value = inputFormPassword;
       setInputFormPassword("");
     }
     else {
-      appState.password.value = "";
+      appState.roomPassword.value = "";
     }
   }
 
   const handleRemovePasswordButtonClick = () => {
-    appState.password.value = "";
+    appState.roomPassword.value = "";
     setInputFormPassword("");
   }
 
@@ -37,31 +37,31 @@ export default function Settings() {
   }
 
   const setMaxUsers = (value: number) => {
-    appState.roomSettings.value!.maxUsers = value;
+    appState.maxUsers.value = value;
   }
 
-  const setIsSendingChatMessagesAllowed = (checked: boolean) => {
-    appState.roomSettings.value!.isSendingChatMessagesAllowed = checked;
+  const setCanAddChatMessage = (checked: boolean) => {
+    appState.userPermissions.value!.canAddChatMessage = checked;
   };
 
-  const setIsAddingVideosAllowed = (checked: boolean) => {
-    appState.roomSettings.value!.isAddingVideosAllowed = checked;
+  const setCanAddVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canAddVideo = checked;
   };
 
-  const setIsRemovingVideosAllowed = (checked: boolean) => {
-    appState.roomSettings.value!.isRemovingVideosAllowed = checked;
+  const setCanRemoveVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canRemoveVideo = checked;
   };
 
-  const setIsPlayingVideosOutsideOfPlaylistAllowed = (checked: boolean) => {
-    appState.roomSettings.value!.isPlayingVideosOutsideOfPlaylistAllowed = checked;
+  const setCanPlayVideoOutsideOfPlaylist = (checked: boolean) => {
+    appState.userPermissions.value!.canPlayVideoOutsideOfPlaylist = checked;
   };
 
-  const setIsStartingPausingVideosAllowed = (checked: boolean) => {
-    appState.roomSettings.value!.isStartingPausingVideosAllowed = checked;
+  const setCanStartOrPauseVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canStartOrPauseVideo = checked;
   };
 
-  const setIsSkippingVideosAllowed = (checked: boolean) => {
-    appState.roomSettings.value!.isSkippingVideosAllowed = checked;
+  const setCanSkipVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canSkipVideo = checked;
   };
 
   return (
@@ -88,9 +88,9 @@ export default function Settings() {
                 />
               </div>
               { 
-                (appState.password.value.length > 0) && 
+                (appState.roomPassword.value.length > 0) && 
                 <div className="mt-2">
-                  <span className="text-white room-password">Current password: {appState.password.value} </span>
+                  <span className="text-white room-password">Current password: {appState.roomPassword.value} </span>
                   <Button
                     text={"Remove password"}
                     classNames="text-primary button-text"
@@ -120,43 +120,43 @@ export default function Settings() {
         <div className="mt-3">
           <Switch 
             label={"Send chat messages"}
-            defaultIsChecked={appState.roomSettings.value?.isSendingChatMessagesAllowed as boolean}
+            defaultIsChecked={appState.userPermissions.value?.canAddChatMessage as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setIsSendingChatMessagesAllowed(checked)} 
+            onCheckChange={(checked: boolean) => setCanAddChatMessage(checked)} 
           />
         </div>
         <div className="mt-3"> 
           <Switch 
             label={"Add videos to the playlist"}
-            defaultIsChecked={appState.roomSettings.value?.isAddingVideosAllowed as boolean}
+            defaultIsChecked={appState.userPermissions.value?.canAddVideo as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setIsAddingVideosAllowed(checked)} 
+            onCheckChange={(checked: boolean) => setCanAddVideo(checked)} 
           />
           <Switch 
             label={"Remove videos from the playlist"}
-            defaultIsChecked={appState.roomSettings.value?.isRemovingVideosAllowed as boolean}
+            defaultIsChecked={appState.userPermissions.value?.canRemoveVideo as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setIsRemovingVideosAllowed(checked)} 
+            onCheckChange={(checked: boolean) => setCanRemoveVideo(checked)} 
           />
           <Switch
             label={"Play videos outside of the playlist"}
-            defaultIsChecked={appState.roomSettings.value?.isPlayingVideosOutsideOfPlaylistAllowed as boolean}
+            defaultIsChecked={appState.userPermissions.value?.canPlayVideoOutsideOfPlaylist as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setIsPlayingVideosOutsideOfPlaylistAllowed(checked)} 
+            onCheckChange={(checked: boolean) => setCanPlayVideoOutsideOfPlaylist(checked)} 
           />
         </div>
         <div className="mt-3">
           <Switch 
             label={"Start/Pause videos"}
-            defaultIsChecked={appState.roomSettings.value?.isStartingPausingVideosAllowed as boolean}
+            defaultIsChecked={appState.userPermissions.value?.canStartOrPauseVideo as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setIsStartingPausingVideosAllowed(checked)} 
+            onCheckChange={(checked: boolean) => setCanStartOrPauseVideo(checked)} 
           />
           <Switch 
             label={"Skip videos"}
-            defaultIsChecked={appState.roomSettings.value?.isSkippingVideosAllowed as boolean}
+            defaultIsChecked={appState.userPermissions.value?.canSkipVideo as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setIsSkippingVideosAllowed(checked)} 
+            onCheckChange={(checked: boolean) => setCanSkipVideo(checked)} 
           />
         </div>
       </div>
