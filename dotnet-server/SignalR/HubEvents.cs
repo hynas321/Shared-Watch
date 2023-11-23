@@ -29,6 +29,11 @@ public static class HubEvents {
     public const string OnAddPlaylistVideo = "OnAddPlaylistVideo";
     public const string OnDeletePlaylistVideo = "OnDeletePlaylistVideo";
 
+    
+    //RoomSettings
+    public const string SetRoomPassword = "SetRoomPassword";
+    public const string OnSetRoomPassword = "OnSetRoomPassword";
+
     //UserPermissions
     public const string SetUserPermissions = "SetUserPermissions";
     public const string OnSetUserPermissions = "OnSetUserPermissions";

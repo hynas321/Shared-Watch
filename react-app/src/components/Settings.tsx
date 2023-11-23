@@ -3,7 +3,6 @@ import Switch from "./Switch";
 import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
-import FormRange from "./FormRange";
 import { AppStateContext, roomHub } from "../context/RoomHubContext";
 import { useContext } from "react";
 import { HubEvents } from "../classes/HubEvents";
@@ -21,16 +20,35 @@ export default function Settings() {
     }
 
     if (inputFormPassword.length > 0) {
-      appState.roomPassword.value = inputFormPassword;
+      roomHub.invoke(
+        HubEvents.SetRoomPassword,
+        appState.roomHash.value,
+        localStorageManager.getAuthorizationToken(),
+        inputFormPassword
+      );
+  
       setInputFormPassword("");
     }
     else {
-      appState.roomPassword.value = "";
+      roomHub.invoke(
+        HubEvents.SetRoomPassword,
+        appState.roomHash.value,
+        localStorageManager.getAuthorizationToken(),
+        ""
+      );
+
+      setInputFormPassword("");
     }
   }
 
   const handleRemovePasswordButtonClick = () => {
-    appState.roomPassword.value = "";
+    roomHub.invoke(
+      HubEvents.SetRoomPassword,
+      appState.roomHash.value,
+      localStorageManager.getAuthorizationToken(),
+      ""
+    );
+
     setInputFormPassword("");
   }
 

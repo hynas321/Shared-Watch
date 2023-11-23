@@ -36,7 +36,6 @@ export default function Header() {
         });
 
         await roomHub.start().then(() => {
-          
           appState.connectionId.value = roomHub.getConnection().connectionId;
         });
 

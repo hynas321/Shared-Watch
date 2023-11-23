@@ -173,6 +173,22 @@ export default function ControlPanel() {
       roomHub.off(HubEvents.OnSetUserPermissions);
     }
   }, [roomHub.getState()]);
+
+  useEffect(() => {
+    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+    
+    roomHub.on(HubEvents.OnSetRoomPassword, (roomPassword: string, roomType: RoomTypesEnum) => {
+      appState.roomPassword.value = roomPassword;
+      appState.roomType.value = roomType;
+    });
+
+
+    return () => {
+      roomHub.off(HubEvents.OnSetRoomPassword);
+    }
+  }, [roomHub.getState()]);
   
   return (
     <div>

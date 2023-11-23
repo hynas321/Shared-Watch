@@ -24,6 +24,10 @@ export class HubEvents {
   static OnAddPlaylistVideo: string = "OnAddPlaylistVideo";
   static OnDeletePlaylistVideo: string = "OnDeletePlaylistVideo";
 
+  //RoomSettings
+  static SetRoomPassword: string = "SetRoomPassword";
+  static OnSetRoomPassword: string = "OnSetRoomPassword";
+
   //UserPermissions
   static SetUserPermissions: string = "SetUserPermissions";
   static OnSetUserPermissions: string = "OnSetUserPermissions";

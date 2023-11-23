@@ -16,6 +16,7 @@ import { PlaylistVideo } from "../types/PlaylistVideo";
 import { UserPermissions } from "../types/UserPermissions";
 import { VideoPlayerState } from "../types/VideoPlayerState";
 import { User } from "../types/User";
+import { useSignal } from "@preact/signals-react";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -25,7 +26,8 @@ export interface CreateRoomModalProps {
 
 export default function CreateRoomModal({title, acceptText, declineText}: CreateRoomModalProps) {
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
-
+  const roomName = useSignal<string>("");
+  const roomPassword = useSignal<string>("");
   const navigate = useNavigate();
 
   const httpManager = new HttpManager();
@@ -40,20 +42,20 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   }, []);
 
   useEffect(() => {
-    if (appState.roomName.value.length >= 3) {
+    if (roomName.value.length >= 3) {
       setIsAcceptButtonEnabled(true);
     }
     else {
       setIsAcceptButtonEnabled(false);
     }
 
-  }, [appState.roomName.value]);
+  }, [roomName.value]);
 
   const handleCreateRoomButtonClick = async () => {
     const [responseStatusCode, roomInformation]: [number, RoomCreateOutput | undefined] =
       await httpManager.createRoom(
-        appState.roomName.value,
-        appState.roomPassword.value,
+        roomName.value,
+        roomPassword.value,
         appState.username.value
       );
     
@@ -73,8 +75,8 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
 
     const roomState: RoomState = {
       roomHash: roomInformation?.roomHash as string,
-      roomName: appState.roomName.value as string,
-      password: appState.roomPassword.value as string
+      roomName: roomName.value as string,
+      password: roomPassword.value as string
     };
     
     joinRoom(roomState);
@@ -149,10 +151,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
                   <InputForm
                     classNames="form-control rounded-0"
                     placeholder="Enter room name (min 3 characters)"
-                    value={appState.roomName.value}
+                    value={roomName.value}
                     trim={false}
                     isEnabled={true}
-                    onChange={(value: string) => {appState.roomName.value = value}}
+                    onChange={(value: string) => {roomName.value = value}}
                   />
               </div>
               <div className="d-block mt-3">
@@ -160,10 +162,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
                 <InputForm
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
-                  value={appState.roomPassword.value}
+                  value={roomPassword.value}
                   trim={true}
                   isEnabled={true}
-                  onChange={(value: string) => {appState.roomPassword.value = value}}
+                  onChange={(value: string) => {roomPassword.value = value}}
                 />
               </div>
             </div>
