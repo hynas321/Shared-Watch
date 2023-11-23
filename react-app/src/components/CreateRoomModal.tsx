@@ -32,12 +32,10 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
 
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
-
+  
   useEffect(() => {
-    
-
     return () => {
-      
+      clearInputFields();
     }
   }, []);
 
@@ -50,6 +48,11 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     }
 
   }, [roomName.value]);
+
+  const clearInputFields = () => {
+    roomName.value = "";
+    roomPassword.value = "";
+  }
 
   const handleCreateRoomButtonClick = async () => {
     const [responseStatusCode, roomInformation]: [number, RoomCreateOutput | undefined] =
@@ -181,7 +184,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
                 <Button
                   text={declineText}
                   classNames={"btn btn-danger"}
-                  onClick={() => {}}
+                  onClick={clearInputFields}
                 />
               </span>
             </div>
