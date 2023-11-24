@@ -4,19 +4,13 @@ import { InputForm } from "./InputForm";
 import { HttpManager } from "../classes/HttpManager";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { RoomState } from "../types/RoomState";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { appState } from "../context/RoomHubContext";
-import { ChatMessage } from "../types/ChatMessage";
-import { PlaylistVideo } from "../types/PlaylistVideo";
-import { UserPermissions } from "../types/UserPermissions";
-import { VideoPlayerState } from "../types/VideoPlayerState";
-import { User } from "../types/User";
 import { useSignal } from "@preact/signals-react";
+import { RoomHelper } from "../classes/RoomHelper";
 
 export interface CreateRoomModalProps {
   title: string;
@@ -31,7 +25,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
   const navigate = useNavigate();
 
   const httpManager = new HttpManager();
-  const localStorageManager = new LocalStorageManager();
+  const roomHelper = new RoomHelper();
   
   useEffect(() => {
     return () => {
@@ -82,53 +76,11 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       password: roomPassword.value as string
     };
     
-    joinRoom(roomState);
-  }
+    const canJoin = await roomHelper.joinRoom(roomState);
 
-  const joinRoom = async (roomState: RoomState) => {
-    const [responseStatusCode, roomInformation] = await httpManager.joinRoom(
-      roomState.roomHash,
-      roomState.password,
-      appState.username.value
-    );
-    if (responseStatusCode !== HttpStatusCodes.OK) {
-
-      switch(responseStatusCode) {
-        case HttpStatusCodes.UNAUTHORIZED:
-          toast.error("Wrong room password");
-          break;
-        case HttpStatusCodes.FORBIDDEN:
-          toast.error("Room full");
-          break;
-        case HttpStatusCodes.NOT_FOUND:
-          toast.error("Room not found");
-          break;
-        case HttpStatusCodes.CONFLICT:
-          toast.error("The user is already in the room");
-          break;
-        default:
-          toast.error("Could not join the room");
-      }
-
-      return;
+    if (canJoin) {
+      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
-
-    appState.roomHash.value = roomState.roomHash;
-    appState.roomName.value = roomState.roomName;
-    appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
-    appState.maxUsers.value = roomInformation?.roomSettings.maxUsers as number;
-    appState.roomPassword.value = roomState.password;
-
-    localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
-    appState.isAdmin.value = roomInformation?.isAdmin as boolean;
-
-    appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
-    appState.playlistVideos.value =  roomInformation?.playlistVideos as PlaylistVideo[];
-    appState.userPermissions.value = roomInformation?.userPermissions as UserPermissions;
-    appState.users.value = roomInformation?.users as User[];
-    appState.videoPlayerState.value = roomInformation?.videoPlayerState as VideoPlayerState;
-
-    navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
   }
 
   return (

@@ -10,20 +10,24 @@ import { useEffect, useContext } from "react";
 import { HubEvents } from "../classes/HubEvents";
 import * as signalR from "@microsoft/signalr";
 import { toast } from "react-toastify";
-import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { HttpManager } from "../classes/HttpManager";
+import useClipboardApi from "use-clipboard-api";
+import { useSignal } from "@preact/signals-react";
 
 export default function Header() {
   const appState = useContext(AppStateContext);
   const roomHub = useContext(RoomHubContext);
-  const httpUrlHelper = new HttpUrlHelper();
+
   const navigate = useNavigate();
+  const [, copy] = useClipboardApi();
+
+  const buttonColor = useSignal<string>("primary");
   
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
+  const httpUrlHelper = new HttpUrlHelper();
 
   useEffect(() => {
-    console.log(localStorageManager.getUsername());
     appState.username.value = localStorageManager.getUsername();
     appState.roomHash.value = httpUrlHelper.getRoomHash(window.location.href);
   }, []);
@@ -50,17 +54,21 @@ export default function Header() {
   }, [roomHub]);
 
   const handleLeaveRoomButtonClick = async () => {
-    const responseStatusCode: number = await httpManager.leaveRoom(appState.roomHash.value);
-
-    if (responseStatusCode === HttpStatusCodes.OK) {
-      toast.success("You have left the room");
-    }
-    else {
-      toast.warning("You have left the room");
-    }
+    httpManager.leaveRoom(appState.roomHash.value);
 
     appState.isInRoom.value = false;
     navigate(ClientEndpoints.mainMenu);
+  }
+
+  const handleCopyToClipboard = async () => {
+    const clipboardValue = window.location.href.replace("room", "joinRoom");
+
+    copy(clipboardValue);
+    buttonColor.value = "success";
+
+    setTimeout(() => {
+      buttonColor.value = "primary";
+    }, 500);
   }
 
   return (
@@ -70,7 +78,7 @@ export default function Header() {
         {!appState.isInRoom.value &&
           <InputForm
             classNames={`form-control form-control-sm rounded-3 ms-3 ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
-            placeholder={"Enter your username"}
+            placeholder={"Username (min. 3 chars)"}
             value={appState.username.value}
             trim={true}
             isEnabled={true}
@@ -86,18 +94,20 @@ export default function Header() {
       </div>
       {
         appState.isInRoom.value &&
-        <div className="justify-content-end me-3">
-          <Button
-            text={<><BsDoorOpenFill /> Copy URL</>}
-            classNames={"btn btn-primary btn-sm me-4 ms-sm-3"}
-            onClick={() => {}}
-          />
-          <Button
-            text={<><BsDoorOpenFill /> Leave room</>}
-            classNames={"btn btn-danger btn-sm"}
-            onClick={handleLeaveRoomButtonClick}
-          />
-        </div>
+        <>
+          <div className="djustify-content-end me-3">
+            <Button
+              text={<><BsDoorOpenFill /> Copy URL</>}
+              classNames={`btn btn-${buttonColor.value} btn-sm me-4 ms-3`}
+              onClick={handleCopyToClipboard}
+            />
+            <Button
+              text={<><BsDoorOpenFill /> Leave room</>}
+              classNames={"btn btn-danger btn-sm"}
+              onClick={handleLeaveRoomButtonClick}
+            />
+          </div>
+        </>
       }
     </nav>
   )

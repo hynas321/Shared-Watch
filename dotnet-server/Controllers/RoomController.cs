@@ -258,6 +258,37 @@ public class RoomController : ControllerBase
         }
     }
 
+    [HttpGet("Get/{roomHash}")]
+    public IActionResult Get([FromRoute] string roomHash)
+    {
+        try
+        {
+            Room room = _roomManager.GetRoom(roomHash);
+            
+            if (room == null)
+            {
+                _logger.LogInformation($"{roomHash} Get: Status 404.");
+                return StatusCode(StatusCodes.Status404NotFound);
+            }
+
+            RoomDTO roomDTO = new RoomDTO(
+                room.RoomHash,
+                room.RoomSettings.RoomName,
+                room.RoomSettings.RoomType,
+                room.Users.Count,
+                room.RoomSettings.MaxUsers
+            );
+
+            _logger.LogInformation($"GetAll: Status 200.");
+            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomDTO));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex.ToString());
+            return StatusCode(StatusCodes.Status500InternalServerError);
+        }
+    }
+
     [HttpGet("GetAllDetails")]
     public IActionResult GetAllDetails([FromHeader] string globalAdminToken)
     {

@@ -13,14 +13,8 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { RoomState } from "../types/RoomState";
 import { animated, useSpring } from "@react-spring/web";
 import CreateRoomModal from "./CreateRoomModal";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { AppStateContext } from "../context/RoomHubContext";
-import { ChatMessage } from "../types/ChatMessage";
-import { PlaylistVideo } from "../types/PlaylistVideo";
-import { UserPermissions } from "../types/UserPermissions";
-import { User } from "../types/User";
-import { VideoPlayerState } from "../types/VideoPlayerState";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
+import { RoomHelper } from "../classes/RoomHelper";
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
@@ -32,7 +26,7 @@ export default function MainView() {
   const [searchText, setSearchText] = useState<string>("");
 
   const httpManager: HttpManager = new HttpManager();
-  const localStorageManager: LocalStorageManager = new LocalStorageManager();
+  const roomHelper = new RoomHelper();
 
   const fetchRooms = async () => {
     const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();
@@ -114,71 +108,34 @@ export default function MainView() {
 
   }, [displayOnlyAvailableRooms]);
 
-  const handlePublicRoomListItemClick = (item: Room) => {
+  const handlePublicRoomListItemClick = async (item: Room) => {
     const roomState: RoomState = {
       roomHash: item.roomHash,
       roomName: item.roomName,
       password: ""
     };
 
-    joinRoom(roomState);
+    const canJoin = await roomHelper.joinRoom(roomState);
+
+    if (canJoin) {
+      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
+    }
   };
 
-  const handlePrivateRoomListItemClick = (item: Room, password: string) => {
+  const handlePrivateRoomListItemClick = async (item: Room, password: string) => {
     const roomState: RoomState = {
       roomHash: item.roomHash,
       roomName: item.roomName,
       password: password
     };
 
-    joinRoom(roomState);
-  }
+    const canJoin = await roomHelper.joinRoom(roomState);
 
-  const joinRoom = async (roomState: RoomState) => {
-    const [responseStatusCode, roomInformation] = await httpManager.joinRoom(
-      roomState.roomHash,
-      roomState.password,
-      appState.username.value
-    );
-    if (responseStatusCode !== HttpStatusCodes.OK) {
-
-      switch(responseStatusCode) {
-        case HttpStatusCodes.UNAUTHORIZED:
-          toast.error("Wrong room password");
-          break;
-        case HttpStatusCodes.FORBIDDEN:
-          toast.error("Room full");
-          break;
-        case HttpStatusCodes.NOT_FOUND:
-          toast.error("Room not found");
-          break;
-        case HttpStatusCodes.CONFLICT:
-          toast.error("The user is already in the room");
-          break;
-        default:
-          toast.error("Could not join the room");
-      }
-
-      return;
+    if (canJoin) {
+      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
-
-    appState.roomHash.value = roomState.roomHash;
-    appState.roomName.value = roomState.roomName;
-    appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
-    appState.maxUsers.value = roomInformation?.roomSettings.maxUsers as number;
-    appState.roomPassword.value = roomState.password;
-
-    localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
-    appState.isAdmin.value = roomInformation?.isAdmin as boolean;
-
-    appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];
-    appState.playlistVideos.value =  roomInformation?.playlistVideos as PlaylistVideo[];
-    appState.userPermissions.value = roomInformation?.userPermissions as UserPermissions;
-    appState.users.value = roomInformation?.users as User[];
-    appState.videoPlayerState.value = roomInformation?.videoPlayerState as VideoPlayerState;
-
-    navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
   }
+
 
   const springs = useSpring({
     from: { y: 200 },
@@ -188,7 +145,7 @@ export default function MainView() {
       tension: 250,
       friction: 15
     }
-  })
+  });
 
   return (
   <>
@@ -235,11 +192,15 @@ export default function MainView() {
             />
           </div>
           {
-            displayedRooms.length === 0 &&
-              <h5 className="text-danger text-center mt-5 mb-5"><b><i>No rooms found</i></b></h5>
+            (displayedRooms.length === 0 && appState.username.value.length >= 3) &&
+              <h5 className="text-white text-center mt-5 mb-5">No rooms found</h5>
           }
           {
-            displayedRooms.length !== 0 &&
+            (displayedRooms.length === 0 && appState.username.value.length < 3) &&
+              <h5 className="text-white text-center mt-5 mb-5">Enter your username to access rooms</h5>
+          }
+          {
+            (displayedRooms.length !== 0) &&
             <div className="main-menu-list mb-3">
               <RoomList
                 list={displayedRooms}

@@ -23,7 +23,7 @@ export function createAppState() {
   const roomName = signal<string>("");
   const roomPassword = signal<string>("");
   const roomType = signal<RoomTypesEnum>(RoomTypesEnum.public);
-  const maxUsers = signal<number>(6);
+  const maxUsers = signal<number>(10);
 
   //Control panel data
   const chatMessages = signal<ChatMessage[]>([]);
@@ -36,12 +36,16 @@ export function createAppState() {
   const unreadChatMessagesCount = signal<number>(0);
   const activePanel = signal<PanelsEnum>(PanelsEnum.Chat);
 
+  //Url
+  const joinedViaView = signal<boolean>(false);
+
   return {
     connectionId,
     username, isAdmin, isInRoom,
     roomHash, roomName, roomPassword, roomType, maxUsers,
     chatMessages, playlistVideos, users, userPermissions, videoPlayerState,
-    unreadChatMessagesCount, activePanel
+    unreadChatMessagesCount, activePanel,
+    joinedViaView
   }
 }
 

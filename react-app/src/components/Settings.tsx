@@ -115,7 +115,7 @@ export default function Settings() {
                   <span className="text-white room-password">Current password: {appState.roomPassword.value} </span>
                   <Button
                     text={"Remove password"}
-                    classNames="text-info button-text"
+                    classNames="text-orange button-text"
                     onClick={handleRemovePasswordButtonClick}
                   />
                 </div>

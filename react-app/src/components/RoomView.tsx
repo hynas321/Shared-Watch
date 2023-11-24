@@ -1,38 +1,27 @@
 import ControlPanel from "./ControlPanel";
 import VideoPlayer from "./VideoPlayer";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { HttpManager } from "../classes/HttpManager";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import Header from "./Header";
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
 import { ping } from "ldrs"
 import { animated, useSpring } from "@react-spring/web";
 import { AppStateContext, roomHub } from "../context/RoomHubContext";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { PanelsEnum } from "../enums/PanelsEnum";
+import { useSignal } from "@preact/signals-react";
 
 export default function RoomView() {
   const appState = useContext(AppStateContext);
   const navigate = useNavigate();
 
+  const isContentVisible = useSignal<boolean>(false);
+
   const httpManager = new HttpManager();
   const httpUrlHelper = new HttpUrlHelper();
-  
-  const checkIfRoomExists = async (hash: string) => {
-    const [responseStatusCode, responseData] = await httpManager.checkIfRoomExists(hash);
-
-    if (responseStatusCode !== HttpStatusCodes.OK) {
-      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
-    }
-    
-    appState.roomType.value = responseData?.roomType as RoomTypesEnum;
-
-    navigate(`${ClientEndpoints.joinRoom}/${hash}`, { replace: true });
-  }
 
   useEffect(() => {
     appState.isInRoom.value = true;
@@ -45,21 +34,21 @@ export default function RoomView() {
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
+    console.log(appState.joinedViaView.value);
 
-    //if (!roomNavigationState || !roomInformation) {
-      //checkIfRoomExists(hash);
-      //return;
-    //}
+    if (!appState.joinedViaView.value) {
+      appState.roomHash.value = hash;
+      navigate(`${ClientEndpoints.joinRoom}/${hash}`, { replace: true });
+      return;
+    }
 
-    appState.roomHash.value = hash;
-  
     return () => {
       appState.activePanel.value = PanelsEnum.Chat;
     }
   }, []);
 
   useEffect(() => {
-    if (!appState.roomHash.value) {
+    if (!appState.roomHash.value || !appState.joinedViaView.value) {
       return;
     }
 
@@ -74,6 +63,8 @@ export default function RoomView() {
     })
 
     window.addEventListener('beforeunload', handleBeforeUnload);
+
+    isContentVisible.value = true;
 
     return () => {
       handleBeforeUnload();
@@ -94,17 +85,22 @@ export default function RoomView() {
 
   return (
     <>
-      <Header />
-      <div className="container">
-        <div className="row">
-          <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-2">
-            <VideoPlayer />
-          </animated.div>
-          <animated.div style={{ ...springs }} className="col-xl-4 col-lg-12 col-xs-6 mt-2">
-            <ControlPanel />
-          </animated.div>
-        </div>
-      </div>
+      {
+        isContentVisible &&
+        <>
+          <Header />
+          <div className="container-fluid-md container-lg">
+            <div className="row">
+              <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-2">
+                <VideoPlayer />
+              </animated.div>
+              <animated.div style={{ ...springs }} className="col-xl-4 col-lg-12 mt-2 mb-3">
+                <ControlPanel />
+              </animated.div>
+            </div>
+          </div>
+        </>
+      }
     </>
   )
 }

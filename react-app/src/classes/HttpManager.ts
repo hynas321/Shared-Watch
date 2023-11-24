@@ -6,7 +6,6 @@ import { HttpApiEndpoints } from "./HttpApiEndpoints";
 import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
 import { Room } from "../types/Room";
-import { RoomExistsOutput } from "../types/HttpTypes/Output/RoomExistsOutput";
 import { appState } from "../context/RoomHubContext";
 
 export class HttpManager {
@@ -55,17 +54,17 @@ export class HttpManager {
     }
   }
 
-  async checkIfRoomExists(roomHash: string): Promise<[number, RoomExistsOutput | undefined]> {
+  async getRoom(roomHash: string): Promise<[number, Room | undefined]> {
     try {
       const response = await axios.get(
-        `${this.httpServerUrl}/${HttpApiEndpoints.roomExists}/${roomHash}`, {
+        `${this.httpServerUrl}/${HttpApiEndpoints.getRoom}/${roomHash}`, {
           headers: {
             'Content-Type': 'application/json'
           },
         }
       );
   
-      return [response.status, response.data] as [number, RoomExistsOutput]
+      return [response.status, response.data] as [number, Room]
     }
     catch (error: any) {
       return [error.response.status, undefined];

@@ -12,6 +12,7 @@ export default function VideoPlayer() {
 
   const isVideoPlaying = useSignal<boolean>(appState.videoPlayerState.value?.isPlaying ?? false);
   const [userStartedVideo, setUserStartedVideo] = useState(false);
+  const [isMobileView, setIsMobileView] = useState(false);
 
   const localStorageManager = new LocalStorageManager();
 
@@ -49,18 +50,35 @@ export default function VideoPlayer() {
     }
   };
 
+  const handleWindowResize = () => {
+    setIsMobileView(window.innerWidth <= 576);
+  };
+
+  useEffect(() => {
+    // Initial check on component mount
+    handleWindowResize();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", handleWindowResize);
+
+    // Cleanup: remove event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleWindowResize);
+    };
+  }, []);
+
   return (
     <>
       <div className="rounded-top-5 bg-dark bg-opacity-50 pt-2 text-center">
         <span className="text-white"><b>Video player</b></span>
       </div>
-      <div className="d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5">
+      <div className={`d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5 ${isMobileView ? "mobile-view" : ""}`}>
         <ReactPlayer
           url={appState.videoPlayerState.value?.url}
           playing={isVideoPlaying.value}
           controls={true}
-          width={"854px"}
-          height={"480px"}
+          width={isMobileView ? "428px" : "854px"}
+          height={isMobileView ? "auto" : "480px"}
           style={{}}
           onStart={handleStartPauseVideo}
           onPause={handleStartPauseVideo}
