@@ -44,7 +44,7 @@ export default function Header() {
         });
 
       } catch (error) {
-        toast.error("Could not establish a connection, please refresh the page");
+        toast.error("Could not establish a connection");
       }
     };
   

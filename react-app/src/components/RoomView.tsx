@@ -34,7 +34,6 @@ export default function RoomView() {
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
-    console.log(appState.joinedViaView.value);
 
     if (!appState.joinedViaView.value) {
       appState.roomHash.value = hash;
@@ -91,7 +90,7 @@ export default function RoomView() {
           <Header />
           <div className="container-fluid-md container-lg">
             <div className="row">
-              <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-2">
+              <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-2 mb-3">
                 <VideoPlayer />
               </animated.div>
               <animated.div style={{ ...springs }} className="col-xl-4 col-lg-12 mt-2 mb-3">

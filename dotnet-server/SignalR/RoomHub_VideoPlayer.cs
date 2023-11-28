@@ -35,4 +35,36 @@ public partial class RoomHub : Hub
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, isPlaying);
     }
+
+    [HubMethodName(HubEvents.SetPlayedSeconds)]
+    public async Task SetPlayedSeconds(string roomHash, string authorizationToken, double playedSeconds)
+    {
+        Room room = _roomManager.GetRoom(roomHash);
+
+        if (room == null)
+        {
+            _logger.LogInformation($"{roomHash} SetPlayedSeconds: Room does not exist. Authorization Token: {authorizationToken}");
+            return;
+        }
+
+        User user = room.GetUser(authorizationToken);
+
+        if (user == null)
+        {
+            _logger.LogInformation($"{roomHash} SetPlayedSeconds: User does not exist. Authorization Token: {authorizationToken}");
+            return;
+        }
+
+        if (user.IsAdmin == false && room.UserPermissions.canSkipVideo == false)
+        {
+            _logger.LogInformation($"{roomHash} SetPlayedSeconds: User does not have the permission. Authorization Token: {authorizationToken}");
+            return;
+        }        
+
+        room.VideoPlayerState.CurrentTime = playedSeconds;
+
+        _logger.LogInformation($"{roomHash} SetPlayedSeconds: {playedSeconds}s. Authorization Token: {authorizationToken}");
+
+        await Clients.Group(roomHash).SendAsync(HubEvents.OnSetPlayedSeconds, playedSeconds);
+    }
 }

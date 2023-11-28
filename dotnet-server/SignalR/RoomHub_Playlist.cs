@@ -25,7 +25,7 @@ public partial class RoomHub : Hub
 
         if (user.IsAdmin == false && room.UserPermissions.canAddVideo == false)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have permission. Authorization Token: {authorizationToken}");
             return;
         }
 
@@ -37,6 +37,12 @@ public partial class RoomHub : Hub
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a queued video. Authorization Token: {authorizationToken}");
             return;
+        }
+
+        _logger.LogInformation(room.PlaylistVideos.Count.ToString());
+        if (room.PlaylistVideos.Count == 1 && _playlistHandler.IsHandlerRunning == false)
+        {
+            _playlistHandler.StartPlaylistHandler(roomHash);
         }
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnAddPlaylistVideo, JsonHelper.Serialize(playlistVideo));
@@ -73,7 +79,6 @@ public partial class RoomHub : Hub
             _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
         }
 
-    
         _logger.LogInformation($"{roomHash} DeletePlaylistVideo: {deletePlaylistVideo.Url}. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, playlistVideoIndex);

@@ -38,6 +38,7 @@ public class RoomController : ControllerBase
                 _logger.LogInformation($"Create: Status 400. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
+
             RoomTypesEnum roomType= input.RoomPassword.Length == 0 ? RoomTypesEnum.Public : RoomTypesEnum.Private;
             Room room = new Room(input.RoomName, input.RoomPassword, roomType);
 
@@ -119,11 +120,17 @@ public class RoomController : ControllerBase
 
             if (room.RoomSettings.MaxUsers == room.Users.Count)
             {
-                _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
+                _logger.LogInformation($"{roomHash} Join: Status 403. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status403Forbidden);
             }
 
             if (room.Users.Any(u => u.Username == input.Username))
+            {
+                _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
+                return StatusCode(StatusCodes.Status409Conflict);
+            }
+
+            if (room.Users.Any(u => u.AuthorizationToken == authorizationToken))
             {
                 _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status409Conflict);

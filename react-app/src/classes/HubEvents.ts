@@ -12,7 +12,9 @@ export class HubEvents {
 
   //VideoPlayer
   static SetIsVideoPlaying = "SetIsVideoPlaying";
+  static SetPlayedSeconds = "SetPlayedSeconds";
   static OnSetIsVideoPlaying = "OnSetIsVideoPlaying";
+  static OnSetPlayedSeconds = "OnSetPlayedSeconds";
 
   //Chat
   static AddChatMessage: string = "AddChatMessage";
@@ -21,6 +23,7 @@ export class HubEvents {
   //Playlist
   static AddPlaylistVideo: string = "AddPlaylistVideo";
   static DeletePlaylistVideo: string = "DeletePlaylistVideo";
+  //static StartPlaylistHandler: string = "StartPlaylistHandler";
   static OnAddPlaylistVideo: string = "OnAddPlaylistVideo";
   static OnDeletePlaylistVideo: string = "OnDeletePlaylistVideo";
 

@@ -21,6 +21,7 @@ export class RoomHelper {
           roomState.password,
           appState.username.value
         );
+
         if (responseStatusCode !== HttpStatusCodes.OK) {
     
           switch(responseStatusCode) {

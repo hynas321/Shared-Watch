@@ -2,11 +2,6 @@ public static class HubEvents {
     //Connection
     public const string OnReceiveConnectionId = "OnReceiveConnectionId";
 
-    //Menu
-    //public const string OnAddRoom = "OnAddRoom";
-    //public const string OnRemoveRoom = "OnRemoveRoom";
-    //public const string OnChangePlayerCount = "OnChangePlayerCount";
-
     //Room
     public const string KickOut = "KickOut";
     public const string SetAdminStatus = "SetAdminStatus";
@@ -17,7 +12,9 @@ public static class HubEvents {
 
     //VideoPlayer
     public const string SetIsVideoPlaying = "SetIsVideoPlaying";
+    public const string SetPlayedSeconds = "SetPlayedSeconds";
     public const string OnSetIsVideoPlaying = "OnSetIsVideoPlaying";
+    public const string OnSetPlayedSeconds = "OnSetPlayedSeconds";
 
     //Chat
     public const string AddChatMessage = "AddChatMessage";
@@ -29,7 +26,6 @@ public static class HubEvents {
     public const string OnAddPlaylistVideo = "OnAddPlaylistVideo";
     public const string OnDeletePlaylistVideo = "OnDeletePlaylistVideo";
 
-    
     //RoomSettings
     public const string SetRoomPassword = "SetRoomPassword";
     public const string OnSetRoomPassword = "OnSetRoomPassword";

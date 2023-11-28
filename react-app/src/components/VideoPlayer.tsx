@@ -1,17 +1,16 @@
 import ReactPlayer from "react-player";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { useSignal } from "@preact/signals-react";
+import { OnProgressProps } from "react-player/base";
 
 export default function VideoPlayer() {
   const appState = useContext(AppStateContext);
   const roomHub = useContext(RoomHubContext);
 
-  const isVideoPlaying = useSignal<boolean>(appState.videoPlayerState.value?.isPlaying ?? false);
-  const [userStartedVideo, setUserStartedVideo] = useState(false);
+  const videoPlayerRef = useRef<ReactPlayer>(null);
   const [isMobileView, setIsMobileView] = useState(false);
 
   const localStorageManager = new LocalStorageManager();
@@ -21,47 +20,54 @@ export default function VideoPlayer() {
       return;
     }
 
-    const handleSetIsVideoPlaying = (isPlaying: boolean) => {
-      isVideoPlaying.value = isPlaying;
-
-      // Reset userStartedVideo to false when the video is stopped or paused
-      if (!isPlaying) {
-        setUserStartedVideo(false);
+    roomHub.on(HubEvents.OnSetIsVideoPlaying, (isPlaying: boolean) => {
+      if (appState.videoPlayerState.value === null) {
+        return;
       }
-    };
 
-    roomHub.on(HubEvents.OnSetIsVideoPlaying, handleSetIsVideoPlaying);
+      appState.videoPlayerState.value.isPlaying = isPlaying;
+    });
+
+    roomHub.on(HubEvents.OnSetPlayedSeconds, (newTime: number) => {
+      if (appState.videoPlayerState.value === null) {
+        return;
+      }
+
+      appState.videoPlayerState.value.currentTime = newTime;
+    });
 
     return () => {
       roomHub.off(HubEvents.OnSetIsVideoPlaying);
-    }
-  }, [roomHub.getState(), isVideoPlaying.value]);
+    };
+  }, [roomHub.getState()]);
 
-  const setUserVideoState = async (newIsPlaying: boolean) => {
-    setUserStartedVideo(true);
-    await roomHub.invoke(HubEvents.SetIsVideoPlaying, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newIsPlaying);
+  const setUserVideoState = async (isPlaying: boolean) => {
+    await roomHub.invoke(
+      HubEvents.SetIsVideoPlaying,
+      appState.roomHash.value,
+      localStorageManager.getAuthorizationToken(),
+      isPlaying
+    );
   };
 
-  const handleStartPauseVideo = () => {
-    if (!userStartedVideo) {
-      setUserVideoState(true);
-    } else {
-      setUserVideoState(!isVideoPlaying.value);
-    }
+  const handleStartVideo = () => {
+    setUserVideoState(true);
   };
+
+  const handlePauseVideo = () => {
+    setUserVideoState(false);
+  };
+  
 
   const handleWindowResize = () => {
     setIsMobileView(window.innerWidth <= 576);
   };
 
   useEffect(() => {
-    // Initial check on component mount
     handleWindowResize();
 
-    // Add event listener for window resize
     window.addEventListener("resize", handleWindowResize);
 
-    // Cleanup: remove event listener on component unmount
     return () => {
       window.removeEventListener("resize", handleWindowResize);
     };
@@ -74,14 +80,21 @@ export default function VideoPlayer() {
       </div>
       <div className={`d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5 ${isMobileView ? "mobile-view" : ""}`}>
         <ReactPlayer
-          url={appState.videoPlayerState.value?.url}
-          playing={isVideoPlaying.value}
+          ref={videoPlayerRef}
+          url={appState.playlistVideos.value.length === 0 ?
+            undefined :
+            appState.playlistVideos.value.map(video => video.url)
+          }
+          playing={appState.videoPlayerState.value?.isPlaying}
           controls={true}
           width={isMobileView ? "428px" : "854px"}
           height={isMobileView ? "auto" : "480px"}
           style={{}}
-          onStart={handleStartPauseVideo}
-          onPause={handleStartPauseVideo}
+          onStart={() => { handleStartVideo(); console.log("start"); }}
+          onPause={() => { handlePauseVideo(); console.log("pause"); }}
+          onDuration={(duration) => console.log(duration)}
+          onEnded={() => {}}
+          onProgress={(state: OnProgressProps) => {} }
         />
       </div>
     </>

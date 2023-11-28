@@ -1,4 +1,8 @@
+import { PlaylistVideo } from "./PlaylistVideo"
+
 export type VideoPlayerState = {
-  url: string,
-  isPlaying: boolean
+  playlistVideo: PlaylistVideo,
+  isPlaying: boolean,
+  currentTime: number,
+  duration: number
 }

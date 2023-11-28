@@ -87,13 +87,16 @@ export default function Playlist() {
               className="border border-secondary list-group-item bg-muted border-2 a-video"
               href={playlistVideo.url.startsWith('http') ? playlistVideo.url : `http://${playlistVideo.url}`}
               target={"_blank"}
+              style={index === 0 ? { backgroundColor: "#DAF7A6" } : {}}
             >
               <div className="row">
                 <div className="col-auto">
                   <img src={VideoIcon} alt="Video Icon" style={videoThumbnailStyle} />
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
-                 <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>{playlistVideo.url}</small>
+                 <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>
+                  <b>{playlistVideo.url}</b>
+                </small>
                  {
                     (appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) &&
                     <div>
