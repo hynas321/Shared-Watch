@@ -11,7 +11,7 @@ export default function VideoPlayer() {
   const roomHub = useContext(RoomHubContext);
 
   const videoPlayerRef = useRef<ReactPlayer>(null);
-  const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
+  const [videoUrl, setVideoUrl] = useState<string | undefined>(appState.videoPlayerState.value?.playlistVideo.url ?? undefined);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
 
   const localStorageManager = new LocalStorageManager();

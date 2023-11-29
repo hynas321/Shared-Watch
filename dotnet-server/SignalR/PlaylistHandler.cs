@@ -49,41 +49,40 @@ public class PlaylistHandler
         {
             PlaylistVideo currentVideo = room.PlaylistVideos[0];
 
+            room.VideoPlayerState.PlaylistVideo.Url = currentVideo.Url;
             await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, currentVideo.Url);
 
-            room.VideoPlayerState.PlaylistVideo.Url = currentVideo.Url;
             room.VideoPlayerState.CurrentTime = 0;
             room.VideoPlayerState.Duration = 20; //To be changed
+            
             room.VideoPlayerState.IsPlaying = true;
-
             await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, true);
 
             bool hasVideoEndedSuccessfully = await UpdatePlayedSeconds(room);
 
+            room.VideoPlayerState.IsPlaying = false;
             await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, false);
 
             if (hasVideoEndedSuccessfully)
             {
                 _roomManager.DeletePlaylistVideo(room.RoomHash, 0);
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, 0);
+
+                room.VideoPlayerState.PlaylistVideo.Url = null;
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
             }
-
-            if (!hasVideoEndedSuccessfully)
+            else
             {
                 try
                 {
                     _roomManager.DeletePlaylistVideo(room.RoomHash, 0);
-                }
-                catch
-                {
-                    // Handle the exception, log, or take appropriate action
-                }
-                finally
-                {
                     await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, 0);
+
+                    room.VideoPlayerState.PlaylistVideo.Url = null;
                     await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
                 }
+                catch
+                {}
             }
         }
 
@@ -95,7 +94,7 @@ public class PlaylistHandler
         try
         {
             double durationTime = room.VideoPlayerState.Duration;
-            string currentVideoUrl = room.VideoPlayerState.PlaylistVideo.Url;
+            int currentVideoHashCode = room.PlaylistVideos[0].GetHashCode();
 
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
@@ -103,15 +102,14 @@ public class PlaylistHandler
             {
                 _logger.LogInformation(room.VideoPlayerState.CurrentTime.ToString());
 
-                if (room.VideoPlayerState.PlaylistVideo.Url != currentVideoUrl)
+                if (room.PlaylistVideos.Count == 0 || room.PlaylistVideos[0].GetHashCode() != currentVideoHashCode)
                 {
                     cancellationToken.Cancel();
                     return false;
                 }
 
-                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
-
                 room.VideoPlayerState.CurrentTime++;
+                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
 
                 await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken.Token);
             }
