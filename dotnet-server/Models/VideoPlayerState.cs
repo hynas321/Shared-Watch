@@ -6,7 +6,7 @@ public class VideoPlayerState {
 
     public VideoPlayerState()
     {
-        PlaylistVideo = new PlaylistVideo("https://www.youtube.com/watch?v=LXb3EKWsInQ");
+        PlaylistVideo = new PlaylistVideo(null);
         IsPlaying = false;
         CurrentTime = 0;
     }

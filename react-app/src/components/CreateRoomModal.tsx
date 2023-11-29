@@ -57,7 +57,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       );
     
     if (responseStatusCode !== HttpStatusCodes.CREATED) {
-      console.log(responseStatusCode)
+
       switch(responseStatusCode) {
         case HttpStatusCodes.CONFLICT:
           toast.error("The room with this name already exists");
@@ -77,8 +77,6 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
     };
     
     const canJoin = await roomHelper.joinRoom(roomState);
-
-    console.log(canJoin);
 
     if (canJoin) {
       navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });

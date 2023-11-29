@@ -67,4 +67,29 @@ public partial class RoomHub : Hub
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnSetPlayedSeconds, playedSeconds);
     }
+
+    [HubMethodName(HubEvents.GetVideoDuration)]
+    public void GetVideoDuration(string roomHash, string authorizationToken, double duration)
+    {
+        Room room = _roomManager.GetRoom(roomHash);
+
+        if (room == null)
+        {
+            _logger.LogInformation($"{roomHash} GetVideoDuration: Room does not exist. Authorization Token: {authorizationToken}");
+            return;
+        }
+
+        User user = room.GetUser(authorizationToken);
+
+        if (user == null)
+        {
+            _logger.LogInformation($"{roomHash} GetVideoDuration: User does not exist. Authorization Token: {authorizationToken}");
+            return;
+        }
+
+        room.VideoPlayerState.Duration = duration;
+
+        _logger.LogInformation($"{roomHash} GetVideoDuration: {duration}s. Authorization Token: {authorizationToken}");
+
+    }
 }

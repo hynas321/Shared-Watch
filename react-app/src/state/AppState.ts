@@ -10,6 +10,7 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 export function createAppState() {
   //signalR
   const connectionId = signal<string | null>("");
+  const connectionIssue = signal<boolean>(false);
 
   //User state
   const username = signal<string>("");
@@ -40,7 +41,7 @@ export function createAppState() {
   const joinedViaView = signal<boolean>(false);
 
   return {
-    connectionId,
+    connectionId, connectionIssue,
     username, isAdmin, isInRoom,
     roomHash, roomName, roomPassword, roomType, maxUsers,
     chatMessages, playlistVideos, users, userPermissions, videoPlayerState,

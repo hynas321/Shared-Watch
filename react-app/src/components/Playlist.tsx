@@ -7,6 +7,7 @@ import VideoIcon from './../assets/video-icon.png'
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { RoomHelper } from "../classes/RoomHelper";
 
 export default function Playlist() {
   const roomHub = useContext(RoomHubContext);
@@ -14,8 +15,11 @@ export default function Playlist() {
   const playlistVideosRef = useRef<HTMLDivElement>(null);
 
   const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
+  const [isInputFormEnabled, setIsInputFormEnabled] = useState<boolean>(true);
+  const [inputFormPlaceholderText, setInputFormPlaceholderText] = useState<string>("Paste Youtube Video URL");
 
   const localStorageManager = new LocalStorageManager();
+  const roomHelper = new RoomHelper();
   
   const videoThumbnailStyle = {
     width: "40px",
@@ -41,6 +45,21 @@ export default function Playlist() {
       url: currentVideoUrlText,
     };
 
+    const isUrlValid = roomHelper.checkIfIsYouTubeVideoLink(newPlaylistVideo.url);
+
+    if (!isUrlValid) {
+      setIsInputFormEnabled(false);
+      setInputFormPlaceholderText("Incorrect Youtube Video URL");
+  
+      setTimeout(() => {
+        setIsInputFormEnabled(true);
+        setInputFormPlaceholderText("Paste Youtube Video URL");
+      }, 1500);
+
+      setCurrentVideoUrlText("");
+      return;
+    }
+
     roomHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");
   }
@@ -63,11 +82,11 @@ export default function Playlist() {
         (appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) &&
         <div className="d-flex mb-3">
           <InputForm
-            classNames="form-control rounded-0"
+            classNames={`form-control rounded-0 ${!isInputFormEnabled && "border-5 border-danger"}`}
             value={currentVideoUrlText}
             trim={true}
-            placeholder="Paste video URL"
-            isEnabled={true}
+            placeholder={inputFormPlaceholderText}
+            isEnabled={isInputFormEnabled}
             onChange={handleTextInputChange}
             onKeyDown={handleEnterPress}
           />
@@ -91,7 +110,7 @@ export default function Playlist() {
             >
               <div className="row">
                 <div className="col-auto">
-                  <img src={VideoIcon} alt="Video Icon" style={videoThumbnailStyle} />
+                  <img src={VideoIcon} alt="Video" style={videoThumbnailStyle} />
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
                  <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>

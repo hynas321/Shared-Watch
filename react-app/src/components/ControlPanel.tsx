@@ -53,7 +53,11 @@ export default function ControlPanel() {
       return;
     }
 
-    roomHub.on(HubEvents.OnAddPlaylistVideo, (playlistVideoSerialized: string) => {
+    roomHub.on(HubEvents.OnAddPlaylistVideo, (playlistVideoSerialized: string | null) => {
+      if (playlistVideoSerialized == null) {
+        return;
+      }
+
       const playlistVideo: PlaylistVideo = JSON.parse(playlistVideoSerialized);
 
       appState.playlistVideos.value = [...appState.playlistVideos.value, playlistVideo];
@@ -130,13 +134,6 @@ export default function ControlPanel() {
 
       if (isCurrentUser) {
         appState.isAdmin.value = updatedUser.isAdmin;
-
-        if (updatedUser.isAdmin) {
-          //toast.success("You have become an admin");
-        }
-        else {
-          //toast.success("You are no longer an admin");
-        }
       }
     
       const userIndex = appState.users.value.findIndex(

@@ -11,10 +11,12 @@ export class HubEvents {
   static OnSetAdminStatus: string = "OnSetAdminStatus";
 
   //VideoPlayer
-  static SetIsVideoPlaying = "SetIsVideoPlaying";
-  static SetPlayedSeconds = "SetPlayedSeconds";
-  static OnSetIsVideoPlaying = "OnSetIsVideoPlaying";
-  static OnSetPlayedSeconds = "OnSetPlayedSeconds";
+  static SetIsVideoPlaying: string = "SetIsVideoPlaying";
+  static SetPlayedSeconds: string = "SetPlayedSeconds";
+  static GetVideoDuration: string = "GetVideoDuration";
+  static OnSetVideoUrl: string = "OnSetVideoUrl";
+  static OnSetIsVideoPlaying: string = "OnSetIsVideoPlaying";
+  static OnSetPlayedSeconds: string = "OnSetPlayedSeconds";
 
   //Chat
   static AddChatMessage: string = "AddChatMessage";

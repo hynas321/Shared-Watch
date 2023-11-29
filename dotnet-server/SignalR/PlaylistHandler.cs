@@ -45,73 +45,68 @@ public class PlaylistHandler
     {
         IsHandlerRunning = true;
 
-        while (true)
+        while (room.PlaylistVideos.Count > 0)
         {
-            room.VideoPlayerState.PlaylistVideo.Url = room.PlaylistVideos[0].Url;
+            PlaylistVideo currentVideo = room.PlaylistVideos[0];
+
+            await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, currentVideo.Url);
+
+            room.VideoPlayerState.PlaylistVideo.Url = currentVideo.Url;
             room.VideoPlayerState.CurrentTime = 0;
-            room.VideoPlayerState.Duration = 10;    //To be changed
+            room.VideoPlayerState.Duration = 20; //To be changed
             room.VideoPlayerState.IsPlaying = true;
 
-            bool hasVideoEndedSuccessfully = await Task.Run(() => UpdatePlayedSeconds(room));
+            await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, true);
+
+            bool hasVideoEndedSuccessfully = await UpdatePlayedSeconds(room);
 
             await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, false);
 
             if (hasVideoEndedSuccessfully)
             {
-                room.PlaylistVideos.RemoveAt(0);
+                _roomManager.DeletePlaylistVideo(room.RoomHash, 0);
+                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, 0);
+                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
             }
 
-            if (room.PlaylistVideos.Count == 0)
+            if (!hasVideoEndedSuccessfully)
             {
-                IsHandlerRunning = false;
-                break;
+                try
+                {
+                    _roomManager.DeletePlaylistVideo(room.RoomHash, 0);
+                }
+                catch
+                {
+                    // Handle the exception, log, or take appropriate action
+                }
+                finally
+                {
+                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, 0);
+                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
+                }
             }
         }
+
+        IsHandlerRunning = false;
     }
 
     private async Task<bool> UpdatePlayedSeconds(Room room)
     {
         try
         {
-            if (room == null)
-            {
-                return false;
-            }
-
-            room.VideoPlayerState.CurrentTime = 0;
-
             double durationTime = room.VideoPlayerState.Duration;
             string currentVideoUrl = room.VideoPlayerState.PlaylistVideo.Url;
 
             CancellationTokenSource cancellationToken = new CancellationTokenSource();
 
-            await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, true);
-
-            for (int i = 0; i <= durationTime; i++)
+            while (room.VideoPlayerState.IsPlaying && room.VideoPlayerState.CurrentTime <= durationTime)
             {
-                _logger.LogInformation(i.ToString());
-                if (room == null)
-                {
-                    cancellationToken.Cancel();
-                    return false;
-                }
+                _logger.LogInformation(room.VideoPlayerState.CurrentTime.ToString());
 
                 if (room.VideoPlayerState.PlaylistVideo.Url != currentVideoUrl)
                 {
                     cancellationToken.Cancel();
                     return false;
-                }
-
-                if (room.PlaylistVideos[0] == null)
-                {
-                    cancellationToken.Cancel();
-                    return false;
-                }
-
-                if (room.VideoPlayerState.CurrentTime >= room.VideoPlayerState.Duration)
-                {
-                    cancellationToken.Cancel();
-                    return true;
                 }
 
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
@@ -123,7 +118,7 @@ public class PlaylistHandler
 
             return true;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(Convert.ToString(ex));
             return false;

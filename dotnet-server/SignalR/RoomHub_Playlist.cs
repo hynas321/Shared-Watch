@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
@@ -12,6 +13,15 @@ public partial class RoomHub : Hub
         if (room == null)
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}");
+            return;
+        }
+
+        bool IsUrlCorrect = CheckIfIsYouTubeVideoLink(playlistVideo.Url);
+
+        if (!IsUrlCorrect)
+        {
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Url {playlistVideo.Url} is incorrect. Authorization Token: {authorizationToken}");
+            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnAddPlaylistVideo, null);
             return;
         }
 
@@ -82,5 +92,15 @@ public partial class RoomHub : Hub
         _logger.LogInformation($"{roomHash} DeletePlaylistVideo: {deletePlaylistVideo.Url}. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, playlistVideoIndex);
+    }
+
+    private bool CheckIfIsYouTubeVideoLink(string url)
+    {
+        string pattern = @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})";
+        Regex regex = new Regex(pattern);
+
+        Match match = regex.Match(url);
+
+        return match.Success;
     }
 }

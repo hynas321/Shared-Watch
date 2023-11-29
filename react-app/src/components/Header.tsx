@@ -9,10 +9,11 @@ import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { useEffect, useContext } from "react";
 import { HubEvents } from "../classes/HubEvents";
 import * as signalR from "@microsoft/signalr";
-import { toast } from "react-toastify";
 import { HttpManager } from "../classes/HttpManager";
 import useClipboardApi from "use-clipboard-api";
 import { useSignal } from "@preact/signals-react";
+import { BsEmojiFrownFill } from "react-icons/bs";
+
 
 export default function Header() {
   const appState = useContext(AppStateContext);
@@ -41,10 +42,11 @@ export default function Header() {
 
         await roomHub.start().then(() => {
           appState.connectionId.value = roomHub.getConnection().connectionId;
+          appState.connectionIssue.value = false;
         });
 
       } catch (error) {
-        toast.error("Could not establish a connection");
+        appState.connectionIssue.value = true;
       }
     };
   
@@ -57,7 +59,7 @@ export default function Header() {
     httpManager.leaveRoom(appState.roomHash.value);
 
     appState.isInRoom.value = false;
-    navigate(ClientEndpoints.mainMenu);
+    navigate(ClientEndpoints.mainMenu, { replace: true });
   }
 
   const handleCopyToClipboard = async () => {
@@ -75,7 +77,8 @@ export default function Header() {
     <nav className="navbar navbar-dark mb-3">
       <div className="d-flex align-items-center justify-content-center">
         <a className="navbar-brand ms-3" href="/"><i><b>SharedWatch</b></i> <BsFillCameraReelsFill /></a>
-        {!appState.isInRoom.value &&
+        {
+          (!appState.isInRoom.value && appState.connectionIssue.value === false) &&
           <InputForm
             classNames={`form-control form-control-sm rounded-3 ms-3 ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
             placeholder={"Username (min. 3 chars)"}
@@ -88,8 +91,13 @@ export default function Header() {
             }}
           />
         }
-        {appState.isInRoom.value &&
+        {
+          (appState.isInRoom.value && appState.connectionIssue.value === false) &&
           <span className="text-white ms-3">Your username: <b>{appState.username.value}</b></span>
+        }
+        {
+          (appState.connectionIssue.value === true) &&
+          <span className="text-white ms-3"><b>CONNECTION ISSUE <BsEmojiFrownFill/></b></span>
         }
       </div>
       {

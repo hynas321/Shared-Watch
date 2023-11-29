@@ -11,7 +11,8 @@ export default function VideoPlayer() {
   const roomHub = useContext(RoomHubContext);
 
   const videoPlayerRef = useRef<ReactPlayer>(null);
-  const [isMobileView, setIsMobileView] = useState(false);
+  const [videoUrl, setVideoUrl] = useState<string | undefined>(undefined);
+  const [isMobileView, setIsMobileView] = useState<boolean>(false);
 
   const localStorageManager = new LocalStorageManager();
 
@@ -34,10 +35,35 @@ export default function VideoPlayer() {
       }
 
       appState.videoPlayerState.value.currentTime = newTime;
+       
+      if (videoPlayerRef.current?.getCurrentTime() != null &&
+        (videoPlayerRef.current?.getCurrentTime() - newTime > 2 ||
+         newTime - videoPlayerRef.current?.getCurrentTime() > 2)) {
+
+        videoPlayerRef.current?.seekTo(newTime);
+      }
     });
+
+    roomHub.on(HubEvents.OnSetVideoUrl, (url: string) => {
+      if (appState.videoPlayerState.value == null) {
+        return;
+      }
+
+      appState.videoPlayerState.value.playlistVideo.url = url;
+      setVideoUrl(url);
+
+      roomHub.send(
+        HubEvents.GetVideoDuration,
+        appState.roomHash.value,
+        localStorageManager.getAuthorizationToken(),
+        videoPlayerRef.current?.getDuration(),
+      );
+    })
 
     return () => {
       roomHub.off(HubEvents.OnSetIsVideoPlaying);
+      roomHub.off(HubEvents.OnSetPlayedSeconds);
+      roomHub.off(HubEvents.OnSetVideoUrl);
     };
   }, [roomHub.getState()]);
 
@@ -81,10 +107,7 @@ export default function VideoPlayer() {
       <div className={`d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5 ${isMobileView ? "mobile-view" : ""}`}>
         <ReactPlayer
           ref={videoPlayerRef}
-          url={appState.playlistVideos.value.length === 0 ?
-            undefined :
-            appState.playlistVideos.value.map(video => video.url)
-          }
+          url={videoUrl}
           playing={appState.videoPlayerState.value?.isPlaying}
           controls={true}
           width={isMobileView ? "428px" : "854px"}

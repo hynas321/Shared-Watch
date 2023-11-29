@@ -13,6 +13,8 @@ public static class HubEvents {
     //VideoPlayer
     public const string SetIsVideoPlaying = "SetIsVideoPlaying";
     public const string SetPlayedSeconds = "SetPlayedSeconds";
+    public const string GetVideoDuration = "GetVideoDuration";
+    public const string OnSetVideoUrl = "OnSetVideoUrl";
     public const string OnSetIsVideoPlaying = "OnSetIsVideoPlaying";
     public const string OnSetPlayedSeconds = "OnSetPlayedSeconds";
 

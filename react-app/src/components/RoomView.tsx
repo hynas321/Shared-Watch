@@ -58,7 +58,7 @@ export default function RoomView() {
     }
 
     roomHub.onclose(() => {
-      toast.error("Connection lost")
+      appState.connectionIssue.value = true;
     })
 
     window.addEventListener('beforeunload', handleBeforeUnload);
