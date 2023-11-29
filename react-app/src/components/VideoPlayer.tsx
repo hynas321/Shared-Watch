@@ -51,16 +51,7 @@ export default function VideoPlayer() {
 
       appState.videoPlayerState.value.playlistVideo.url = url;
       setVideoUrl(url);
-
-      setTimeout(async () => {
-        await roomHub.invoke(
-          HubEvents.GetVideoDuration,
-          appState.roomHash.value,
-          localStorageManager.getAuthorizationToken(),
-          videoPlayerRef.current?.getDuration(),
-        );
-      }, 1000); // Adjust the delay as needed
-    })
+    });
 
     return () => {
       roomHub.off(HubEvents.OnSetIsVideoPlaying);
@@ -115,7 +106,7 @@ export default function VideoPlayer() {
           width={isMobileView ? "428px" : "854px"}
           height={isMobileView ? "auto" : "480px"}
           style={{}}
-          onStart={() => { handleStartVideo(); console.log("start"); }}
+          onPlay={() => { handleStartVideo(); console.log("start"); }}
           onPause={() => { handlePauseVideo(); console.log("pause"); }}
           onDuration={(duration) => console.log(duration)}
           onEnded={() => {}}
