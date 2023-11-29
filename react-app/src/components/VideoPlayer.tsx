@@ -44,7 +44,7 @@ export default function VideoPlayer() {
       }
     });
 
-    roomHub.on(HubEvents.OnSetVideoUrl, (url: string) => {
+    roomHub.on(HubEvents.OnSetVideoUrl, async (url: string) => {
       if (appState.videoPlayerState.value == null) {
         return;
       }
@@ -52,12 +52,14 @@ export default function VideoPlayer() {
       appState.videoPlayerState.value.playlistVideo.url = url;
       setVideoUrl(url);
 
-      roomHub.send(
-        HubEvents.GetVideoDuration,
-        appState.roomHash.value,
-        localStorageManager.getAuthorizationToken(),
-        videoPlayerRef.current?.getDuration(),
-      );
+      setTimeout(async () => {
+        await roomHub.invoke(
+          HubEvents.GetVideoDuration,
+          appState.roomHash.value,
+          localStorageManager.getAuthorizationToken(),
+          videoPlayerRef.current?.getDuration(),
+        );
+      }, 1000); // Adjust the delay as needed
     })
 
     return () => {

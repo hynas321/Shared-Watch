@@ -50,12 +50,12 @@ public class PlaylistHandler
             PlaylistVideo currentVideo = room.PlaylistVideos[0];
 
             room.VideoPlayerState.PlaylistVideo.Url = currentVideo.Url;
+            room.VideoPlayerState.CurrentTime = 0;
+
             await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, currentVideo.Url);
 
-            room.VideoPlayerState.CurrentTime = 0;
-            room.VideoPlayerState.Duration = 20; //To be changed
-            
             room.VideoPlayerState.IsPlaying = true;
+
             await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, true);
 
             bool hasVideoEndedSuccessfully = await UpdatePlayedSeconds(room);
@@ -76,13 +76,16 @@ public class PlaylistHandler
                 try
                 {
                     _roomManager.DeletePlaylistVideo(room.RoomHash, 0);
-                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, 0);
-
-                    room.VideoPlayerState.PlaylistVideo.Url = null;
-                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
                 }
                 catch
-                {}
+                {
+                    // Handle the exception, log, or take appropriate action
+                }
+                finally
+                {
+                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, 0);
+                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
+                }
             }
         }
 

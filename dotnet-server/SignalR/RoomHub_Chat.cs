@@ -29,6 +29,11 @@ public partial class RoomHub : Hub
             return;
         }
 
+        DateTime utcNow = DateTime.UtcNow.AddDays(0);
+        TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
+        DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+
+        chatMessage.Date = localTime.ToString("HH:mm:ss");
 
         _logger.LogInformation($"{roomHash} AddChatMessage: {chatMessage.Date} {chatMessage.Username}: {chatMessage.Text}. Authorization Token: {authorizationToken}");
 
