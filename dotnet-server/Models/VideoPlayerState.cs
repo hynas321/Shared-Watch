@@ -5,7 +5,7 @@ public class VideoPlayerState {
 
     public VideoPlayerState()
     {
-        PlaylistVideo = new PlaylistVideo("abc", "? ? ?", 3, null, null);
+        PlaylistVideo = new PlaylistVideo(null, null, 3, null, null);
         IsPlaying = false;
         CurrentTime = 0;
     }

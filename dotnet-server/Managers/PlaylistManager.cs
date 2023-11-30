@@ -57,7 +57,7 @@ public async Task ManagePlaylistHandler(Room room)
     {
         IsHandlerRunning = true;
 
-        while (room.PlaylistVideos.Count > 0)
+        while (room.PlaylistVideos.Count > 0 && room.Users.Count > 0)
         {
             PlaylistVideo currentVideo = room.PlaylistVideos[0];
 
@@ -135,6 +135,11 @@ private async Task<bool> UpdatePlayedSeconds(Room room, PlaylistVideo currentVid
                 return false;
             }
 
+            if (room.Users.Count == 0)
+            {
+                return false;
+            }
+            
             await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
 
             await Task.Delay(TimeSpan.FromSeconds(1));
