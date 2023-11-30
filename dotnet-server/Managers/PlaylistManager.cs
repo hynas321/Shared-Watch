@@ -130,12 +130,10 @@ private async Task<bool> UpdatePlayedSeconds(Room room, PlaylistVideo currentVid
         {
             _logger.LogInformation(room.VideoPlayerState.CurrentTime.ToString());
 
-            if (room.PlaylistVideos.Count == 0 || room.PlaylistVideos[0].Hash != currentVideoHash)
-            {
-                return false;
-            }
-
-            if (room.Users.Count == 0)
+            if (room.PlaylistVideos.Count == 0 ||
+                room.PlaylistVideos[0].Hash != currentVideoHash ||
+                room.Users.Count == 0
+            )
             {
                 return false;
             }
@@ -150,7 +148,15 @@ private async Task<bool> UpdatePlayedSeconds(Room room, PlaylistVideo currentVid
             {
                 while (!room.VideoPlayerState.IsPlaying)
                 {
-                    await Task.Delay(100);
+                    if (room.PlaylistVideos.Count == 0 ||
+                        room.PlaylistVideos[0].Hash != currentVideoHash ||
+                        room.Users.Count == 0
+                    )
+                    {
+                        return false;
+                    }
+
+                    await Task.Delay(250);
                 }
             }
         }

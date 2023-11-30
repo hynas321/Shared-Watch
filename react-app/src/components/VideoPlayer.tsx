@@ -42,7 +42,7 @@ export default function VideoPlayer() {
         (videoPlayerRef.current?.getCurrentTime() - newTime > 2 ||
          newTime - videoPlayerRef.current?.getCurrentTime() > 2)) {
 
-        videoPlayerRef.current?.seekTo(newTime);
+        videoPlayerRef.current?.seekTo(newTime, "seconds");
       }
     });
 
@@ -110,6 +110,7 @@ export default function VideoPlayer() {
           style={{}}
           onPlay={() => { handleStartVideo(); console.log("start"); }}
           onPause={() => { handlePauseVideo(); console.log("pause"); }}
+          onSeek={(seconds: number) => { console.log(videoPlayerRef.current?.seekTo(seconds, "seconds"))}}
         />
       </div>
     </>
