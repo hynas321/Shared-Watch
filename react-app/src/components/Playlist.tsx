@@ -8,6 +8,7 @@ import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomHelper } from "../classes/RoomHelper";
+import ReactPlayer from "react-player";
 
 export default function Playlist() {
   const roomHub = useContext(RoomHubContext);
@@ -36,16 +37,12 @@ export default function Playlist() {
     setCurrentVideoUrlText(text);
   }
 
-  const handleAddVideoUrlButtonClick = () => {
+  const handleAddVideoUrlButtonClick = async () => {
     if (!currentVideoUrlText || currentVideoUrlText?.length === 0) {
       return;
     }
 
-    const newPlaylistVideo: PlaylistVideo = {
-      url: currentVideoUrlText,
-    };
-
-    const isUrlValid = roomHelper.checkIfIsYouTubeVideoLink(newPlaylistVideo.url);
+    const isUrlValid = roomHelper.checkIfIsYouTubeVideoLink(currentVideoUrlText);
 
     if (!isUrlValid) {
       setIsInputFormEnabled(false);
@@ -59,6 +56,13 @@ export default function Playlist() {
       setCurrentVideoUrlText("");
       return;
     }
+
+    const newPlaylistVideo: PlaylistVideo = {
+      url: currentVideoUrlText,
+      duration: 10
+    };
+
+    console.log(newPlaylistVideo);
 
     roomHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");

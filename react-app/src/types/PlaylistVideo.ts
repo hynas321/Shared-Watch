@@ -1,3 +1,4 @@
 export type PlaylistVideo = {
-  url: string
+  url: string,
+  duration: number
 }

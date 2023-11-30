@@ -13,6 +13,7 @@ export default function VideoPlayer() {
   const videoPlayerRef = useRef<ReactPlayer>(null);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(appState.videoPlayerState.value?.playlistVideo.url ?? undefined);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayerState.value?.isPlaying ?? false);
 
   const localStorageManager = new LocalStorageManager();
 
@@ -27,6 +28,7 @@ export default function VideoPlayer() {
       }
 
       appState.videoPlayerState.value.isPlaying = isPlaying;
+      setIsVideoPlaying(isPlaying);
     });
 
     roomHub.on(HubEvents.OnSetPlayedSeconds, (newTime: number) => {
@@ -101,7 +103,7 @@ export default function VideoPlayer() {
         <ReactPlayer
           ref={videoPlayerRef}
           url={videoUrl}
-          playing={appState.videoPlayerState.value?.isPlaying}
+          playing={isVideoPlaying}
           controls={true}
           width={isMobileView ? "428px" : "854px"}
           height={isMobileView ? "auto" : "480px"}

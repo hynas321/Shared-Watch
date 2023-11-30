@@ -61,7 +61,7 @@ public class PlaylistHandler
 
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, true);
 
-                bool hasVideoEndedSuccessfully = await UpdatePlayedSeconds(room);
+                bool hasVideoEndedSuccessfully = await UpdatePlayedSeconds(room, currentVideo);
 
                 room.VideoPlayerState.IsPlaying = false;
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, false);
@@ -101,12 +101,12 @@ public class PlaylistHandler
         
     }
 
-    private async Task<bool> UpdatePlayedSeconds(Room room)
+    private async Task<bool> UpdatePlayedSeconds(Room room, PlaylistVideo currentVideo)
     {
         try
         {
-            _logger.LogInformation("Duration: " + room.VideoPlayerState.Duration);
-            double durationTime = 10; // To be changed;
+            _logger.LogInformation("Duration: " + currentVideo.Duration);
+            double durationTime = currentVideo.Duration; // To be changed;
             int currentVideoHashCode = room.PlaylistVideos[0].GetHashCode();
 
             CancellationTokenSource cancellationToken = new CancellationTokenSource();

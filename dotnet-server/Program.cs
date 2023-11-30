@@ -1,10 +1,18 @@
 using Dotnet.Server.Hubs;
+using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var configuration = builder.Configuration;
 // Add services to the container.
 
 builder.Services.AddControllers();
+var youtubeServiceInitializer = new BaseClientService.Initializer
+{
+    ApiKey = configuration["YouTubeApi:ApiKey"],
+    ApplicationName = "ReactApplication"
+};
+builder.Services.AddSingleton(new YouTubeService(youtubeServiceInitializer));
 builder.Services.AddScoped<PlaylistHandler>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
