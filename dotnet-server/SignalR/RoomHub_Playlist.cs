@@ -6,6 +6,7 @@ namespace Dotnet.Server.Hubs;
 public partial class RoomHub : Hub
 {
     [HubMethodName(HubEvents.AddPlaylistVideo)]
+    [Obsolete]
     public async Task AddPlaylistVideo(string roomHash, string authorizationToken, PlaylistVideo playlistVideo)
     {
         Room room = _roomManager.GetRoom(roomHash);
@@ -41,15 +42,36 @@ public partial class RoomHub : Hub
 
         _logger.LogInformation($"{roomHash} AddPlaylistVideo: {playlistVideo.Url}. Authorization Token: {authorizationToken}");
 
+        string title = _youtubeAPIService.GetVideoTitle(playlistVideo.Url);
+
+        if (title == null)
+        {
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find title {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnAddPlaylistVideo, null);
+            return;
+        }
+
+        playlistVideo.Title = title;
+
+        string thumbnailUrl = _youtubeAPIService.GetVideoThumbnailUrl(playlistVideo.Url);
+
+        if (thumbnailUrl == null)
+        {
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find thumbnail URL {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+            await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnAddPlaylistVideo, null);
+            return;
+        }
+        
+        playlistVideo.ThumbnailUrl = thumbnailUrl;
+
         bool isPlaylistVideoAdded = _roomManager.AddPlaylistVideo(roomHash, playlistVideo);
 
         if (!isPlaylistVideoAdded)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a queued video. Authorization Token: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a video {playlistVideo.Url}. Authorization Token: {authorizationToken}");
             return;
         }
 
-        _logger.LogInformation(room.PlaylistVideos.Count.ToString());
         if (room.PlaylistVideos.Count == 1 && _playlistHandler.IsHandlerRunning == false)
         {
             _playlistHandler.StartPlaylistHandler(roomHash);
@@ -59,13 +81,13 @@ public partial class RoomHub : Hub
     }
 
     [HubMethodName(HubEvents.DeletePlaylistVideo)]
-    public async Task DeletePlaylistVideo(string roomHash, string authorizationToken, int playlistVideoIndex)
+    public async Task DeletePlaylistVideo(string roomHash, string authorizationToken, string videoHash)
     {
         Room room = _roomManager.GetRoom(roomHash);
 
         if (room == null)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}, PlaylistVideoHash: {videoHash}");
             return;
         }
 
@@ -73,25 +95,25 @@ public partial class RoomHub : Hub
 
         if (user == null)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not exist. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not exist. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
             return;
         }
 
         if (user.IsAdmin == false && room.UserPermissions.canRemoveVideo == false)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
         }
 
-        PlaylistVideo deletePlaylistVideo = _roomManager.DeletePlaylistVideo(roomHash, playlistVideoIndex);
+        PlaylistVideo deletePlaylistVideo = _roomManager.DeletePlaylistVideo(roomHash, videoHash);
 
         if (deletePlaylistVideo == null)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
+            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
         }
 
-        _logger.LogInformation($"{roomHash} DeletePlaylistVideo: {deletePlaylistVideo.Url}. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {playlistVideoIndex}");
+        _logger.LogInformation($"{roomHash} DeletePlaylistVideo: {deletePlaylistVideo.Url}. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
 
-        await Clients.Group(roomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, playlistVideoIndex);
+        await Clients.Group(roomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, videoHash);
     }
 
     private bool CheckIfIsYouTubeVideoLink(string url)

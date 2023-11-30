@@ -110,9 +110,6 @@ export default function VideoPlayer() {
           style={{}}
           onPlay={() => { handleStartVideo(); console.log("start"); }}
           onPause={() => { handlePauseVideo(); console.log("pause"); }}
-          onDuration={(duration) => console.log(duration)}
-          onEnded={() => {}}
-          onProgress={(state: OnProgressProps) => {} }
         />
       </div>
     </>

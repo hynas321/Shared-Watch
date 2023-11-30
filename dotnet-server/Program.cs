@@ -7,13 +7,16 @@ var configuration = builder.Configuration;
 // Add services to the container.
 
 builder.Services.AddControllers();
-var youtubeServiceInitializer = new BaseClientService.Initializer
+builder.Services.AddSingleton(sp =>
 {
-    ApiKey = configuration["YouTubeApi:ApiKey"],
-    ApplicationName = "ReactApplication"
-};
-builder.Services.AddSingleton(new YouTubeService(youtubeServiceInitializer));
-builder.Services.AddScoped<PlaylistHandler>();
+    var youtubeAPIServiceInitializer = new BaseClientService.Initializer
+    {
+        ApiKey = configuration["YouTubeApi:ApiKey"],
+        ApplicationName = "ReactApplication"
+    };
+    return new YouTubeAPIService(youtubeAPIServiceInitializer);
+});
+builder.Services.AddScoped<PlaylistManager>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

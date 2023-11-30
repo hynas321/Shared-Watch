@@ -6,12 +6,14 @@ public partial class RoomHub : Hub
 {
     private readonly ILogger<RoomHub> _logger;
     private readonly RoomManager _roomManager = new RoomManager();
-    private readonly PlaylistHandler _playlistHandler;
+    private readonly PlaylistManager _playlistHandler;
+    private readonly YouTubeAPIService _youtubeAPIService;
 
-    public RoomHub(ILogger<RoomHub> logger, PlaylistHandler playlistHandler)
+    public RoomHub(ILogger<RoomHub> logger, PlaylistManager playlistHandler, YouTubeAPIService youTubeAPIService)
     {
         _logger = logger;
         _playlistHandler = playlistHandler;
+        _youtubeAPIService = youTubeAPIService;
     }
 
     public override async Task OnConnectedAsync()

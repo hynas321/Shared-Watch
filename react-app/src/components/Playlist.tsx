@@ -8,7 +8,6 @@ import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomHelper } from "../classes/RoomHelper";
-import ReactPlayer from "react-player";
 
 export default function Playlist() {
   const roomHub = useContext(RoomHubContext);
@@ -59,10 +58,8 @@ export default function Playlist() {
 
     const newPlaylistVideo: PlaylistVideo = {
       url: currentVideoUrlText,
-      duration: 10
+      duration: 5
     };
-
-    console.log(newPlaylistVideo);
 
     roomHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");
@@ -75,8 +72,13 @@ export default function Playlist() {
   }
 
   const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
-    event.preventDefault();    
-    roomHub.invoke(HubEvents.DeletePlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), index);
+    event.preventDefault();
+    roomHub.invoke(
+      HubEvents.DeletePlaylistVideo,
+      appState.roomHash.value,
+      localStorageManager.getAuthorizationToken(),
+      appState.playlistVideos.value[index].hash
+    );
   }
 
   return (
@@ -114,11 +116,11 @@ export default function Playlist() {
             >
               <div className="row">
                 <div className="col-auto">
-                  <img src={VideoIcon} alt="Video" style={videoThumbnailStyle} />
+                  <img src={playlistVideo.thumbnailUrl === null ? VideoIcon : playlistVideo.thumbnailUrl} alt="Video" style={videoThumbnailStyle} />
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
                  <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>
-                  <b>{playlistVideo.url}</b>
+                  <b>{playlistVideo.title === null ? playlistVideo.url : playlistVideo.title}</b>
                 </small>
                  {
                     (appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) &&

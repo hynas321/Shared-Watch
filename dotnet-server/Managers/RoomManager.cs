@@ -217,6 +217,7 @@ public class RoomManager {
                 return false;
             }
 
+            playlistVideo.Hash = Guid.NewGuid().ToString().Replace("-", "")[..8];;
             room.PlaylistVideos.Add(playlistVideo);
 
             return true;
@@ -227,7 +228,7 @@ public class RoomManager {
         }
     }
 
-    public PlaylistVideo DeletePlaylistVideo(string roomHash, int playlistVideoIndex)
+    public PlaylistVideo DeletePlaylistVideo(string roomHash, string videoHash)
     {
         try
         {
@@ -238,14 +239,14 @@ public class RoomManager {
                 return null;
             }
 
-            PlaylistVideo playlistVideo = room.PlaylistVideos[playlistVideoIndex];
+            PlaylistVideo playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
 
             if (playlistVideo == null)
             {
                 return null;
             }
 
-            room.PlaylistVideos.RemoveAt(playlistVideoIndex);
+            room.PlaylistVideos.Remove(playlistVideo);
 
             return playlistVideo;
         }

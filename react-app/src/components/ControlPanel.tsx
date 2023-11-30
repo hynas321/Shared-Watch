@@ -63,10 +63,10 @@ export default function ControlPanel() {
       appState.playlistVideos.value = [...appState.playlistVideos.value, playlistVideo];
     });
 
-    roomHub.on(HubEvents.OnDeletePlaylistVideo, (removedIndex: number) => {
+    roomHub.on(HubEvents.OnDeletePlaylistVideo, (playlistVideoHash: string) => {
 
       appState.playlistVideos.value = appState.playlistVideos.value.filter(
-        (_, index) => index !== removedIndex
+        (video) => video.hash !== playlistVideoHash
       );
     });
 
