@@ -37,7 +37,7 @@ public partial class RoomHub : Hub
     }
 
     [HubMethodName(HubEvents.SetPlayedSeconds)]
-    public async Task SetPlayedSeconds(string roomHash, string authorizationToken, double playedSeconds)
+    public void SetPlayedSeconds(string roomHash, string authorizationToken, double playedSeconds)
     {
         Room room = _roomManager.GetRoom(roomHash);
 
@@ -59,12 +59,10 @@ public partial class RoomHub : Hub
         {
             _logger.LogInformation($"{roomHash} SetPlayedSeconds: User does not have the permission. Authorization Token: {authorizationToken}");
             return;
-        }        
-
-        room.VideoPlayerState.CurrentTime = playedSeconds;
+        }
+        
+        room.VideoPlayerState.CurrentTime = Math.Round(playedSeconds);
 
         _logger.LogInformation($"{roomHash} SetPlayedSeconds: {playedSeconds}s. Authorization Token: {authorizationToken}");
-
-        await Clients.Group(roomHash).SendAsync(HubEvents.OnSetPlayedSeconds, playedSeconds);
     }
 }

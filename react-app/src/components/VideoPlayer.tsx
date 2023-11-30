@@ -14,6 +14,7 @@ export default function VideoPlayer() {
   const [videoUrl, setVideoUrl] = useState<string | undefined>(appState.videoPlayerState.value?.playlistVideo.url ?? undefined);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayerState.value?.isPlaying ?? false);
+  const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] = useState<boolean>(false);
 
   const localStorageManager = new LocalStorageManager();
 
@@ -35,14 +36,22 @@ export default function VideoPlayer() {
       if (appState.videoPlayerState.value === null) {
         return;
       }
-
+      
+      setIsVideoCurrentTimeDifferenceLarge(false);
       appState.videoPlayerState.value.currentTime = newTime;
        
       if (videoPlayerRef.current?.getCurrentTime() != null &&
-        (videoPlayerRef.current?.getCurrentTime() - newTime > 2 ||
-         newTime - videoPlayerRef.current?.getCurrentTime() > 2)) {
-
+        (videoPlayerRef.current?.getCurrentTime() - newTime > 1 ||
+         newTime - videoPlayerRef.current?.getCurrentTime() > 1)) {
+        
         videoPlayerRef.current?.seekTo(newTime, "seconds");
+      }
+
+      if (videoPlayerRef.current?.getCurrentTime() != null &&
+        (videoPlayerRef.current?.getCurrentTime() - newTime > 2 ||
+        newTime - videoPlayerRef.current?.getCurrentTime() > 2)) {
+      
+        setIsVideoCurrentTimeDifferenceLarge(true);
       }
     });
 
@@ -61,7 +70,7 @@ export default function VideoPlayer() {
       roomHub.off(HubEvents.OnSetVideoUrl);
     };
   }, [roomHub.getState()]);
-
+  
   const setUserVideoState = async (isPlaying: boolean) => {
     await roomHub.invoke(
       HubEvents.SetIsVideoPlaying,
@@ -79,6 +88,18 @@ export default function VideoPlayer() {
     setUserVideoState(false);
   };
   
+  const handleOnProgress = async (state: OnProgressProps) => {
+    if (isVideoCurrentTimeDifferenceLarge && appState.isAdmin.value) {
+      await roomHub.invoke(
+        HubEvents.SetPlayedSeconds,
+        appState.roomHash.value,
+        localStorageManager.getAuthorizationToken(),
+        state.playedSeconds
+      )
+
+      setIsVideoCurrentTimeDifferenceLarge(false);
+    }
+  };
 
   const handleWindowResize = () => {
     setIsMobileView(window.innerWidth <= 576);
@@ -108,9 +129,9 @@ export default function VideoPlayer() {
           width={isMobileView ? "428px" : "854px"}
           height={isMobileView ? "auto" : "480px"}
           style={{}}
-          onPlay={() => { handleStartVideo(); console.log("start"); }}
-          onPause={() => { handlePauseVideo(); console.log("pause"); }}
-          onSeek={(seconds: number) => { console.log(videoPlayerRef.current?.seekTo(seconds, "seconds"))}}
+          onPlay={() => { handleStartVideo(); }}
+          onPause={() => { handlePauseVideo(); }}
+          onProgress={(state: OnProgressProps) => {handleOnProgress(state)}}
         />
       </div>
     </>

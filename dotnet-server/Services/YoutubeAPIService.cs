@@ -12,7 +12,6 @@ public class YouTubeAPIService
         _youTubeService = new YouTubeService(initializer);
     }
 
-    [Obsolete]
     public int GetVideoDuration(string videoUrl)
     {
         var videoRequest = _youTubeService.Videos.List("contentDetails");
@@ -23,20 +22,7 @@ public class YouTubeAPIService
         if (videoResponse.Items.Count == 1)
         {
             string duration = videoResponse.Items[0].ContentDetails.Duration;
-            
             TimeSpan timeSpan = XmlConvert.ToTimeSpan(duration);
-
-            if ((int)timeSpan.TotalSeconds == 0)
-            {
-                (bool isLive, double currentTime) videoIsLiveOutput = CheckIfVideoIsLive(videoUrl);
-
-                if (!videoIsLiveOutput.isLive)
-                {
-                    return -1;
-                }
-
-                return (int)videoIsLiveOutput.currentTime;
-            }
 
             return (int)timeSpan.TotalSeconds;
         }
@@ -88,32 +74,5 @@ public class YouTubeAPIService
         }
 
         return null;
-    }
-
-    [Obsolete]
-    private (bool, double) CheckIfVideoIsLive(string videoUrl)
-    {
-        var videoRequest = _youTubeService.Videos.List("liveStreamingDetails");
-        videoRequest.Id = GetVideoId(videoUrl);
-
-        var videoResponse = videoRequest.Execute();
-
-        if (videoResponse.Items.Count == 1)
-        {
-            var liveStreamingDetails = videoResponse.Items[0].LiveStreamingDetails;
-
-            if (liveStreamingDetails != null && liveStreamingDetails.ActualStartTime != null)
-            {
-                DateTime currentTime = DateTime.Now.ToUniversalTime();
-                DateTime startTime = liveStreamingDetails.ActualStartTime.Value;
-
-                TimeSpan elapsedTime = currentTime - startTime;
-                return (true, elapsedTime.TotalSeconds);
-            }
-
-            return (false, -1);
-        }
-
-        return (false, -1);
     }
 }

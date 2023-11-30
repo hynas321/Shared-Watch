@@ -13,7 +13,6 @@ export class HubEvents {
   //VideoPlayer
   static SetIsVideoPlaying: string = "SetIsVideoPlaying";
   static SetPlayedSeconds: string = "SetPlayedSeconds";
-  static GetVideoDuration: string = "GetVideoDuration";
   static OnSetVideoUrl: string = "OnSetVideoUrl";
   static OnSetIsVideoPlaying: string = "OnSetIsVideoPlaying";
   static OnSetPlayedSeconds: string = "OnSetPlayedSeconds";
@@ -25,7 +24,6 @@ export class HubEvents {
   //Playlist
   static AddPlaylistVideo: string = "AddPlaylistVideo";
   static DeletePlaylistVideo: string = "DeletePlaylistVideo";
-  //static StartPlaylistHandler: string = "StartPlaylistHandler";
   static OnAddPlaylistVideo: string = "OnAddPlaylistVideo";
   static OnDeletePlaylistVideo: string = "OnDeletePlaylistVideo";
 

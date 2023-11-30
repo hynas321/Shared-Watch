@@ -22,7 +22,6 @@ public class PlaylistManager
         _youtubeAPIService = youTubeAPIService;
     }
 
-    [Obsolete]
     public async void StartPlaylistHandler(string roomHash)
     {
         try
@@ -50,123 +49,121 @@ public class PlaylistManager
         }
     }
 
- [Obsolete]
-public async Task ManagePlaylistHandler(Room room)
-{
-    try
+    public async Task ManagePlaylistHandler(Room room)
     {
-        IsHandlerRunning = true;
-
-        while (room.PlaylistVideos.Count > 0 && room.Users.Count > 0)
+        try
         {
-            PlaylistVideo currentVideo = room.PlaylistVideos[0];
+            IsHandlerRunning = true;
 
-            room.VideoPlayerState.PlaylistVideo.Url = currentVideo.Url;
-            room.VideoPlayerState.CurrentTime = 0;
-
-            await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, currentVideo.Url);
-
-            room.VideoPlayerState.IsPlaying = true;
-
-            await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, true);
-
-            bool hasVideoEndedSuccessfully = await UpdatePlayedSeconds(room, currentVideo);
-
-            room.VideoPlayerState.IsPlaying = false;
-            await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, false);
-
-            if (hasVideoEndedSuccessfully)
+            while (room.PlaylistVideos.Count > 0 && room.Users.Count > 0)
             {
-                _roomManager.DeletePlaylistVideo(room.RoomHash, currentVideo.Hash);
-                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, currentVideo.Hash);
+                PlaylistVideo currentVideo = room.PlaylistVideos[0];
 
-                room.VideoPlayerState.PlaylistVideo.Url = null;
-                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
-            }
-            else
-            {
-                try
+                room.VideoPlayerState.PlaylistVideo.Url = currentVideo.Url;
+                room.VideoPlayerState.CurrentTime = 0;
+
+                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, currentVideo.Url);
+
+                room.VideoPlayerState.IsPlaying = true;
+
+                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, true);
+
+                bool hasVideoEndedSuccessfully = await UpdateCurrentTime(room, currentVideo);
+
+                room.VideoPlayerState.IsPlaying = false;
+                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetIsVideoPlaying, false);
+
+                if (hasVideoEndedSuccessfully)
                 {
                     _roomManager.DeletePlaylistVideo(room.RoomHash, currentVideo.Hash);
-                }
-                catch
-                {
-                    // TODO: Handle the exception
-                }
-                finally
-                {
-                    room.VideoPlayerState.PlaylistVideo.Url = null;
                     await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, currentVideo.Hash);
+
+                    room.VideoPlayerState.PlaylistVideo.Url = null;
                     await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
                 }
+                else
+                {
+                    try
+                    {
+                        _roomManager.DeletePlaylistVideo(room.RoomHash, currentVideo.Hash);
+                    }
+                    catch
+                    {
+                        // TODO
+                    }
+                    finally
+                    {
+                        room.VideoPlayerState.PlaylistVideo.Url = null;
+                        await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, currentVideo.Hash);
+                        await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
+                    }
+                }
             }
+
+            IsHandlerRunning = false;
         }
-
-        IsHandlerRunning = false;
-    }
-    catch (Exception ex)
-    {
-        _logger.LogInformation(ex.ToString());
-    }
-}
-
-[Obsolete]
-private async Task<bool> UpdatePlayedSeconds(Room room, PlaylistVideo currentVideo)
-{
-    try
-    {
-        double durationTime = _youtubeAPIService.GetVideoDuration(currentVideo.Url);
-
-        if (durationTime == -1)
+        catch (Exception ex)
         {
-            return false;
+            _logger.LogInformation(ex.ToString());
         }
+    }
 
-        string currentVideoHash = currentVideo.Hash;
-
-        _logger.LogInformation(durationTime.ToString() + " duration");
-
-        while (room.VideoPlayerState.IsPlaying && room.VideoPlayerState.CurrentTime <= durationTime)
+    private async Task<bool> UpdateCurrentTime(Room room, PlaylistVideo currentVideo)
+    {
+        try
         {
-            _logger.LogInformation(room.VideoPlayerState.CurrentTime.ToString());
+            double durationTime = _youtubeAPIService.GetVideoDuration(currentVideo.Url);
 
-            if (room.PlaylistVideos.Count == 0 ||
-                room.PlaylistVideos[0].Hash != currentVideoHash ||
-                room.Users.Count == 0
-            )
+            if (durationTime == -1)
             {
                 return false;
             }
-            
-            await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
 
-            await Task.Delay(TimeSpan.FromSeconds(1));
+            string currentVideoHash = currentVideo.Hash;
 
-            room.VideoPlayerState.CurrentTime++;
+            _logger.LogInformation(durationTime.ToString() + " duration");
 
-            if (!room.VideoPlayerState.IsPlaying)
+            while (room.VideoPlayerState.IsPlaying && room.VideoPlayerState.CurrentTime <= durationTime)
             {
-                while (!room.VideoPlayerState.IsPlaying)
-                {
-                    if (room.PlaylistVideos.Count == 0 ||
-                        room.PlaylistVideos[0].Hash != currentVideoHash ||
-                        room.Users.Count == 0
-                    )
-                    {
-                        return false;
-                    }
+                _logger.LogInformation(room.VideoPlayerState.CurrentTime.ToString());
 
-                    await Task.Delay(250);
+                if (room.PlaylistVideos.Count == 0 ||
+                    room.PlaylistVideos[0].Hash != currentVideoHash ||
+                    room.Users.Count == 0
+                )
+                {
+                    return false;
+                }
+                
+                await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
+
+                await Task.Delay(TimeSpan.FromMilliseconds(1000));
+
+                room.VideoPlayerState.CurrentTime += 1;
+
+                if (!room.VideoPlayerState.IsPlaying)
+                {
+                    while (!room.VideoPlayerState.IsPlaying)
+                    {
+                        if (room.PlaylistVideos.Count == 0 ||
+                            room.PlaylistVideos[0].Hash != currentVideoHash ||
+                            room.Users.Count == 0
+                        )
+                        {
+                            return false;
+                        }
+
+                        await Task.Delay(100);
+                    }
                 }
             }
-        }
 
-        return true;
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(Convert.ToString(ex));
+            return false;
+        }
     }
-    catch (Exception ex)
-    {
-        _logger.LogError(Convert.ToString(ex));
-        return false;
-    }
-}
 }
