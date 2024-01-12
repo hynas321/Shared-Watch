@@ -204,6 +204,10 @@ public class RoomController : ControllerBase
 
             _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
 
+            IEnumerable<RoomDTO> rooms = _roomManager.GetAllRoomsDTO();
+
+            _roomHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
+
             _logger.LogInformation(
                 $"{roomHash} Join: Status 200. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
             );
@@ -283,6 +287,10 @@ public class RoomController : ControllerBase
             var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
 
             _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
+
+            IEnumerable<RoomDTO> rooms = _roomManager.GetAllRoomsDTO();
+
+            _roomHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
 
             _logger.LogInformation(
                 $"{roomHash} Leave: Status 200. AuthorizationToken: {authorizationToken}"

@@ -13,8 +13,10 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { RoomState } from "../types/RoomState";
 import { animated, useSpring } from "@react-spring/web";
 import CreateRoomModal from "./CreateRoomModal";
-import { AppStateContext } from "../context/RoomHubContext";
+import { AppStateContext, roomHub } from "../context/RoomHubContext";
 import { RoomHelper } from "../classes/RoomHelper";
+import * as signalR from "@microsoft/signalr";
+import { HubEvents } from "../classes/HubEvents";
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
@@ -27,6 +29,22 @@ export default function MainView() {
 
   const httpManager: HttpManager = new HttpManager();
   const roomHelper = new RoomHelper();
+
+  useEffect(() => {
+    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    roomHub.on(HubEvents.onListOfRoomsUpdated, (listOfRoomsSerialized: string) => {
+      const rooms: Room[] = JSON.parse(listOfRoomsSerialized);
+
+      setDisplayedRooms(rooms);
+    });
+
+    return () => {
+      roomHub.off(HubEvents.onRoomUpdated);
+    }
+  }, [roomHub.getState()]);
 
   const fetchRooms = async () => {
     const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();

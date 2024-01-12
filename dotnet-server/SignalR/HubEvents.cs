@@ -1,6 +1,11 @@
 public static class HubEvents {
     //Connection
     public const string OnReceiveConnectionId = "OnReceiveConnectionId";
+    public const string SendHeartbeat = "SendHeartbeat";
+    public const string OnSendHeartbeat = "OnSendHeartbeat";
+
+    //Rooms
+    public const string OnListOfRoomsUpdated = "OnListOfRoomsUpdated";
 
     //Room
     public const string KickOut = "KickOut";

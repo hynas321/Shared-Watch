@@ -93,7 +93,7 @@ export default function RoomView() {
               <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-2 mb-3">
                 <VideoPlayer />
               </animated.div>
-              <animated.div style={{ ...springs }} className="col-xl-4 col-lg-12 mt-2 mb-3">
+              <animated.div style={{ ...springs }} className="col-xl-4 col-lg-8 mx-lg-auto mt-2 mb-3">
                 <ControlPanel />
               </animated.div>
             </div>

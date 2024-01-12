@@ -1,6 +1,12 @@
 export class HubEvents {
   //Connection
- static OnReceiveConnectionId: string = "OnReceiveConnectionId";
+  static OnReceiveConnectionId: string = "OnReceiveConnectionId";
+  static SendHeartbeat: string = "SendHeartbeat";
+  static OnSendHeartbeat: string = "OnSendHeartbeat";
+
+  //Rooms
+  static onRoomUpdated: string = "OnRoomUpdated";
+  static onListOfRoomsUpdated: string = "OnListOfRoomsUpdated";
 
   //User
   static KickOut: string = "KickOut";
