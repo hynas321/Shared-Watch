@@ -121,7 +121,7 @@ export default function JoinRoomView() {
     />
     <div className="container">
       <div className="row justify-content-center">
-        <animated.div className="main-menu-panel mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
+        <animated.div className="mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
           <h3 className="text-white text-center mt-3 mb-3">Join the room</h3>
           <div className="row d-flex justify-content-between align-items-center">
             <div className="list-group rounded-3">
