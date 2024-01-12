@@ -5,6 +5,7 @@ import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { OnProgressProps } from "react-player/base";
+import { BsCameraVideoOffFill } from "react-icons/bs";
 
 export default function VideoPlayer() {
   const appState = useContext(AppStateContext);
@@ -59,7 +60,7 @@ export default function VideoPlayer() {
       if (appState.videoPlayerState.value == null) {
         return;
       }
-
+      console.log(url);
       appState.videoPlayerState.value.playlistVideo.url = url;
       setVideoUrl(url);
     });
@@ -121,18 +122,32 @@ export default function VideoPlayer() {
         <span className="text-white"><b>Video player</b></span>
       </div>
       <div className={`d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5 ${isMobileView ? "mobile-view" : ""}`}>
-        <ReactPlayer
-          ref={videoPlayerRef}
-          url={videoUrl}
-          playing={isVideoPlaying}
-          controls={true}
-          width={isMobileView ? "428px" : "854px"}
-          height={isMobileView ? "auto" : "480px"}
-          style={{}}
-          onPlay={() => { handleStartVideo(); }}
-          onPause={() => { handlePauseVideo(); }}
-          onProgress={(state: OnProgressProps) => {handleOnProgress(state)}}
-        />
+        {
+          videoUrl !== undefined && videoUrl !== null ?
+          <ReactPlayer
+            ref={videoPlayerRef}
+            url={videoUrl}
+            playing={isVideoPlaying}
+            controls={true}
+            width={isMobileView ? "428px" : "854px"}
+            height={isMobileView ? "auto" : "480px"}
+            style={{}}
+            onPlay={() => { handleStartVideo(); }}
+            onPause={() => { handlePauseVideo(); }}
+            onProgress={(state: OnProgressProps) => {handleOnProgress(state)}}
+          />
+          :
+          <div className="d-flex align-items-center justify-content-center text-white"
+            style={{
+              width: isMobileView ? "428px" : "854px",
+              height: isMobileView ? "auto" : "480px"
+            }}>
+            <div className="text-center">
+              <h1><BsCameraVideoOffFill /></h1>
+              <h5>No video to display</h5>
+            </div>
+          </div>
+        }
       </div>
     </>
   );

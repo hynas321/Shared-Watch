@@ -23,7 +23,6 @@ export class RoomHelper {
       );
 
       if (responseStatusCode !== HttpStatusCodes.OK) {
-  
         switch(responseStatusCode) {
           case HttpStatusCodes.UNAUTHORIZED:
             toast.error("Wrong room password");
@@ -71,6 +70,4 @@ export class RoomHelper {
     
       return !!match;
     }
-    
-    
 }

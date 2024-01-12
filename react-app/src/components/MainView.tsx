@@ -186,7 +186,7 @@ export default function MainView() {
           <div className="mt-3 mb-3">
             <Switch
               label="Show only available rooms"
-              defaultIsChecked={displayOnlyAvailableRooms as boolean}
+              isChecked={displayOnlyAvailableRooms as boolean}
               isEnabled={appState.username.value.length >= 3}
               onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
             />

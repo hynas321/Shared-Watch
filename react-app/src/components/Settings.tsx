@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Switch from "./Switch";
 import { InputForm } from "./InputForm";
 import Button from "./Button";
@@ -10,9 +10,14 @@ import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Settings() {
   const appState = useContext(AppStateContext);
+  const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
 
   const localStorageManager = new LocalStorageManager();
+
+  useEffect(() => {
+    setUserPermissions(appState.userPermissions.value);
+  }, [, appState.userPermissions.value]);
 
   const handleSetRoomPrivateButtonClick = () => {
     if (inputFormPassword === appState.roomPassword.value) {
@@ -127,7 +132,7 @@ export default function Settings() {
         <div className="mt-3">
           <Switch 
             label={"Send chat messages"}
-            defaultIsChecked={appState.userPermissions.value?.canAddChatMessage as boolean}
+            isChecked={userPermissions?.canAddChatMessage as boolean}
             isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setCanAddChatMessage(checked)} 
           />
@@ -135,13 +140,13 @@ export default function Settings() {
         <div className="mt-3"> 
           <Switch 
             label={"Add videos to the playlist"}
-            defaultIsChecked={appState.userPermissions.value?.canAddVideo as boolean}
+            isChecked={appState.userPermissions.value?.canAddVideo as boolean}
             isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setCanAddVideo(checked)} 
           />
           <Switch 
             label={"Remove videos from the playlist"}
-            defaultIsChecked={appState.userPermissions.value?.canRemoveVideo as boolean}
+            isChecked={appState.userPermissions.value?.canRemoveVideo as boolean}
             isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setCanRemoveVideo(checked)} 
           />
@@ -149,13 +154,13 @@ export default function Settings() {
         <div className="mt-3">
           <Switch 
             label={"Start/Pause videos"}
-            defaultIsChecked={appState.userPermissions.value?.canStartOrPauseVideo as boolean}
+            isChecked={appState.userPermissions.value?.canStartOrPauseVideo as boolean}
             isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setCanStartOrPauseVideo(checked)} 
           />
           <Switch 
             label={"Skip videos"}
-            defaultIsChecked={appState.userPermissions.value?.canSkipVideo as boolean}
+            isChecked={appState.userPermissions.value?.canSkipVideo as boolean}
             isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setCanSkipVideo(checked)} 
           />

@@ -1,19 +1,13 @@
-import React, { useState } from 'react';
-
 export interface SwitchProps {
   label: string;
-  defaultIsChecked: boolean;
+  isChecked: boolean;
   isEnabled: boolean;
   onCheckChange: (checked: boolean) => void;
 }
 
-export default function Switch({ label, defaultIsChecked, isEnabled, onCheckChange }: SwitchProps) {
-  const [isChecked, setIsChecked] = useState(defaultIsChecked);
-
-  const handleCheckChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newChecked = event.target.checked;
-    setIsChecked(newChecked);
-    onCheckChange(newChecked);
+export default function Switch({ label, isChecked, isEnabled, onCheckChange }: SwitchProps) {
+  const handleCheckChange = () => {
+    onCheckChange(!isChecked);
   };
 
   return (

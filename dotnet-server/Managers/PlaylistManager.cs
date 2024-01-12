@@ -87,10 +87,7 @@ public class PlaylistManager
                     {
                         _roomManager.DeletePlaylistVideo(room.RoomHash, currentVideo.Hash);
                     }
-                    catch
-                    {
-                        // TODO
-                    }
+                    catch {}
                     finally
                     {
                         room.VideoPlayerState.PlaylistVideo.Url = null;
@@ -137,9 +134,9 @@ public class PlaylistManager
                 
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
 
-                await Task.Delay(TimeSpan.FromMilliseconds(1000));
+                await Task.Delay(TimeSpan.FromMilliseconds(100));
 
-                room.VideoPlayerState.CurrentTime += 1;
+                room.VideoPlayerState.CurrentTime += 0.1;
 
                 if (!room.VideoPlayerState.IsPlaying)
                 {

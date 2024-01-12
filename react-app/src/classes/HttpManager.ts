@@ -25,7 +25,7 @@ export class HttpManager {
       return [response.status, response.data];
     }
     catch (error: any) {
-      return [500, undefined]
+      return [error.response.status ?? 500, undefined]
     }
   }
 
@@ -50,7 +50,7 @@ export class HttpManager {
       return [response.status, response.data] as [number, RoomCreateOutput];
     }
     catch (error: any) {
-      return [500, undefined]
+      return [error.response.status ?? 500, undefined]
     }
   }
 
@@ -67,7 +67,7 @@ export class HttpManager {
       return [response.status, response.data] as [number, Room]
     }
     catch (error: any) {
-      return [500, undefined];
+      return [error.response.status ?? 500, undefined];
     }
   }
 
@@ -94,7 +94,7 @@ export class HttpManager {
       return [response.status, response.data] as [number, RoomJoinOutput]
 
     } catch (error: any) {
-      return [500, undefined];
+      return [error.response.status ?? 500, undefined];
     }
   }
 
@@ -116,7 +116,7 @@ export class HttpManager {
       return response.status as number;
 
     } catch (error: any) {
-      return 500 as number;
+      return error.response.status ?? 500 as number;
     }
   }
 }

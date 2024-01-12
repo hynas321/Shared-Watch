@@ -13,7 +13,10 @@ public partial class RoomHub : Hub
 
         if (room == null)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}");
+            _logger.LogInformation(
+                $"{roomHash} AddPlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}"
+            );
+
             return;
         }
 
@@ -21,7 +24,10 @@ public partial class RoomHub : Hub
 
         if (!IsUrlCorrect)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Url {playlistVideo.Url} is incorrect. Authorization Token: {authorizationToken}");
+            _logger.LogInformation(
+                $"{roomHash} AddPlaylistVideo: Url {playlistVideo.Url} is incorrect. Authorization Token: {authorizationToken}"
+            );
+
             await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnAddPlaylistVideo, null);
             return;
         }
@@ -30,23 +36,34 @@ public partial class RoomHub : Hub
 
         if (user == null)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not exist. Authorization Token: {authorizationToken}");
+            _logger.LogInformation(
+                $"{roomHash} AddPlaylistVideo: User does not exist. Authorization Token: {authorizationToken}"
+            );
+
             return;
         }
 
         if (user.IsAdmin == false && room.UserPermissions.canAddVideo == false)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have permission. Authorization Token: {authorizationToken}");
+            _logger.LogInformation(
+                $"{roomHash} AddPlaylistVideo: User does not have permission. Authorization Token: {authorizationToken}"
+            );
+
             return;
         }
 
-        _logger.LogInformation($"{roomHash} AddPlaylistVideo: {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+        _logger.LogInformation(
+            $"{roomHash} AddPlaylistVideo: {playlistVideo.Url}. Authorization Token: {authorizationToken}"
+        );
 
         string title = _youtubeAPIService.GetVideoTitle(playlistVideo.Url);
 
         if (title == null)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find title {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+            _logger.LogInformation(
+                $"{roomHash} AddPlaylistVideo: Could not find title {playlistVideo.Url}. Authorization Token: {authorizationToken}"
+            );
+
             await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnAddPlaylistVideo, null);
             return;
         }
@@ -57,7 +74,10 @@ public partial class RoomHub : Hub
 
         if (thumbnailUrl == null)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find thumbnail URL {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+            _logger.LogInformation(
+                $"{roomHash} AddPlaylistVideo: Could not find thumbnail URL {playlistVideo.Url}. Authorization Token: {authorizationToken}"
+            );
+
             await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnAddPlaylistVideo, null);
             return;
         }
@@ -68,7 +88,10 @@ public partial class RoomHub : Hub
 
         if (!isPlaylistVideoAdded)
         {
-            _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a video {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+            _logger.LogInformation(
+                $"{roomHash} AddPlaylistVideo: Error when adding a video {playlistVideo.Url}. Authorization Token: {authorizationToken}"
+            );
+
             return;
         }
 
@@ -87,7 +110,10 @@ public partial class RoomHub : Hub
 
         if (room == null)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}, PlaylistVideoHash: {videoHash}");
+            _logger.LogInformation(
+                $"{roomHash} DeletePlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}, PlaylistVideoHash: {videoHash}"
+            );
+
             return;
         }
 
@@ -95,32 +121,42 @@ public partial class RoomHub : Hub
 
         if (user == null)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not exist. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
+            _logger.LogInformation(
+                $"{roomHash} DeletePlaylistVideo: User does not exist. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}"
+            );
+
             return;
         }
 
         if (user.IsAdmin == false && room.UserPermissions.canRemoveVideo == false)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
+            _logger.LogInformation(
+                $"{roomHash} DeletePlaylistVideo: User does not have the permission. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}"
+            );
         }
 
         PlaylistVideo deletePlaylistVideo = _roomManager.DeletePlaylistVideo(roomHash, videoHash);
 
         if (deletePlaylistVideo == null)
         {
-            _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
+            _logger.LogInformation(
+                $"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}"
+            );
         }
 
-        _logger.LogInformation($"{roomHash} DeletePlaylistVideo: {deletePlaylistVideo.Url}. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}");
+        _logger.LogInformation(
+            $"{roomHash} DeletePlaylistVideo: {deletePlaylistVideo.Url}. Authorization Token: {authorizationToken}, PlaylistVideoIndex: {videoHash}"
+        );
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, videoHash);
     }
 
     private bool CheckIfIsYouTubeVideoLink(string url)
     {
-        string pattern = @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})";
-        Regex regex = new Regex(pattern);
+        string pattern =
+            @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})";
 
+        Regex regex = new Regex(pattern);
         Match match = regex.Match(url);
 
         return match.Success;
