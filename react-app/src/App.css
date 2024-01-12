@@ -7,8 +7,7 @@
 }
 
 .background-gradient {
-	background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d56a);
-	/* animation: gradient 10s ease infinite; */
+	background: linear-gradient(-45deg, #d56441, #c82d69, #2299c4, #24c765);
 	height: 100vh;
 }
 
@@ -42,7 +41,7 @@
 }
 
 .text-orange {
-  color: orange;
+  color: rgb(255, 145, 0)
 }
 
 .video-player {
@@ -90,11 +89,11 @@
 }
 
 .main-menu-panel {
-  max-height: 650px;
+  height: 550px;
 }
 
 .main-menu-list {
-  max-height: 420px;
+  max-height: 320px;
   overflow-y: auto;
 }
 

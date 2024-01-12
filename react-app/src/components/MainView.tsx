@@ -17,6 +17,8 @@ import { AppStateContext, roomHub } from "../context/RoomHubContext";
 import { RoomHelper } from "../classes/RoomHelper";
 import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
+import { BsDoorOpenFill } from "react-icons/bs";
+import { BsFillPersonLinesFill } from "react-icons/bs";
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
@@ -38,11 +40,11 @@ export default function MainView() {
     roomHub.on(HubEvents.onListOfRoomsUpdated, (listOfRoomsSerialized: string) => {
       const rooms: Room[] = JSON.parse(listOfRoomsSerialized);
 
-      setDisplayedRooms(rooms);
+      setRooms(rooms);
     });
 
     return () => {
-      roomHub.off(HubEvents.onRoomUpdated);
+      roomHub.off(HubEvents.onListOfRoomsUpdated);
     }
   }, [roomHub.getState()]);
 
@@ -71,10 +73,6 @@ export default function MainView() {
   }, []);
 
   useEffect(() => {
-    if (rooms.length === 0) {
-      return;
-    }
-    
     if (displayOnlyAvailableRooms) {
       const filteredRooms = rooms.filter((room) =>
         room.roomName.toLowerCase().includes(searchText.toLowerCase()) &&
@@ -91,13 +89,9 @@ export default function MainView() {
       setDisplayedRooms(filteredRooms);
     }
 
-  }, [searchText]);
+  }, [searchText, rooms]);
 
   useEffect(() => {
-    if (rooms.length === 0) {
-      return;
-    }
-    
     if (displayOnlyAvailableRooms && searchText.length > 0) {
       const filteredRooms = rooms.filter((room) =>
         room.roomName.toLowerCase().includes(searchText.toLowerCase()) &&
@@ -124,7 +118,7 @@ export default function MainView() {
       setDisplayedRooms(rooms);
     }
 
-  }, [displayOnlyAvailableRooms]);
+  }, [displayOnlyAvailableRooms, rooms]);
 
   const handlePublicRoomListItemClick = async (item: Room) => {
     const roomState: RoomState = {
@@ -211,11 +205,17 @@ export default function MainView() {
           </div>
           {
             (displayedRooms.length === 0 && appState.username.value.length >= 3) &&
-              <h5 className="text-white text-center mt-5 mb-5">No rooms found</h5>
+              <>
+                <h1 className="text-white text-center" style={{marginTop: "7rem"}}><BsDoorOpenFill /></h1>
+                <h5 className="text-white text-center">No rooms found</h5>
+              </>
           }
           {
             (displayedRooms.length === 0 && appState.username.value.length < 3) &&
-              <h5 className="text-white text-center mt-5 mb-5">Enter your username to access rooms</h5>
+            <>
+              <h1 className="text-white text-center" style={{marginTop: "7rem"}}><BsFillPersonLinesFill /></h1>
+              <h5 className="text-white text-center">Enter your username to access rooms</h5>
+            </>
           }
           {
             (displayedRooms.length !== 0) &&
