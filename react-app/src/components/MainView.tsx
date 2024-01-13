@@ -57,6 +57,8 @@ export default function MainView() {
 
     setRooms(responseData ?? []);
     setDisplayedRooms(responseData ?? []);
+    setSearchText(".");
+    setSearchText("");
   }
   
   useEffect(() => {

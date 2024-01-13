@@ -105,7 +105,7 @@ public class RoomController : ControllerBase
             string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
             string signalRConnectionId = Request.Headers["X-SignalR-ConnectionId"];
 
-            if (!ModelState.IsValid || roomHash == "" || signalRConnectionId == "")
+            if (!ModelState.IsValid || roomHash == "" || signalRConnectionId == null)
             {   
                 _logger.LogInformation(
                     $"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
@@ -162,20 +162,29 @@ public class RoomController : ControllerBase
             }
 
             bool isUserAdmin = false;
+            User newUser;
 
             if (room.Users.Count == 0)
             {
                 isUserAdmin = true;
-                room.AdminTokens.Add(authorizationToken);
             }
 
             if (room.AdminTokens.Any(o => o == authorizationToken))
             {
                 isUserAdmin = true;
+                newUser = new User(input.Username, isUserAdmin, authorizationToken);
+            }
+            else
+            {
+                newUser = new User(input.Username, isUserAdmin);
             }
 
-            User newUser = new User(input.Username, isUserAdmin);
             UserDTO newUserDTO = new UserDTO(newUser.Username, newUser.IsAdmin);
+
+            if (room.Users.Count == 0)
+            {
+                room.AdminTokens.Add(newUser.AuthorizationToken);
+            }
 
             var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
 
@@ -229,7 +238,7 @@ public class RoomController : ControllerBase
             string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
             string signalRConnectionId = Request.Headers["X-SignalR-ConnectionId"];
 
-            if (roomHash == "" || authorizationToken == "" || signalRConnectionId == "")
+            if (roomHash == "" || authorizationToken == "" || signalRConnectionId == null)
             {
                 _logger.LogInformation(
                     $"{roomHash} Leave: Status 400. AuthorizationToken: {authorizationToken}"
