@@ -9,8 +9,13 @@ import { Room } from "../types/Room";
 import { appState } from "../context/RoomHubContext";
 
 export class HttpManager {
-  private httpServerUrl = "http://localhost:5050";
+  private httpServerUrl: string;
   private authorizationManager = new LocalStorageManager();
+
+  constructor() {
+    let env = import.meta.env;
+    this.httpServerUrl = env.VITE_SERVER_URL;
+  }
 
   async getAllRooms(): Promise<[number, Room[] | undefined]> {
     try {
@@ -20,7 +25,7 @@ export class HttpManager {
             'Content-Type': 'application/json'
           },
         }
-      );
+      );  
   
       return [response.status, response.data];
     }

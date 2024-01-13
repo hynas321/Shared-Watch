@@ -29,6 +29,7 @@
     "use-clipboard-api": "^0.3.4"
   },
   "devDependencies": {
+    "@types/node": "^20.11.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@types/react-redux": "^7.1.28",

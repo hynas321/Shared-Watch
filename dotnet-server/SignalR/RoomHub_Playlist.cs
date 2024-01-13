@@ -6,7 +6,6 @@ namespace Dotnet.Server.Hubs;
 public partial class RoomHub : Hub
 {
     [HubMethodName(HubEvents.AddPlaylistVideo)]
-    [Obsolete]
     public async Task AddPlaylistVideo(string roomHash, string authorizationToken, PlaylistVideo playlistVideo)
     {
         Room room = _roomManager.GetRoom(roomHash);

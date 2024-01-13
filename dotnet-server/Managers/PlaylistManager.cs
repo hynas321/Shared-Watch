@@ -83,17 +83,9 @@ public class PlaylistManager
                 }
                 else
                 {
-                    try
-                    {
-                        _roomManager.DeletePlaylistVideo(room.RoomHash, currentVideo.Hash);
-                    }
-                    catch {}
-                    finally
-                    {
-                        room.VideoPlayerState.PlaylistVideo.Url = null;
-                        await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, currentVideo.Hash);
-                        await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
-                    }
+                    room.VideoPlayerState.PlaylistVideo.Url = null;
+                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnDeletePlaylistVideo, currentVideo.Hash);
+                    await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetVideoUrl, null);
                 }
             }
 
@@ -134,9 +126,9 @@ public class PlaylistManager
                 
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
 
-                await Task.Delay(TimeSpan.FromMilliseconds(100));
+                await Task.Delay(TimeSpan.FromMilliseconds(500));
 
-                room.VideoPlayerState.CurrentTime += 0.1;
+                room.VideoPlayerState.CurrentTime += 0.5;
 
                 if (!room.VideoPlayerState.IsPlaying)
                 {
