@@ -13,12 +13,11 @@ import { useSignal } from "@preact/signals-react";
 import { RoomHelper } from "../classes/RoomHelper";
 
 export interface CreateRoomModalProps {
-  title: string;
   acceptText: string;
   declineText: string;
 }
 
-export default function CreateRoomModal({title, acceptText, declineText}: CreateRoomModalProps) {
+export default function CreateRoomModal({acceptText, declineText}: CreateRoomModalProps) {
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
   const roomName = useSignal<string>("");
   const roomPassword = useSignal<string>("");
@@ -88,7 +87,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
       <div>
         <span className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
           <Button
-            text={title}
+            text={"Create"}
             classNames={`btn btn-success ms-3 ${appState.username.value.length < 3 && "disabled"}`}
             onClick={() => {}}
           />
@@ -98,7 +97,7 @@ export default function CreateRoomModal({title, acceptText, declineText}: Create
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header bg-light">
-              <h5 className="modal-title">{title}</h5>
+              <h5 className="modal-title">{"Create new room"}</h5>
             </div>
             <div className="modal-body bg-light">
               <div className="d-block">

@@ -118,10 +118,9 @@ export default function VideoPlayer() {
 
   return (
     <>
-      <div className="rounded-top-5 bg-dark bg-opacity-50 pt-2 text-center">
-        <span className="text-white"><b>Video player</b></span>
+      <div className="rounded-top-5 bg-dark bg-opacity-50 pt-4 pb-2 text-center">
       </div>
-      <div className={`d-flex justify-content-center rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-5 ${isMobileView ? "mobile-view" : ""}`}>
+      <div className={`d-flex justify-content-center bg-dark bg-opacity-50`}>
         {
           videoUrl !== undefined && videoUrl !== null ?
           <ReactPlayer
@@ -129,9 +128,9 @@ export default function VideoPlayer() {
             url={videoUrl}
             playing={isVideoPlaying}
             controls={true}
-            width={isMobileView ? "428px" : "854px"}
-            height={isMobileView ? "auto" : "480px"}
-            style={{}}
+            width="100%"
+            height="100%"
+            style={{ objectFit: "cover", aspectRatio: `16/9` }}
             onPlay={() => { handleStartVideo(); }}
             onPause={() => { handlePauseVideo(); }}
             onProgress={(state: OnProgressProps) => {handleOnProgress(state)}}
@@ -148,6 +147,8 @@ export default function VideoPlayer() {
             </div>
           </div>
         }
+      </div>
+      <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-4 text-center">
       </div>
     </>
   );

@@ -179,19 +179,18 @@ export default function MainView() {
         <animated.div className="main-menu-panel mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
           <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
           <div className="row d-flex justify-content-between align-items-center text-center">
-            <div className="col-7">
+            <div className="col-6">
               <InputForm
                 classNames="form-control rounded-3 disabled"
-                placeholder="Search room name"
+                placeholder="Search name"
                 value={searchText}
                 trim={false}
                 isEnabled={appState.username.value.length >= 3}
                 onChange={(value: string) => setSearchText(value)}
               />
             </div>
-            <div className="col-5 text-end">
+            <div className="col-6 text-end">
             <CreateRoomModal
-              title="Create room"
               acceptText="Create"
               declineText="Go back"
             />

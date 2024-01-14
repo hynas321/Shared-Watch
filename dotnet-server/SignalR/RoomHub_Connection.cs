@@ -24,6 +24,7 @@ public partial class RoomHub : Hub
 
     public override async Task OnDisconnectedAsync(Exception exception)
     {   
+        string connectionId = Context.ConnectionId;
         await base.OnDisconnectedAsync(exception);
     }
 }

@@ -103,7 +103,7 @@ export default function Header() {
       {
         appState.isInRoom.value &&
         <>
-          <div className="djustify-content-end me-3">
+          <div className="justify-content-end me-3">
             <Button
               text={<><BsDoorOpenFill /> Copy URL</>}
               classNames={`btn btn-${buttonColor.value} btn-sm me-4 ms-3`}

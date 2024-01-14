@@ -7,8 +7,8 @@
 }
 
 .background-gradient {
-	background: linear-gradient(-45deg, #d56441, #c82d69, #2299c4, #24c765);
-	height: 100vh;
+  background: linear-gradient(-45deg, #d56441, #c82d69, #2299c4, #24c765);
+  height: 100vh;
 }
 
 .background-dark {
@@ -125,16 +125,4 @@
 p {
   text-align: center;
   margin: 5px 0 0 0;
-}
-
-.player-wrapper {
-  width: auto;
-  height: auto;
-}
-.react-player {
-  padding-top: 56.25%; position: relative;
-}
-
-.react-player > div {
-  position: absolute;
 }
