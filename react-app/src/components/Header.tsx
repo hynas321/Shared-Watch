@@ -13,6 +13,8 @@ import { HttpManager } from "../classes/HttpManager";
 import useClipboardApi from "use-clipboard-api";
 import { useSignal } from "@preact/signals-react";
 import { BsEmojiFrownFill } from "react-icons/bs";
+import { BsFilePerson } from "react-icons/bs";
+import { BsFillLayersFill } from "react-icons/bs";
 
 
 export default function Header() {
@@ -74,49 +76,53 @@ export default function Header() {
   }
 
   return (
-    <nav className="navbar navbar-dark mb-3">
-      <div className="d-flex align-items-center justify-content-center">
-        <a className="navbar-brand ms-3" href="/"><i><b>SharedWatch</b></i> <BsFillCameraReelsFill /></a>
-        {
-          (!appState.isInRoom.value && appState.connectionIssue.value === false) &&
-          <InputForm
-            classNames={`form-control form-control-sm rounded-3 ms-3 ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
-            placeholder={"Username (min. 3 chars)"}
-            value={appState.username.value}
-            trim={true}
-            isEnabled={true}
-            onChange={(value: string) => {
-              appState.username.value = value;
-              localStorageManager.setUsername(value);
-            }}
-          />
-        }
-        {
-          (appState.isInRoom.value && appState.connectionIssue.value === false) &&
-          <span className="text-white ms-3">Your username: <b>{appState.username.value}</b></span>
-        }
-        {
-          (appState.connectionIssue.value === true) &&
-          <span className="text-white ms-3"><b>CONNECTION ISSUE <BsEmojiFrownFill/></b></span>
-        }
-      </div>
-      {
-        appState.isInRoom.value &&
-        <>
-          <div className="justify-content-end me-3">
-            <Button
-              text={<><BsDoorOpenFill /> Copy URL</>}
-              classNames={`btn btn-${buttonColor.value} btn-sm me-4 ms-3`}
-              onClick={handleCopyToClipboard}
-            />
-            <Button
-              text={<><BsDoorOpenFill /> Leave room</>}
-              classNames={"btn btn-danger btn-sm"}
-              onClick={handleLeaveRoomButtonClick}
-            />
-          </div>
-        </>
-      }
-    </nav>
-  )
+    <div>
+      <nav className="navbar navbar-dark mb-2 mt-2">
+        <div className="d-flex align-items-center">
+          <a className="navbar-brand ms-3" href="/"><i><b>Shared Watch</b></i> <BsFillCameraReelsFill /></a>
+          {
+            (!appState.isInRoom.value && appState.connectionIssue.value === false) &&
+            <div className="ms-3 me-3">
+              <InputForm
+                classNames={`form-control form-control rounded-3  ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
+                placeholder={"Username (min. 3 chars)"}
+                value={appState.username.value}
+                trim={true}
+                isEnabled={true}
+                onChange={(value: string) => {
+                  appState.username.value = value;
+                  localStorageManager.setUsername(value);
+                }}
+              />
+            </div>
+          }
+          {
+            (appState.isInRoom.value && appState.connectionIssue.value === false) &&
+            <div className="text-white ms-3 me-3"><BsFilePerson /><span className="text-break text-warning ms-2"><b>{appState.username.value}</b></span></div>
+          }
+          {
+            (appState.connectionIssue.value === true) &&
+            <span className="text-warning ms-3 me-3"><b>CONNECTION ISSUE <BsEmojiFrownFill/></b></span>
+          }
+        </div>
+        <div className="d-flex justify-content-end">
+          {
+            appState.isInRoom.value &&
+            <div className="justify-content-end me-3 mt-header">
+              <Button
+                text={<><BsFillLayersFill /> Copy URL</>}
+                classNames={`btn btn-${buttonColor.value} btn-sm me-4 ms-3`}
+                onClick={handleCopyToClipboard}
+              />
+              <Button
+                text={<><BsDoorOpenFill /> Leave room</>}
+                classNames={"btn btn-danger btn-sm"}
+                onClick={handleLeaveRoomButtonClick}
+              />
+            </div>
+          }
+        </div>
+      </nav>
+    </div>
+  );
 }

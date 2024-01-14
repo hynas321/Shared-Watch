@@ -36,6 +36,8 @@ export class HttpManager {
 
   async createRoom(roomName: string, roomPassword: string, username: string): Promise<[number, RoomCreateOutput | undefined]> {
     try {
+      const authorizationToken = this.authorizationManager.getAuthorizationToken();
+
       const requestBody: RoomCreateInput = {
         roomName: roomName,
         roomPassword: roomPassword,
@@ -47,6 +49,7 @@ export class HttpManager {
         requestBody, {
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authorizationToken}`,
             'X-SignalR-ConnectionId': appState.connectionId.value
           },
         }

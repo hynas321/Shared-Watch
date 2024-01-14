@@ -66,6 +66,13 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
             }
           );
           break;
+        case HttpStatusCodes.UNAUTHORIZED:
+          toast.error(
+            "You are already in a different room", {
+              containerId: ToastNotificationEnum.Main
+            }
+          )
+          break;
         default:
           toast.error(
             "Could not create the room", {
@@ -97,12 +104,12 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
         <span className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
           <Button
             text={"Create"}
-            classNames={`btn btn-success ms-3 ${appState.username.value.length < 3 && "disabled"}`}
+            classNames="btn btn-success ms-3"
             onClick={() => {}}
           />
         </span>
       </div>
-      <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog">
+      <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog" style={{marginTop: '3.75rem', backgroundColor: 'rgba(0,0,0,.0001)'}}>
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header bg-light">

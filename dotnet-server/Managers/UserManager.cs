@@ -101,6 +101,31 @@ public class UserManager {
         }
     }
 
+    public User GetUserByAuthorizationToken(string authorizationToken)
+    {
+        try
+        {
+            IEnumerable<Room> rooms = _roomManager.GetRooms();
+
+            foreach (var room in rooms)
+            {
+                foreach (var user in room.Users)
+                {
+                    if (user.AuthorizationToken == authorizationToken)
+                    {
+                        return user;
+                    }
+                }
+            }
+
+            return null;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
     public User GetUserByUsername(string roomHash, string username)
     {
         try
@@ -120,6 +145,31 @@ public class UserManager {
             }
 
             return user;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    public User GetUserByConnectionId(string connectionId)
+    {
+        try
+        {
+            IEnumerable<Room> rooms = _roomManager.GetRooms();
+
+            foreach (var room in rooms)
+            {
+                foreach (var user in room.Users)
+                {
+                    if (user.SignalRConnectionId == connectionId)
+                    {
+                        return user;
+                    }
+                }
+            }
+
+            return null;
         }
         catch (Exception)
         {

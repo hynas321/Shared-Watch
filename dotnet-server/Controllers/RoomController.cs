@@ -32,6 +32,7 @@ public class RoomController : ControllerBase
     {
         try
         {
+            string authorizationToken = Request.Headers[HeaderNames.Authorization].ToString().Replace("Bearer ", "");
             string signalRConnectionId = Request.Headers["X-SignalR-ConnectionId"];
 
             if (!ModelState.IsValid || signalRConnectionId == null)
@@ -41,6 +42,17 @@ public class RoomController : ControllerBase
                 );
 
                 return StatusCode(StatusCodes.Status400BadRequest);
+            }
+
+            bool isUserConnectedInOtherRoom = _userManager.GetUserByAuthorizationToken(authorizationToken) != null;
+
+            if (isUserConnectedInOtherRoom)
+            {
+                _logger.LogInformation(
+                    $"Create: Status 401. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}"
+                );
+
+                return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
             RoomTypesEnum roomType= input.RoomPassword.Length == 0 ? RoomTypesEnum.Public : RoomTypesEnum.Private;

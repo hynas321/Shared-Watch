@@ -184,43 +184,48 @@ export default function MainView() {
       <div className="row justify-content-center">
         <animated.div className="main-menu-panel mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
           <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
-          <div className="row d-flex justify-content-between align-items-center text-center">
-            <div className="col-6">
-              <InputForm
-                classNames="form-control rounded-3 disabled"
-                placeholder="Search name"
-                value={searchText}
-                trim={false}
-                isEnabled={appState.username.value.length >= 3}
-                onChange={(value: string) => setSearchText(value)}
+          {
+            appState.username.value.length >= 3 &&
+            <div className="mt-4">
+              <div className="row d-flex justify-content-between align-items-center text-center">
+              <div className="col-6">
+                <InputForm
+                  classNames="form-control rounded-3 disabled"
+                  placeholder="Search room name"
+                  value={searchText}
+                  trim={false}
+                  isEnabled={true}
+                  onChange={(value: string) => setSearchText(value)}
+                />
+              </div>
+              <div className="col-6 text-end">
+              <CreateRoomModal
+                acceptText="Create"
+                declineText="Go back"
               />
+              </div>
+              </div>
+              <div className="mt-3 mb-3">
+                <Switch
+                  label="Show only available rooms"
+                  isChecked={displayOnlyAvailableRooms as boolean}
+                  isEnabled={true}
+                  onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
+                />
+              </div>
             </div>
-            <div className="col-6 text-end">
-            <CreateRoomModal
-              acceptText="Create"
-              declineText="Go back"
-            />
-            </div>
-          </div>
-          <div className="mt-3 mb-3">
-            <Switch
-              label="Show only available rooms"
-              isChecked={displayOnlyAvailableRooms as boolean}
-              isEnabled={appState.username.value.length >= 3}
-              onCheckChange={(value: boolean) => setDisplayOnlyAvailableRooms(value)}
-            />
-          </div>
+          }
           {
             (displayedRooms.length === 0 && appState.username.value.length >= 3) &&
               <>
-                <h1 className="text-white text-center" style={{marginTop: "7rem"}}><BsDoorOpenFill /></h1>
-                <h5 className="text-white text-center">No rooms found</h5>
+                <h1 className="text-white text-center" style={{marginTop: "4rem"}}><BsDoorOpenFill /></h1>
+                <h5 className="text-white text-center">No rooms to display</h5>
               </>
           }
           {
             (displayedRooms.length === 0 && appState.username.value.length < 3) &&
             <>
-              <h1 className="text-white text-center" style={{marginTop: "7rem"}}><BsFillPersonLinesFill /></h1>
+              <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsFillPersonLinesFill /></h1>
               <h5 className="text-white text-center">Enter your username to access rooms</h5>
             </>
           }

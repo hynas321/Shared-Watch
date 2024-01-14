@@ -193,13 +193,13 @@ export default function ControlPanel() {
   return (
     <div>
       <div className="rounded-top-5 bg-dark bg-opacity-50 pt-3 pb-3 px-4">
-      <div className="d-flex align-items-center">
-        <div className="text-center flex-grow-1">
-          <h5 className="text-white">
-          {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />}{appState.roomName.value}
-          </h5> 
+        <div className="d-flex align-items-center">
+          <div className="text-center flex-grow-1">
+            <h5 className="text-white">
+            {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />}{appState.roomName.value}
+            </h5> 
+          </div>
         </div>
-      </div>
       </div>
       <div className="row">
         <div className="btn-group" role="group">
