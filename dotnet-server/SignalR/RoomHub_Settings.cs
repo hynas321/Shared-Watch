@@ -47,7 +47,7 @@ public partial class RoomHub : Hub
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnSetRoomPassword, newRoomPassword, room.RoomSettings.RoomType);
 
-        IEnumerable<RoomDTO> rooms = _roomManager.GetAllRoomsDTO();
+        IEnumerable<RoomDTO> rooms = _roomManager.GetRoomsDTO();
 
         await Clients.AllExcept(Context.ConnectionId).SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
     }

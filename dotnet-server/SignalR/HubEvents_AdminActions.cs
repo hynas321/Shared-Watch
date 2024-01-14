@@ -38,7 +38,7 @@ public partial class RoomHub : Hub
             return;
         }
 
-        User userToKickOut = _roomManager.GetUserByUsername(roomHash, usernameToKickOut);
+        User userToKickOut = _userManager.GetUserByUsername(roomHash, usernameToKickOut);
 
         if (userToKickOut == null)
         {
@@ -53,7 +53,7 @@ public partial class RoomHub : Hub
             $"{roomHash} KickOut: {userToKickOut.Username} {userToKickOut.IsAdmin} {userToKickOut.AuthorizationToken}. Authorization Token: {authorizationToken}"
         );
 
-        User kickedOutUser = _roomManager.DeleteUser(roomHash, userToKickOut.AuthorizationToken);
+        User kickedOutUser = _userManager.DeleteUser(roomHash, userToKickOut.AuthorizationToken);
 
         if (kickedOutUser == null)
         {
@@ -103,7 +103,7 @@ public partial class RoomHub : Hub
             return;
         }
 
-        User updatedUser = _roomManager.GetUserByUsername(roomHash, usernameToSetAdminStatus);
+        User updatedUser = _userManager.GetUserByUsername(roomHash, usernameToSetAdminStatus);
 
         if (updatedUser == null)
         {

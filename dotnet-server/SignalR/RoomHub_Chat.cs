@@ -48,7 +48,7 @@ public partial class RoomHub : Hub
             $"{roomHash} AddChatMessage: {chatMessage.Date} {chatMessage.Username}: {chatMessage.Text}. Authorization Token: {authorizationToken}"
         );
 
-        bool isChatMessageAdded = _roomManager.AddChatMessage(roomHash, chatMessage);
+        bool isChatMessageAdded = _chatManager.AddChatMessage(roomHash, chatMessage);
 
         if (!isChatMessageAdded)
         {

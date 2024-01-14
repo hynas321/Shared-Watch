@@ -14,6 +14,7 @@ public class RoomController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly IHubContext<RoomHub> _roomHubContext;
     private readonly RoomManager _roomManager = new RoomManager();
+    private readonly UserManager _userManager = new UserManager();
 
     public RoomController(
         ILogger<RoomController> logger,
@@ -172,7 +173,7 @@ public class RoomController : ControllerBase
             if (room.AdminTokens.Any(o => o == authorizationToken))
             {
                 isUserAdmin = true;
-                newUser = new User(input.Username, isUserAdmin, authorizationToken);
+                newUser = new User(input.Username, isUserAdmin, authorizationToken, signalRConnectionId);
             }
             else
             {
@@ -188,7 +189,7 @@ public class RoomController : ControllerBase
 
             var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
 
-            bool isNewUserAdded = _roomManager.AddUser(roomHash, newUser);
+            bool isNewUserAdded = _userManager.AddUser(roomHash, newUser);
 
             if (!isNewUserAdded)
             {
@@ -205,7 +206,7 @@ public class RoomController : ControllerBase
                 IsAdmin = newUser.IsAdmin,
                 ChatMessages = room.ChatMessages,
                 PlaylistVideos = room.PlaylistVideos,
-                Users = _roomManager.GetUsersDTO(roomHash).ToList(),
+                Users = _userManager.GetUsersDTO(roomHash).ToList(),
                 RoomSettings = room.RoomSettings,
                 UserPermissions = room.UserPermissions,
                 VideoPlayerState = room.VideoPlayerState
@@ -213,7 +214,7 @@ public class RoomController : ControllerBase
 
             _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
 
-            IEnumerable<RoomDTO> rooms = _roomManager.GetAllRoomsDTO();
+            IEnumerable<RoomDTO> rooms = _roomManager.GetRoomsDTO();
 
             _roomHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
 
@@ -258,7 +259,7 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            User user = _roomManager.GetUserByAuthorizationToken(roomHash, authorizationToken);
+            User user = _userManager.GetUserByAuthorizationToken(roomHash, authorizationToken);
 
             if (user == null)
             {
@@ -269,7 +270,7 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            User deletedUser = _roomManager.DeleteUser(roomHash, authorizationToken);
+            User deletedUser = _userManager.DeleteUser(roomHash, authorizationToken);
 
             if (deletedUser == null)
             {
@@ -297,7 +298,7 @@ public class RoomController : ControllerBase
 
             _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
 
-            IEnumerable<RoomDTO> rooms = _roomManager.GetAllRoomsDTO();
+            IEnumerable<RoomDTO> rooms = _roomManager.GetRoomsDTO();
 
             _roomHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
 
@@ -319,7 +320,7 @@ public class RoomController : ControllerBase
     {
         try 
         {   
-            IEnumerable<RoomDTO> roomsDTO = _roomManager.GetAllRoomsDTO();
+            IEnumerable<RoomDTO> roomsDTO = _roomManager.GetRoomsDTO();
 
             _logger.LogInformation($"GetAll: Status 200.");
 
@@ -377,7 +378,7 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            IEnumerable<Room> rooms = _roomManager.GetAllRooms();
+            IEnumerable<Room> rooms = _roomManager.GetRooms();
 
             _logger.LogInformation("GetAllDetails: Status 200");
 

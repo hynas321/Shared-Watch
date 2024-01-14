@@ -83,7 +83,7 @@ public partial class RoomHub : Hub
         
         playlistVideo.ThumbnailUrl = thumbnailUrl;
 
-        bool isPlaylistVideoAdded = _roomManager.AddPlaylistVideo(roomHash, playlistVideo);
+        bool isPlaylistVideoAdded = _playlistManager.AddPlaylistVideo(roomHash, playlistVideo);
 
         if (!isPlaylistVideoAdded)
         {
@@ -94,9 +94,9 @@ public partial class RoomHub : Hub
             return;
         }
 
-        if (room.PlaylistVideos.Count == 1 && _playlistHandler.IsHandlerRunning == false)
+        if (room.PlaylistVideos.Count == 1 && _playlistService.IsHandlerRunning == false)
         {
-            _playlistHandler.StartPlaylistHandler(roomHash);
+            _playlistService.StartPlaylistService(roomHash);
         }
 
         await Clients.Group(roomHash).SendAsync(HubEvents.OnAddPlaylistVideo, JsonHelper.Serialize(playlistVideo));
@@ -134,7 +134,7 @@ public partial class RoomHub : Hub
             );
         }
 
-        PlaylistVideo deletePlaylistVideo = _roomManager.DeletePlaylistVideo(roomHash, videoHash);
+        PlaylistVideo deletePlaylistVideo = _playlistManager.DeletePlaylistVideo(roomHash, videoHash);
 
         if (deletePlaylistVideo == null)
         {

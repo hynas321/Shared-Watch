@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 public class PlaylistVideo
 {
     public string Hash { get; set; }
