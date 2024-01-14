@@ -1,10 +1,10 @@
 import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import './App.css'
-import MainView from './components/MainView'
-import RoomView from './components/RoomView';
-import NotFoundView from './components/NotFoundView';
+import MainView from './components/views/MainView'
+import RoomView from './components/views/RoomView';
+import NotFoundView from './components/views/NotFoundView';
 import { useEffect } from 'react';
-import JoinRoomView from './components/JoinRoomView';
+import JoinRoomView from './components/views/JoinRoomView';
 import { AppStateContext, RoomHubContext, appState, roomHub } from './context/RoomHubContext';
 
 function App() {

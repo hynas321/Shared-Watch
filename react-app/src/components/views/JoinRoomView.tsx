@@ -1,21 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useContext, useState } from "react";
-import { HttpManager } from "../classes/HttpManager";
-import { HttpStatusCodes } from "../classes/HttpStatusCodes";
-import { ClientEndpoints } from "../classes/ClientEndpoints";
-import { AppStateContext } from "../context/RoomHubContext";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
+import { HttpManager } from "../../classes/HttpManager";
+import { HttpStatusCodes } from "../../classes/HttpStatusCodes";
+import { ClientEndpoints } from "../../classes/ClientEndpoints";
+import { AppStateContext } from "../../context/RoomHubContext";
+import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { animated, useSpring } from "@react-spring/web";
-import Header from "./Header";
+import Header from "../Header";
 import { ToastContainer } from "react-toastify";
-import { HttpUrlHelper } from "../classes/HttpUrlHelper";
+import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
 import { useSignal } from "@preact/signals-react";
-import { Room } from "../types/Room";
+import { Room } from "../../types/Room";
 import { BsFillLockFill, BsFillPeopleFill } from "react-icons/bs";
-import { InputForm } from "./InputForm";
-import Button from "./Button";
-import { RoomState } from "../types/RoomState";
-import { RoomHelper } from "../classes/RoomHelper";
+import { InputForm } from "../InputForm";
+import Button from "../Button";
+import { RoomState } from "../../types/RoomState";
+import { RoomHelper } from "../../classes/RoomHelper";
 
 export default function JoinRoomView() {
   const appState = useContext(AppStateContext);

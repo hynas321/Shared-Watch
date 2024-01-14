@@ -11,6 +11,7 @@ import { RoomState } from "../types/RoomState";
 import { appState } from "../context/RoomHubContext";
 import { useSignal } from "@preact/signals-react";
 import { RoomHelper } from "../classes/RoomHelper";
+import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 
 export interface CreateRoomModalProps {
   acceptText: string;
@@ -59,10 +60,18 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
 
       switch(responseStatusCode) {
         case HttpStatusCodes.CONFLICT:
-          toast.error("The room with this name already exists");
+          toast.error(
+            "The room with this name already exists", {
+              containerId: ToastNotificationEnum.Main
+            }
+          );
           break;
         default:
-          toast.error("Could not create the room");
+          toast.error(
+            "Could not create the room", {
+              containerId: ToastNotificationEnum.Main
+            }
+          );
           break;
       }
 

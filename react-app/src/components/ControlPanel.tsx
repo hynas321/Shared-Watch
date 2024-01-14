@@ -17,6 +17,7 @@ import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { useNavigate } from "react-router-dom";
 import { HttpManager } from "../classes/HttpManager";
 import { UserPermissions } from "../types/UserPermissions";
+import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 
 export default function ControlPanel() {
   const roomHub = useContext(RoomHubContext);
@@ -43,16 +44,6 @@ export default function ControlPanel() {
       }
     });
 
-    return () => {
-      roomHub.off(HubEvents.OnAddChatMessage);
-    }
-  }, [roomHub.getState()]);
-
-  useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
     roomHub.on(HubEvents.OnAddPlaylistVideo, (playlistVideoSerialized: string | null) => {
       if (playlistVideoSerialized == null) {
         return;
@@ -64,23 +55,11 @@ export default function ControlPanel() {
     });
 
     roomHub.on(HubEvents.OnDeletePlaylistVideo, (playlistVideoHash: string) => {
-
       appState.playlistVideos.value = appState.playlistVideos.value.filter(
         (video) => video.hash !== playlistVideoHash
       );
     });
 
-    return () => {
-      roomHub.off(HubEvents.OnAddPlaylistVideo);
-      roomHub.off(HubEvents.OnDeletePlaylistVideo);
-    }
-  }, [roomHub.getState()]);
-
-  useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-    
     roomHub.on(HubEvents.OnJoinRoom, (newUser: User) => {
       appState.users.value = [...appState.users.value, newUser];
     });
@@ -91,49 +70,85 @@ export default function ControlPanel() {
       );
     });
 
-    return () => {
-      roomHub.off(HubEvents.OnJoinRoom);
-      roomHub.off(HubEvents.OnLeaveRoom);
-    }
-  }, [roomHub.getState()]);
-
-  useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
     roomHub.on(HubEvents.OnKickOut, (removedUserSerialized: string) => {
       const removedUser: User = JSON.parse(removedUserSerialized);
       const isCurrentUser = removedUser.username === appState.username.value;
-
+      
       if (isCurrentUser) {
-        toast.error("You have been kicked out");
+        toast.error(
+          "You have been kicked out", {
+            containerId: ToastNotificationEnum.Main,
+          }
+        );
         httpManager.leaveRoom(appState.roomHash.value);
         navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
         return;
       }
+
+      toast.info(
+        `User ${removedUser.username} has been kicked out`, {
+          containerId: ToastNotificationEnum.Room
+        }
+      );
 
       appState.users.value = appState.users.value.filter(
         (user) => user.username !== removedUser.username
       );
     });
 
-    return () => {
-      roomHub.off(HubEvents.OnKickOut);
-    }
-  }, [roomHub.getState()]);
-
-  useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
     roomHub.on(HubEvents.OnSetAdminStatus, (updatedUserSerialized: string) => {
       const updatedUser: User = JSON.parse(updatedUserSerialized);
       const isCurrentUser = updatedUser.username === appState.username.value;
 
-      if (isCurrentUser) {
+      if (isCurrentUser && updatedUser.isAdmin === true) {
         appState.isAdmin.value = updatedUser.isAdmin;
+        
+        toast.clearWaitingQueue({
+            containerId: ToastNotificationEnum.Room
+          }
+        );
+
+        toast.success(
+          `You have become an admin`, {
+            containerId: ToastNotificationEnum.Room
+          }
+        );
+      } 
+      else if (isCurrentUser && updatedUser.isAdmin === false) {
+        toast.clearWaitingQueue({
+            containerId: ToastNotificationEnum.Room
+          }
+        );
+
+        toast.error(
+          `You are no longer an admin`, {
+            containerId: ToastNotificationEnum.Room
+          }
+        );
+      }
+      else if (!isCurrentUser && updatedUser.isAdmin === true) {
+        toast.clearWaitingQueue({
+            containerId: ToastNotificationEnum.Room
+          }
+        );
+
+        toast.info(
+          `User ${updatedUser.username} has become an admin`, {
+            containerId: ToastNotificationEnum.Room
+          }
+        );
+      }
+      else if (!isCurrentUser && updatedUser.isAdmin === false) {
+        toast.clearWaitingQueue({
+            containerId: ToastNotificationEnum.Room
+          }
+        );
+
+        toast.info(
+          `User ${updatedUser.username} is no longer an admin`, {
+            containerId: ToastNotificationEnum.Room
+          }
+        );
       }
     
       const userIndex = appState.users.value.findIndex(
@@ -148,16 +163,6 @@ export default function ControlPanel() {
       }
     });
 
-    return () => {
-      roomHub.off(HubEvents.OnSetAdminStatus);
-    }
-  }, [roomHub.getState()]);
-
-  useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
     roomHub.on(HubEvents.OnSetUserPermissions, (userPermissionsSerialized: string) => {
       const userPermissions: UserPermissions = JSON.parse(userPermissionsSerialized);
 
@@ -166,16 +171,6 @@ export default function ControlPanel() {
       }
     });
 
-    return () => {
-      roomHub.off(HubEvents.OnSetUserPermissions);
-    }
-  }, [roomHub.getState()]);
-
-  useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-    
     roomHub.on(HubEvents.OnSetRoomPassword, (roomPassword: string, roomType: RoomTypesEnum) => {
       appState.roomPassword.value = roomPassword;
       appState.roomType.value = roomType;
@@ -183,10 +178,18 @@ export default function ControlPanel() {
 
 
     return () => {
+      roomHub.off(HubEvents.OnAddChatMessage);
+      roomHub.off(HubEvents.OnAddPlaylistVideo);
+      roomHub.off(HubEvents.OnDeletePlaylistVideo);
+      roomHub.off(HubEvents.OnJoinRoom);
+      roomHub.off(HubEvents.OnLeaveRoom);
+      roomHub.off(HubEvents.OnKickOut);
+      roomHub.off(HubEvents.OnSetAdminStatus);
+      roomHub.off(HubEvents.OnSetUserPermissions);
       roomHub.off(HubEvents.OnSetRoomPassword);
     }
   }, [roomHub.getState()]);
-  
+
   return (
     <div>
       <div className="rounded-top-5 bg-dark bg-opacity-50 pt-3 pb-3 px-4">

@@ -10,6 +10,7 @@ import { LocalStorageManager } from "./LocalStorageManager";
 import { User } from "../types/User";
 import { UserPermissions } from "../types/UserPermissions";
 import { VideoPlayerState } from "../types/VideoPlayerState";
+import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 
 export class RoomHelper {
   private httpManager = new HttpManager();
@@ -25,19 +26,39 @@ export class RoomHelper {
       if (responseStatusCode !== HttpStatusCodes.OK) {
         switch(responseStatusCode) {
           case HttpStatusCodes.UNAUTHORIZED:
-            toast.error("Wrong room password");
+            toast.error(
+              "Wrong room password", {
+                containerId: ToastNotificationEnum.Main
+              }
+            );
             break;
           case HttpStatusCodes.FORBIDDEN:
-            toast.error("Room full");
+            toast.error(
+              "Room is full", {
+                containerId: ToastNotificationEnum.Main
+              }
+            );
             break;
           case HttpStatusCodes.NOT_FOUND:
-            toast.error("Room not found");
+            toast.error(
+              "Room does not exist", {
+                containerId: ToastNotificationEnum.Main
+              }
+            );
             break;
           case HttpStatusCodes.CONFLICT:
-            toast.error("The user is already in the room");
+            toast.error(
+              "The user with this username is already in the room", {
+                containerId: ToastNotificationEnum.Main
+              }
+            );
             break;
           default:
-            toast.error("Could not join the room");
+            toast.error(
+              "Could not join the room", {
+                containerId: ToastNotificationEnum.Main
+              }
+            );
         }
   
         return false

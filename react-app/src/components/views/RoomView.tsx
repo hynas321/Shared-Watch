@@ -1,18 +1,19 @@
-import ControlPanel from "./ControlPanel";
-import VideoPlayer from "./VideoPlayer";
+import ControlPanel from "../ControlPanel";
+import VideoPlayer from "../VideoPlayer";
 import { useContext, useEffect } from "react";
-import { HttpManager } from "../classes/HttpManager";
+import { HttpManager } from "../../classes/HttpManager";
 import { useNavigate } from "react-router-dom";
-import { ClientEndpoints } from "../classes/ClientEndpoints";
-import Header from "./Header";
-import { toast } from 'react-toastify';
+import { ClientEndpoints } from "../../classes/ClientEndpoints";
+import Header from "../Header";
+import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { HttpUrlHelper } from "../classes/HttpUrlHelper";
+import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
 import { ping } from "ldrs"
 import { animated, useSpring } from "@react-spring/web";
-import { AppStateContext, roomHub } from "../context/RoomHubContext";
-import { PanelsEnum } from "../enums/PanelsEnum";
+import { AppStateContext, roomHub } from "../../context/RoomHubContext";
+import { PanelsEnum } from "../../enums/PanelsEnum";
 import { useSignal } from "@preact/signals-react";
+import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 
 export default function RoomView() {
   const appState = useContext(AppStateContext);
@@ -30,7 +31,11 @@ export default function RoomView() {
     const hash: string = httpUrlHelper.getRoomHash(window.location.href);
 
     if (!hash || hash.length === 0) {
-      toast.error("Room not found");
+      toast.error(
+        "Room not found", {
+          containerId: ToastNotificationEnum.Main
+        }
+      );
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
@@ -88,12 +93,24 @@ export default function RoomView() {
         isContentVisible &&
         <>
           <Header />
+          <ToastContainer
+            containerId={ToastNotificationEnum.Room}
+            position="top-right"
+            autoClose={1500}
+            hideProgressBar={true}
+            closeOnClick={true}
+            draggable={true}
+            pauseOnHover={false}
+            theme="dark"
+            style={{top: '0px', opacity: 0.9}}
+            limit={1}
+          />
           <div className="container-fluid-md container-lg">
             <div className="row">
-              <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-2 mb-3">
+              <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-3 mb-3">
                 <VideoPlayer />
               </animated.div>
-              <animated.div style={{ ...springs }} className="col-xl-4 col-lg-8 mx-lg-auto mt-2 mb-3">
+              <animated.div style={{ ...springs }} className="col-xl-4 col-lg-8 mx-lg-auto mt-3 mb-3">
                 <ControlPanel />
               </animated.div>
             </div>

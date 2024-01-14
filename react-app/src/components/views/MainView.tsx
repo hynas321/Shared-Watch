@@ -1,24 +1,25 @@
 import { useContext, useEffect, useState } from "react";
-import { Room } from "../types/Room";
-import RoomList from "./RoomList";
+import { Room } from "../../types/Room";
+import RoomList from "../RoomList";
 import { useNavigate } from "react-router-dom";
-import { ClientEndpoints } from "../classes/ClientEndpoints"; 
-import { InputForm } from "./InputForm";
-import Switch from "./Switch";
-import { HttpManager } from "../classes/HttpManager";
-import Header from "./Header";
+import { ClientEndpoints } from "../../classes/ClientEndpoints"; 
+import { InputForm } from "../InputForm";
+import Switch from "../Switch";
+import { HttpManager } from "../../classes/HttpManager";
+import Header from "../Header";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { HttpStatusCodes } from "../classes/HttpStatusCodes";
-import { RoomState } from "../types/RoomState";
+import { HttpStatusCodes } from "../../classes/HttpStatusCodes";
+import { RoomState } from "../../types/RoomState";
 import { animated, useSpring } from "@react-spring/web";
-import CreateRoomModal from "./CreateRoomModal";
-import { AppStateContext, roomHub } from "../context/RoomHubContext";
-import { RoomHelper } from "../classes/RoomHelper";
+import CreateRoomModal from "../CreateRoomModal";
+import { AppStateContext, roomHub } from "../../context/RoomHubContext";
+import { RoomHelper } from "../../classes/RoomHelper";
 import * as signalR from "@microsoft/signalr";
-import { HubEvents } from "../classes/HubEvents";
+import { HubEvents } from "../../classes/HubEvents";
 import { BsDoorOpenFill } from "react-icons/bs";
 import { BsFillPersonLinesFill } from "react-icons/bs";
+import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
@@ -52,7 +53,11 @@ export default function MainView() {
     const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();
 
     if (responseStatusCode !== HttpStatusCodes.OK) {
-      toast.error("Could not load the rooms");
+      toast.error(
+        "Could not load the rooms", {
+          containerId: ToastNotificationEnum.Main
+        }
+      );
     }
 
     setRooms(responseData ?? []);
@@ -165,6 +170,7 @@ export default function MainView() {
   <>
     <Header />
     <ToastContainer
+      containerId={ToastNotificationEnum.Main}
       position="top-right"
       autoClose={3000}
       hideProgressBar={true}
@@ -172,7 +178,7 @@ export default function MainView() {
       draggable={true}
       pauseOnHover={false}
       theme="dark"
-      style={{opacity: 0.9}}
+      style={{top: '0px', opacity: 0.9}}
     />
     <div className="container">
       <div className="row justify-content-center">
