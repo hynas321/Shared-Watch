@@ -1,54 +1,69 @@
 import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
-import { QueuedVideo } from "../types/QueuedVideo";
+import { PlaylistVideo } from "../types/PlaylistVideo";
 import Button from "./Button";
 import { InputForm } from "./InputForm";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import VideoIcon from './../assets/video-icon.png'
+import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { HubEvents } from "../classes/HubEvents";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { RoomHelper } from "../classes/RoomHelper";
 
-export interface PlaylistProps {
-  onChange?: (queuedVideos: QueuedVideo[]) => void;
-}
+export default function Playlist() {
+  const roomHub = useContext(RoomHubContext);
+  const appState = useContext(AppStateContext);
+  const playlistVideosRef = useRef<HTMLDivElement>(null);
 
-export default function Playlist({onChange}: PlaylistProps) {
-  const [queuedVideos, setQueuedVideos] = useState<QueuedVideo[]>([]);
   const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
-  const queuedVideosRef = useRef<HTMLDivElement>(null);
+  const [isInputFormEnabled, setIsInputFormEnabled] = useState<boolean>(true);
+  const [inputFormPlaceholderText, setInputFormPlaceholderText] = useState<string>("Paste Youtube Video URL");
 
+  const localStorageManager = new LocalStorageManager();
+  const roomHelper = new RoomHelper();
+  
   const videoThumbnailStyle = {
-    width: "60px",
-    height: "45px"
+    width: "40px",
+    height: "40px"
   };
-
+  
   useEffect(() => {
-    if (queuedVideosRef.current) {
-      queuedVideosRef.current.scrollTop = queuedVideosRef.current.scrollHeight;
+    if (playlistVideosRef.current) {
+      playlistVideosRef.current.scrollTop = playlistVideosRef.current.scrollHeight;
     }
-  }, [queuedVideos]);
+  }, [appState.playlistVideos.value]);
 
   const handleTextInputChange = (text: string) => {
     setCurrentVideoUrlText(text);
   }
 
-  const handleAddVideoUrlButtonClick = () => {
+  const handleAddVideoUrlButtonClick = async () => {
     if (!currentVideoUrlText || currentVideoUrlText?.length === 0) {
       return;
     }
 
-    const newQueuedVideo: QueuedVideo = {
-      url: "https://www.youtube.com/watch?v=p2zMXSXhZ9M",
-      image: "https://img.youtube.com/vi/UgkvcWx8oXw/2.jpg",
-      title: currentVideoUrlText
-      //title can be fetched from webpage's title (from URL)
+    const isUrlValid = roomHelper.checkIfIsYouTubeVideoLink(currentVideoUrlText);
+
+    if (!isUrlValid) {
+      setIsInputFormEnabled(false);
+      setInputFormPlaceholderText("Incorrect Youtube Video URL");
+  
+      setTimeout(() => {
+        setIsInputFormEnabled(true);
+        setInputFormPlaceholderText("Paste Youtube Video URL");
+      }, 1500);
+
+      setCurrentVideoUrlText("");
+      return;
+    }
+
+    const newPlaylistVideo: PlaylistVideo = {
+      url: currentVideoUrlText,
+      duration: 5
     };
 
-    setQueuedVideos([...queuedVideos, newQueuedVideo])
+    roomHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");
   }
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(queuedVideos);
-    }
-  }, [queuedVideos]);
 
   const handleEnterPress = (key: string) => {
     if (key === "Enter") {
@@ -56,51 +71,67 @@ export default function Playlist({onChange}: PlaylistProps) {
     }
   }
 
-  const handleRemoveQueuedVideoButtonClick = (event: any, index: number) => {
+  const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
     event.preventDefault();
-    setQueuedVideos(queuedVideos.filter((_, i) => i !== index));
+    roomHub.invoke(
+      HubEvents.DeletePlaylistVideo,
+      appState.roomHash.value,
+      localStorageManager.getAuthorizationToken(),
+      appState.playlistVideos.value[index].hash
+    );
   }
 
   return (
     <>
-      <div className="d-flex mb-3">
-        <InputForm
-          classNames="form-control rounded-0"
-          value={currentVideoUrlText}
-          placeholder="Paste video URL"
-          onChange={handleTextInputChange}
-          onKeyDown={handleEnterPress}
-        />
-        <Button
-          text={<BsPlusCircleFill />}
-          classNames="btn btn-primary rounded-0"
-          onClick={handleAddVideoUrlButtonClick}
-        />
-      </div>
-      <div className="list-group rounded-3 control-panel-list" ref={queuedVideosRef}>
+      
       {
-        queuedVideos.length !== 0 ? (
-          queuedVideos.map((queuedVideo, index) => (
+        (appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) &&
+        <div className="d-flex mb-3">
+          <InputForm
+            classNames={`form-control rounded-0 ${!isInputFormEnabled && "border-5 border-danger"}`}
+            value={currentVideoUrlText}
+            trim={true}
+            placeholder={inputFormPlaceholderText}
+            isEnabled={isInputFormEnabled}
+            onChange={handleTextInputChange}
+            onKeyDown={handleEnterPress}
+          />
+          <Button
+            text={<BsPlusCircleFill />}
+            classNames="btn btn-primary rounded-0"
+            onClick={handleAddVideoUrlButtonClick}
+          />
+        </div>
+      }
+      <div className="list-group rounded-3 control-panel-list" ref={playlistVideosRef}>
+      {
+        appState.playlistVideos.value.length !== 0 ? (
+          appState.playlistVideos.value.map((playlistVideo, index) => (
             <a 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"
-              href={queuedVideo.url}
+              href={playlistVideo.url.startsWith('http') ? playlistVideo.url : `http://${playlistVideo.url}`}
               target={"_blank"}
+              style={index === 0 ? { backgroundColor: "#DAF7A6" } : {}}
             >
               <div className="row">
                 <div className="col-auto">
-                    {queuedVideo.image !== undefined && <img src={queuedVideo.image} style={videoThumbnailStyle} alt="Video Thumbnail" />}
+                  <img src={playlistVideo.thumbnailUrl === null ? VideoIcon : playlistVideo.thumbnailUrl} alt="Video" style={videoThumbnailStyle} />
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
-                  <small>{queuedVideo.title !== undefined ? queuedVideo.title : queuedVideo.url}</small>
-                  <div>
-                    <Button
-                      text={<BsXCircle/>}
-                      classNames="btn btn-outline-danger btn-sm"
-                      styles={{marginLeft: "5px", }}
-                      onClick={() => handleRemoveQueuedVideoButtonClick(event, index)}
-                    />
-                  </div>
+                 <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>
+                  <b>{playlistVideo.title === null ? playlistVideo.url : playlistVideo.title}</b>
+                </small>
+                 {
+                    (appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) &&
+                    <div>
+                      <Button
+                        text={<BsXCircle/>}
+                        classNames="btn btn-outline-danger btn-sm"
+                        onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
+                      />
+                    </div>
+                  }
                 </div>
               </div>
             </a>

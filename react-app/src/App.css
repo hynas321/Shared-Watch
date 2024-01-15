@@ -3,9 +3,30 @@
   background-image: url('./assets/background.jpg');
   background-size: cover;
   background-position: center;
-  background-attachment: fixed; /* Optional for a fixed background */
   height: 100vh;
 }
+
+.background-gradient {
+  background: linear-gradient(-45deg, #d56441, #c82d69, #2299c4, #24c765);
+  height: 100vh;
+}
+
+.background-dark {
+  background-color: #000;
+}
+
+@keyframes gradient {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
 
 .font-border {
   text-shadow: 
@@ -19,6 +40,10 @@
     1px  1px 0px #000;
 }
 
+.text-orange {
+  color: rgb(255, 145, 0)
+}
+
 .video-player {
   height: 500px;
   width: 100%;
@@ -29,7 +54,7 @@
 }
 
 .control-panel-list {
-  max-height: 400px;
+  max-height: 340px;
   overflow-y: auto;
 }
 
@@ -43,6 +68,10 @@
 }
 
 .chat-message {
+  overflow-wrap: break-word;
+}
+
+.queued-video {
   overflow-wrap: break-word;
 }
 
@@ -60,10 +89,46 @@
 }
 
 .main-menu-panel {
-  max-height: 600px;
+  height: 550px;
 }
 
 .main-menu-list {
-  max-height: 420px;
+  max-height: 320px;
   overflow-y: auto;
+}
+
+.available-element {
+  cursor: pointer;
+}
+
+.unavailable-element {
+  cursor: not-allowed;
+}
+
+.box-container {
+  display: flex;
+}
+.box {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.box:first-child > span { margin-right: auto; }
+
+.box:last-child  > span { margin-left: auto;  }
+
+.box {
+  align-items: center;
+}
+
+p {
+  text-align: center;
+  margin: 5px 0 0 0;
+}
+
+@media (max-width: 768px) {
+  .mt-header {
+    margin-top: 0.75rem;
+  }
 }

@@ -1,9 +1,9 @@
 import { RoomTypesEnum } from "../enums/RoomTypesEnum"
 
 export type Room = {
-  hash: string,
+  roomHash: string,
   roomName: string,
-  occupiedSlots: number,
-  totalSlots: number,
   roomType: RoomTypesEnum,
+  occupiedSlots: number,
+  totalSlots: number
 }

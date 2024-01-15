@@ -1,38 +1,59 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Switch from "./Switch";
 import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
-import FormRange from "./FormRange";
+import { AppStateContext, roomHub } from "../context/RoomHubContext";
+import { useContext } from "react";
+import { HubEvents } from "../classes/HubEvents";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Settings() {
-  const [roomPassword, setRoomPassword] = useState<string>("");
+  const appState = useContext(AppStateContext);
+  const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
-  const [, setMaxUsers] = useState<number>(6);
-  const [isSendingChatMessagesAllowed, setIsSendingChatMessagesAllowed] = useState<boolean>(true);
-  const [isAddingVideosAllowed, setIsAddingVideosAllowed] = useState<boolean>(true);
-  const [isRemovingVideosAllowed, setIsRemovingVideosAllowed] = useState<boolean>(true);
-  const [isPlayingVideosOutsideOfPlaylistAllowed, setIsPlayingVideosOutsideOfPlaylistAllowed] = useState<boolean>(true);
-  const [isStartingPausingVideosAllowed, setIsStartingPausingVideosAllowed] = useState<boolean>(false);
-  const [isSkippingVideosAllowed, setIsSkippingVideosAllowed] = useState<boolean>(false);
-  const [userIsAdmin] = useState<boolean>(false);
+
+  const localStorageManager = new LocalStorageManager();
+
+  useEffect(() => {
+    setUserPermissions(appState.userPermissions.value);
+  }, [, appState.userPermissions.value]);
 
   const handleSetRoomPrivateButtonClick = () => {
-    if (inputFormPassword === roomPassword) {
+    if (inputFormPassword === appState.roomPassword.value) {
       return;
     }
 
     if (inputFormPassword.length > 0) {
-      setRoomPassword(inputFormPassword);
+      roomHub.invoke(
+        HubEvents.SetRoomPassword,
+        appState.roomHash.value,
+        localStorageManager.getAuthorizationToken(),
+        inputFormPassword
+      );
+  
       setInputFormPassword("");
     }
     else {
-      setRoomPassword("");
+      roomHub.invoke(
+        HubEvents.SetRoomPassword,
+        appState.roomHash.value,
+        localStorageManager.getAuthorizationToken(),
+        ""
+      );
+
+      setInputFormPassword("");
     }
   }
 
   const handleRemovePasswordButtonClick = () => {
-    setRoomPassword("");
+    roomHub.invoke(
+      HubEvents.SetRoomPassword,
+      appState.roomHash.value,
+      localStorageManager.getAuthorizationToken(),
+      ""
+    );
+
     setInputFormPassword("");
   }
 
@@ -42,18 +63,48 @@ export default function Settings() {
     }
   }
 
+  const invokeChange = () => {
+    roomHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
+  };
+
+  const setCanAddChatMessage = (checked: boolean) => {
+    appState.userPermissions.value!.canAddChatMessage = checked;
+    invokeChange();
+  };
+
+  const setCanAddVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canAddVideo = checked;
+    invokeChange();
+  };
+
+  const setCanRemoveVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canRemoveVideo = checked;
+    invokeChange();
+  };
+
+  const setCanStartOrPauseVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canStartOrPauseVideo = checked;
+    invokeChange();
+  };
+
+  const setCanSkipVideo = (checked: boolean) => {
+    appState.userPermissions.value!.canSkipVideo = checked;
+    invokeChange();
+  };
+
   return (
     <>
-      <div className="d-block">
           {
-            userIsAdmin &&
-            <>
+            appState.isAdmin.value &&
+            <div className="d-block mb-3">
               <h6 className="text-info text-center mb-3">Room settings</h6>
               <div className="d-flex">
                 <InputForm
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
                   value={inputFormPassword}
+                  trim={false}
+                  isEnabled={true}
                   onChange={(value: string) => setInputFormPassword(value)}
                   onKeyDown={handleSetRoomPrivateEnterClick}
                 />
@@ -64,75 +115,54 @@ export default function Settings() {
                 />
               </div>
               { 
-                (roomPassword.length > 0) && 
+                (appState.roomPassword.value.length > 0) && 
                 <div className="mt-2">
-                  <span className="text-white room-password">Current password: {roomPassword} </span>
+                  <span className="text-white room-password">Current password: {appState.roomPassword.value} </span>
                   <Button
                     text={"Remove password"}
-                    classNames="text-primary button-text"
+                    classNames="text-orange button-text"
                     onClick={handleRemovePasswordButtonClick}
                   />
                 </div>
               }
-            </>
+            </div>
           }
-        <div className="text-white text-center">
-          {
-            userIsAdmin &&
-            <FormRange
-              label={"Max users"}
-              labelClassNames={"mt-3"}
-              minValue={2}
-              maxValue={10}
-              defaultValue={6}
-              step={1}
-              onChange={(value: number) => setMaxUsers(value)}
-            />
-          }
-        </div>
-      </div>
-      <div className="d-block mt-3">
+      <div className="d-block">
         <h6 className="text-info text-center">User permissions</h6>
         <div className="mt-3">
           <Switch 
             label={"Send chat messages"}
-            defaultIsChecked={isSendingChatMessagesAllowed}
-            isEnabled={userIsAdmin}
-            onCheckChange={(checked: boolean) => setIsSendingChatMessagesAllowed(checked)} 
+            isChecked={userPermissions?.canAddChatMessage as boolean}
+            isEnabled={appState.isAdmin.value}
+            onCheckChange={(checked: boolean) => setCanAddChatMessage(checked)} 
           />
         </div>
         <div className="mt-3"> 
           <Switch 
             label={"Add videos to the playlist"}
-            defaultIsChecked={isAddingVideosAllowed}
-            isEnabled={userIsAdmin}
-            onCheckChange={(checked: boolean) => setIsAddingVideosAllowed(checked)} 
+            isChecked={appState.userPermissions.value?.canAddVideo as boolean}
+            isEnabled={appState.isAdmin.value}
+            onCheckChange={(checked: boolean) => setCanAddVideo(checked)} 
           />
           <Switch 
             label={"Remove videos from the playlist"}
-            defaultIsChecked={isRemovingVideosAllowed}
-            isEnabled={userIsAdmin}
-            onCheckChange={(checked: boolean) => setIsRemovingVideosAllowed(checked)} 
-          />
-          <Switch
-            label={"Play videos outside of the playlist"}
-            defaultIsChecked={isPlayingVideosOutsideOfPlaylistAllowed}
-            isEnabled={userIsAdmin}
-            onCheckChange={(checked: boolean) => setIsPlayingVideosOutsideOfPlaylistAllowed(checked)} 
+            isChecked={appState.userPermissions.value?.canRemoveVideo as boolean}
+            isEnabled={appState.isAdmin.value}
+            onCheckChange={(checked: boolean) => setCanRemoveVideo(checked)} 
           />
         </div>
         <div className="mt-3">
           <Switch 
             label={"Start/Pause videos"}
-            defaultIsChecked={isStartingPausingVideosAllowed}
-            isEnabled={userIsAdmin}
-            onCheckChange={(checked: boolean) => setIsStartingPausingVideosAllowed(checked)} 
+            isChecked={appState.userPermissions.value?.canStartOrPauseVideo as boolean}
+            isEnabled={appState.isAdmin.value}
+            onCheckChange={(checked: boolean) => setCanStartOrPauseVideo(checked)} 
           />
           <Switch 
             label={"Skip videos"}
-            defaultIsChecked={isSkippingVideosAllowed}
-            isEnabled={userIsAdmin}
-            onCheckChange={(checked: boolean) => setIsSkippingVideosAllowed(checked)} 
+            isChecked={appState.userPermissions.value?.canSkipVideo as boolean}
+            isEnabled={appState.isAdmin.value}
+            onCheckChange={(checked: boolean) => setCanSkipVideo(checked)} 
           />
         </div>
       </div>

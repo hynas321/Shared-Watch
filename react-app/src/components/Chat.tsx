@@ -1,23 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { ChatMessage } from "../types/ChatMessage";
 import { InputForm } from "./InputForm";
 import { BsSendFill } from "react-icons/bs";
+import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { HubEvents } from "../classes/HubEvents";
+import { LocalStorageManager } from "../classes/LocalStorageManager";
 
-export interface ChatProps {
-  onChange?: (chatMessages: ChatMessage[]) => void;
-}
+export default function Chat() {
+  const appState = useContext(AppStateContext);
+  const roomHub = useContext(RoomHubContext);
 
-export default function Chat({onChange}: ChatProps) {
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
   const messagesRef = useRef<HTMLDivElement>(null);
+  const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
+
+  const localStorageManager = new LocalStorageManager();
+
+  useEffect(() => {
+    if (appState.unreadChatMessagesCount.value !== 0) {
+      appState.unreadChatMessagesCount.value = 0;
+    }
+  }, []);
 
   useEffect(() => {
     if (messagesRef.current) {
       messagesRef.current.scrollTop = messagesRef.current.scrollHeight;
     }
-  }, [chatMessages]);
+  }, [appState.chatMessages.value]);
 
   const handleTextInputChange = (text: string) => {
     setCurrentChatMessageText(text);
@@ -32,20 +41,15 @@ export default function Chat({onChange}: ChatProps) {
     const currentDate: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
 
     const newChatMessage: ChatMessage = {
-      username: "User1",
+      username: appState.username.value,
       text: currentChatMessageText,
       date: currentDate
     }
 
-    setChatMessages([...chatMessages, newChatMessage])
+    roomHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
+
     setCurrentChatMessageText("");
   };
-
-  useEffect(() => {
-    if (onChange) {
-      onChange(chatMessages);
-    }
-  }, [chatMessages]);
 
   const handleEnterPress = (key: string) => {
     if (key === "Enter") {
@@ -55,31 +59,36 @@ export default function Chat({onChange}: ChatProps) {
 
   return (
     <>
-      <div className="d-flex mb-3">
-        <InputForm
-          classNames="form-control rounded-0"
-          value={currentChatMessageText}
-          placeholder="Enter your message"
-          onChange={handleTextInputChange}
-          onKeyDown={handleEnterPress}
-        />
-        <Button
-          text={<BsSendFill />}
-          classNames="btn btn-primary rounded-0"
-          onClick={handleSendMessage}
-        />
-      </div>
+        {
+          (appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) &&
+          <div className="d-flex mb-3">
+            <InputForm
+              classNames="form-control rounded-0"
+              value={currentChatMessageText}
+              trim={false}
+              placeholder="Enter your message"
+              isEnabled={true}
+              onChange={handleTextInputChange}
+              onKeyDown={handleEnterPress}
+            />
+            <Button
+              text={<BsSendFill />}
+              classNames="btn btn-primary rounded-0"
+              onClick={handleSendMessage}
+            />
+          </div>
+        }
       <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
       {
-        chatMessages.length !== 0 ? (
-          chatMessages.map((chatMessage, index) => (
+        appState.chatMessages.value.length !== 0 ? (
+          appState.chatMessages.value.map((chatMessage, index) => (
             <li 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2"
             >
               <div className="d-block chat-message">
                 <small className="text-muted">{`(${chatMessage.date})`} </small>
-                <span className="text-primary"><b>{chatMessage.username}: </b> </span>
+                <span className={`${appState.username.value == chatMessage.username ? "text-orange" : "text-primary" } `}><b>{chatMessage.username}: </b> </span>
                 <span className="text-dark">{chatMessage.text}</span>
               </div>
             </li>
