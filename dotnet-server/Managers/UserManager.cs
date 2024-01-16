@@ -58,13 +58,19 @@ public class UserManager {
 
             foreach (var room in rooms)
             {
-                foreach (var user in room.Users)
+                var userToRemove = room.Users.FirstOrDefault(user => user.SignalRConnectionId == connectionId);
+
+                if (userToRemove != null)
                 {
-                    if (user.SignalRConnectionId == connectionId)
-                    {
-                        room.Users.Remove(user);
-                        return (user, room.RoomHash);
-                    }
+                    User removedUser = new User(
+                        userToRemove.Username,
+                        userToRemove.IsAdmin,
+                        userToRemove.AuthorizationToken,
+                        userToRemove.SignalRConnectionId
+                    );
+
+                    room.Users.Remove(userToRemove);
+                    return (removedUser, room.RoomHash);
                 }
             }
 
@@ -75,6 +81,7 @@ public class UserManager {
             return (null, null);
         }
     }
+
     public User GetUserByAuthorizationToken(string roomHash, string authorizationToken)
     {
         try

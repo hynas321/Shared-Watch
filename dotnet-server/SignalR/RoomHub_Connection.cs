@@ -29,23 +29,32 @@ public partial class RoomHub : Hub
     public override async Task OnConnectedAsync()
     {
         await Clients.Client(Context.ConnectionId).SendAsync(HubEvents.OnReceiveConnectionId, Context.ConnectionId);
+        _logger.LogInformation($"Hub: User Connected: {Context.ConnectionId}");
         await base.OnConnectedAsync();
     }
 
     public override async Task OnDisconnectedAsync(Exception exception)
-    {   
-        string signalRConnectionId = Context.ConnectionId;
-
-        (User removedUser, string roomHash) = _userManager.DeleteUserByConnectionId(signalRConnectionId);
-
-        if (removedUser == null || roomHash == null)
+    {
+        (User removedUser, string roomHash) = _userManager.DeleteUserByConnectionId(Context.ConnectionId);
+        _logger.LogInformation(Context.ConnectionId);
+        if (removedUser != null && roomHash != null)
         {
-            return;
+            UserDTO userDTO = new UserDTO(removedUser.Username, removedUser.IsAdmin);
+            await _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
+
+            Room room = _roomManager.GetRoom(roomHash);
+
+            if (room.Users.Count == 0)
+            {
+                _roomManager.DeleteRoom(roomHash);
+
+                IEnumerable<RoomDTO> rooms = _roomManager.GetRoomsDTO();
+        
+                await _roomHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
+            }
         }
 
-        UserDTO userDTO = new UserDTO(removedUser.Username, removedUser.IsAdmin);
-
-        await _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
+        _logger.LogInformation($"Hub: User Disconnected: {Context.ConnectionId}");
         await base.OnDisconnectedAsync(exception);
     }
 }

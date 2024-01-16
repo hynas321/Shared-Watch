@@ -12,7 +12,7 @@ export default function NotFoundView() {
         <Button 
           text={"Go to Main Menu"}
           classNames={`btn btn-primary mx-1 mt-3`}
-          onClick={() => navigate(`${ClientEndpoints.mainMenu}`, { replace: true })}
+          onClick={() => navigate(`${ClientEndpoints.mainMenu}`)}
         />
       </div>
     </>

@@ -121,7 +121,7 @@ public class RoomController : ControllerBase
             if (!ModelState.IsValid || roomHash == "" || signalRConnectionId == null)
             {   
                 _logger.LogInformation(
-                    $"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
+                    $"{roomHash} Join: Status 400. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
                 );
     
                 return StatusCode(StatusCodes.Status400BadRequest);
@@ -189,7 +189,7 @@ public class RoomController : ControllerBase
             }
             else
             {
-                newUser = new User(input.Username, isUserAdmin);
+                newUser = new User(input.Username, isUserAdmin, signalRConnectionId: signalRConnectionId);
             }
 
             UserDTO newUserDTO = new UserDTO(newUser.Username, newUser.IsAdmin);

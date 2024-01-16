@@ -61,7 +61,7 @@ export default function Header() {
     httpManager.leaveRoom(appState.roomHash.value);
 
     appState.isInRoom.value = false;
-    navigate(ClientEndpoints.mainMenu, { replace: true });
+    navigate(ClientEndpoints.mainMenu);
   }
 
   const handleCopyToClipboard = async () => {
