@@ -304,9 +304,9 @@ public class RoomController : ControllerBase
                 _roomManager.DeleteRoom(roomHash);
             }
 
-            UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
+            _roomHubContext.Groups.RemoveFromGroupAsync(signalRConnectionId, roomHash);
 
-            var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
+            UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
 
             _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
 

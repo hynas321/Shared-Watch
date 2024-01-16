@@ -223,14 +223,14 @@ export default function MainView() {
               </>
           }
           {
-            (displayedRooms.length === 0 && appState.username.value.length < 3) &&
+            (appState.username.value.length < 3) &&
             <>
               <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsFillPersonLinesFill /></h1>
               <h5 className="text-white text-center">Enter your username to access rooms</h5>
             </>
           }
           {
-            (displayedRooms.length !== 0) &&
+            (displayedRooms.length !== 0 && appState.username.value.length >= 3) &&
             <div className="main-menu-list mb-3">
               <RoomList
                 list={displayedRooms}
