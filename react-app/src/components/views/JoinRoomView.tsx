@@ -52,7 +52,7 @@ export default function JoinRoomView() {
     const [responseStatus, responseData] = await httpManager.getRoom(hash);
 
     if (responseStatus !== HttpStatusCodes.OK) {
-      navigate(`${ClientEndpoints.mainMenu}`);
+      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
 
@@ -86,7 +86,7 @@ export default function JoinRoomView() {
     const canJoin = await roomHelper.joinRoom(roomState);
 
     if (canJoin) {
-      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`);
+      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
   };
 
@@ -100,7 +100,7 @@ export default function JoinRoomView() {
     const canJoin = await roomHelper.joinRoom(roomState);
 
     if (canJoin) {
-      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`);
+      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
   }
 
@@ -167,7 +167,7 @@ export default function JoinRoomView() {
             <Button
               text={"Go to Main Menu"}
               classNames={`btn btn-primary mx-1 mt-4 mb-2`}
-              onClick={() => navigate(`${ClientEndpoints.mainMenu}`)}
+              onClick={() => navigate(`${ClientEndpoints.mainMenu}`, { replace: true })}
             />
           </div>
         </animated.div>

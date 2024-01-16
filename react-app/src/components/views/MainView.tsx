@@ -137,7 +137,7 @@ export default function MainView() {
     const canJoin = await roomHelper.joinRoom(roomState);
 
     if (canJoin) {
-      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`);
+      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
   };
 
@@ -151,7 +151,7 @@ export default function MainView() {
     const canJoin = await roomHelper.joinRoom(roomState);
 
     if (canJoin) {
-      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`);
+      navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
   }
 

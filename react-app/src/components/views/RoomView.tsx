@@ -38,7 +38,7 @@ export default function RoomView() {
 
     if (!appState.joinedViaView.value) {
       appState.roomHash.value = hash;
-      navigate(`${ClientEndpoints.joinRoom}/${hash}`);
+      navigate(`${ClientEndpoints.joinRoom}/${hash}`, { replace: true });
       return;
     }
 
@@ -54,7 +54,7 @@ export default function RoomView() {
 
     const handleBeforeUnload = async () => {
       //await httpManager.leaveRoom(appState.roomHash.value);
-      navigate(`${ClientEndpoints.mainMenu}`);
+      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
 
