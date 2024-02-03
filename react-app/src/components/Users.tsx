@@ -53,7 +53,7 @@ export default function Users() {
                   (user.isAdmin && appState.isAdmin.value === true &&appState.username.value != user.username) &&
                     <Button
                       text={<BsShieldFillMinus />}
-                      classNames="btn btn-outline-warning me-2"
+                      classNames="btn btn-success me-2 text-orange"
                       onClick={() => handleAdminStatusButtonClick(false, user.username)}
                     />
                 }
@@ -61,7 +61,7 @@ export default function Users() {
                   (!user.isAdmin && appState.isAdmin.value === true && appState.username.value != user.username) &&
                   <Button
                     text={<BsShieldFillPlus />}
-                    classNames="btn btn-outline-warning me-2"
+                    classNames="btn btn-success me-2"
                     onClick={() => handleAdminStatusButtonClick(true, user.username)}
                   />
                 }
@@ -69,7 +69,7 @@ export default function Users() {
                   (appState.isAdmin.value === true && appState.username.value != user.username) &&
                   <Button
                     text={<BsFillPersonXFill />}
-                    classNames="btn btn-outline-danger"
+                    classNames="btn btn-danger"
                     onClick={() => handleKickOutUserButtonClick(event, user.username)}
                   />
                 }

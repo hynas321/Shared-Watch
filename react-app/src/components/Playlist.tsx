@@ -1,4 +1,4 @@
-import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
+import { BsFillXCircleFill, BsPlusCircleFill } from "react-icons/bs";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import Button from "./Button";
 import { InputForm } from "./InputForm";
@@ -126,8 +126,8 @@ export default function Playlist() {
                     (appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) &&
                     <div>
                       <Button
-                        text={<BsXCircle/>}
-                        classNames="btn btn-outline-danger btn-sm"
+                        text={<BsFillXCircleFill/>}
+                        classNames="btn btn-danger btn-sm"
                         onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
                       />
                     </div>

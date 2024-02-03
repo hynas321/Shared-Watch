@@ -17,7 +17,7 @@ import { AppStateContext, roomHub } from "../../context/RoomHubContext";
 import { RoomHelper } from "../../classes/RoomHelper";
 import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../../classes/HubEvents";
-import { BsDoorOpenFill } from "react-icons/bs";
+import { BsDoorOpenFill, BsExclamationTriangleFill } from "react-icons/bs";
 import { BsFillPersonLinesFill } from "react-icons/bs";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 
@@ -185,7 +185,7 @@ export default function MainView() {
         <animated.div className="main-menu-panel mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
           <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
           {
-            appState.username.value.length >= 3 &&
+            (appState.username.value.length >= 3 && appState.connectionIssue.value === false) &&
             <div className="mt-4">
               <div className="row d-flex justify-content-between align-items-center text-center">
               <div className="col-6">
@@ -216,17 +216,26 @@ export default function MainView() {
             </div>
           }
           {
-            (displayedRooms.length === 0 && appState.username.value.length >= 3) &&
+            (displayedRooms.length === 0 && appState.username.value.length >= 3 && appState.connectionIssue.value === false) &&
               <>
                 <h1 className="text-white text-center" style={{marginTop: "4rem"}}><BsDoorOpenFill /></h1>
                 <h5 className="text-white text-center">No rooms to display</h5>
               </>
           }
           {
-            (appState.username.value.length < 3) &&
+            (appState.username.value.length < 3 && appState.connectionIssue.value === false) &&
             <>
               <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsFillPersonLinesFill /></h1>
-              <h5 className="text-white text-center">Enter your username to access rooms</h5>
+              <h5 className="text-white text-center">Enter your username</h5>
+              <h6 className="text-white text-center">To gain access to room functionalities</h6>
+            </>
+          }
+          {
+            (appState.connectionIssue.value === true) &&
+            <>
+              <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsExclamationTriangleFill /></h1>
+              <h5 className="text-white text-center">Connection Issue</h5>
+              <h6 className="text-white text-center">Check your internet connection</h6>
             </>
           }
           {

@@ -1,4 +1,4 @@
-import { BsDoorOpenFill, BsFillCameraReelsFill } from "react-icons/bs";
+import { BsDoorOpenFill, BsFillCameraReelsFill, BsFillPersonFill, BsShieldFillCheck } from "react-icons/bs";
 import { InputForm } from "./InputForm";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
@@ -12,11 +12,7 @@ import * as signalR from "@microsoft/signalr";
 import { HttpManager } from "../classes/HttpManager";
 import useClipboardApi from "use-clipboard-api";
 import { useSignal } from "@preact/signals-react";
-import { BsEmojiFrownFill } from "react-icons/bs";
-import { BsFilePerson } from "react-icons/bs";
 import { BsFillLayersFill } from "react-icons/bs";
-
-
 export default function Header() {
   const appState = useContext(AppStateContext);
   const roomHub = useContext(RoomHubContext);
@@ -34,6 +30,11 @@ export default function Header() {
     appState.username.value = localStorageManager.getUsername();
     appState.roomHash.value = httpUrlHelper.getRoomHash(window.location.href);
   }, []);
+
+  useEffect(() => {
+    console.log(appState.isAdmin.value);
+  }, [appState.isAdmin.value]);
+
 
   useEffect(() => {
     const startRoomHubConnection = async () => {
@@ -81,7 +82,7 @@ export default function Header() {
         <div className="d-flex align-items-center">
           <a className="navbar-brand ms-3" href="/"><i><b>Shared Watch</b></i> <BsFillCameraReelsFill /></a>
           {
-            (!appState.isInRoom.value && appState.connectionIssue.value === false) &&
+            (!appState.isInRoom.value) &&
             <div className="ms-3 me-3">
               <InputForm
                 classNames={`form-control form-control rounded-3  ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
@@ -97,12 +98,13 @@ export default function Header() {
             </div>
           }
           {
-            (appState.isInRoom.value && appState.connectionIssue.value === false) &&
-            <div className="text-white ms-3 me-3"><BsFilePerson /><span className="text-break text-warning ms-2"><b>{appState.username.value}</b></span></div>
-          }
-          {
-            (appState.connectionIssue.value === true) &&
-            <span className="text-warning ms-3 me-3"><b>CONNECTION ISSUE <BsEmojiFrownFill/></b></span>
+            (appState.isInRoom.value) &&
+            <div className="text-white ms-3 me-3">
+              { appState.isAdmin.value ? <BsShieldFillCheck /> : <BsFillPersonFill /> }
+              <span className="text-break text-orange ms-2">
+                <b>{appState.username.value}</b>
+              </span>
+            </div>
           }
         </div>
         <div className="d-flex justify-content-end">

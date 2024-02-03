@@ -115,6 +115,8 @@ export default function ControlPanel() {
         );
       } 
       else if (isCurrentUser && updatedUser.isAdmin === false) {
+        appState.isAdmin.value = updatedUser.isAdmin;
+        
         toast.clearWaitingQueue({
             containerId: ToastNotificationEnum.Room
           }

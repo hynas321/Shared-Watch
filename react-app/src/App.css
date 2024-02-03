@@ -7,7 +7,7 @@
 }
 
 .background-gradient {
-  background: linear-gradient(-45deg, #d56441, #c82d69, #2299c4, #24c765);
+  background: linear-gradient(-45deg, #d56441, #c82d69, #1379c7, #0280e0);
   height: 100vh;
 }
 
@@ -41,7 +41,7 @@
 }
 
 .text-orange {
-  color: rgb(255, 145, 0)
+  color: rgb(255, 145, 0);
 }
 
 .video-player {

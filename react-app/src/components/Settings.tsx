@@ -97,7 +97,7 @@ export default function Settings() {
           {
             appState.isAdmin.value &&
             <div className="d-block mb-3">
-              <h6 className="text-info text-center mb-3">Room settings</h6>
+              <h6 className="text-orange text-center mb-3">Room settings</h6>
               <div className="d-flex">
                 <InputForm
                   classNames="form-control rounded-0"
@@ -128,7 +128,7 @@ export default function Settings() {
             </div>
           }
       <div className="d-block">
-        <h6 className="text-info text-center">User permissions</h6>
+        <h6 className="text-orange text-center">User permissions</h6>
         <div className="mt-3">
           <Switch 
             label={"Send chat messages"}
