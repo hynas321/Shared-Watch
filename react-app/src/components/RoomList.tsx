@@ -1,9 +1,10 @@
 import { BsFillLockFill, BsFillPeopleFill } from "react-icons/bs";
 import { Room } from "../types/Room";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import Button from "./Button";
 import { useEffect, useState } from "react";
+import { appState } from "../context/AppContext";
 
 export interface RoomListProps {
   list: Room[];
@@ -24,30 +25,21 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
     }
   }, [privateRoomPassword]);
 
-  const availableRoomStyles = {
-    cursor: "pointer"
-  }
-
-  const fullRoomStyles = {
-    cursor: "not-allowed",
-    color: "darkgray"
-  }
-
   return (
     <div className="list-group rounded-3">
       {
         list.map((room, index) => (
           <li
             key={index}
-            className="list-group-item mt-1 py-2"
-            style={room.occupiedSlots !== room.totalSlots ? availableRoomStyles : fullRoomStyles}
-            onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public) ? () => onPublicRoomClick(room) : undefined}
+            className={`list-group-item mt-1 py-2 ${(room.occupiedSlots === room.totalSlots || appState.username.value.length < 3) ? "unavailable-element" : "available-element"}`}
+            style={(room.occupiedSlots === room.totalSlots || appState.username.value.length < 3) ? {color: "darkgray"} : {}}
+            onClick={(room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.public && appState.username.value.length >= 3) ? () => onPublicRoomClick(room) : undefined}
           >
             <div
             {
               ...room.roomType === RoomTypesEnum.private ? {
                 'data-bs-toggle': 'collapse',
-                'data-bs-target': `#collapseExample-${room.hash}`,
+                'data-bs-target': `#collapseExample-${room.roomHash}`,
                 'aria-expanded': false
               } : {}
             }
@@ -56,19 +48,22 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
               <h6><BsFillPeopleFill /> {`${room.occupiedSlots}/${room.totalSlots}`}</h6>
             </div>
             {
-              (room.roomType === RoomTypesEnum.private && room.occupiedSlots !== room.totalSlots) &&
-                <div className="collapse" id={`collapseExample-${room.hash}`}>
+              (room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.private && appState.username.value.length >= 3) &&
+                <div className="collapse" id={`collapseExample-${room.roomHash}`}>
                   <div className="d-flex">
-                    <InputForm
+                    <InputField
                       classNames={"form-control mx-1"}
                       placeholder={"Enter password"}
                       value={privateRoomPassword}
+                      trim={true}
+                      isEnabled={true}
+                      maxCharacters={35}
                       onChange={(value: string) => setPrivateRoomPassword(value)}
                     />
                     <Button
                       text={"Enter"}
                       classNames={`btn btn-primary mx-1 ${!isEnterPrivateRoomButtonEnabled && "disabled"}`}
-                      onClick={(room: Room) => onPrivateRoomClick(room, privateRoomPassword)}
+                      onClick={() => onPrivateRoomClick(room, privateRoomPassword)}
                     />
                   </div>
                 </div>
