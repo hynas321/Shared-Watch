@@ -3,7 +3,7 @@ import { Room } from "../../types/Room";
 import RoomList from "../RoomList";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../../classes/ClientEndpoints"; 
-import { InputForm } from "../InputForm";
+import { InputField } from "../InputField";
 import Switch from "../Switch";
 import { HttpManager } from "../../classes/HttpManager";
 import Header from "../Header";
@@ -189,12 +189,13 @@ export default function MainView() {
             <div className="mt-4">
               <div className="row d-flex justify-content-between align-items-center text-center">
               <div className="col-6">
-                <InputForm
+                <InputField
                   classNames="form-control rounded-3 disabled"
                   placeholder="Search room name"
                   value={searchText}
                   trim={false}
                   isEnabled={true}
+                  maxCharacters={60}
                   onChange={(value: string) => setSearchText(value)}
                 />
               </div>
@@ -235,7 +236,7 @@ export default function MainView() {
             <>
               <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsExclamationTriangleFill /></h1>
               <h5 className="text-white text-center">Connection Issue</h5>
-              <h6 className="text-white text-center">Check your internet connection</h6>
+              <h6 className="text-white text-center">Check your internet connection or refresh the page</h6>
             </>
           }
           {

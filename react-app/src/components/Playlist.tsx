@@ -1,7 +1,7 @@
 import { BsFillXCircleFill, BsPlusCircleFill } from "react-icons/bs";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import Button from "./Button";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import { useContext, useEffect, useRef, useState } from "react";
 import VideoIcon from './../assets/video-icon.png'
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
@@ -87,12 +87,13 @@ export default function Playlist() {
       {
         (appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) &&
         <div className="d-flex mb-3">
-          <InputForm
+          <InputField
             classNames={`form-control rounded-0 ${!isInputFormEnabled && "border-5 border-danger"}`}
             value={currentVideoUrlText}
             trim={true}
             placeholder={inputFormPlaceholderText}
             isEnabled={isInputFormEnabled}
+            maxCharacters={200}
             onChange={handleTextInputChange}
             onKeyDown={handleEnterPress}
           />

@@ -1,5 +1,5 @@
 import { BsDoorOpenFill, BsFillCameraReelsFill, BsFillPersonFill, BsShieldFillCheck } from "react-icons/bs";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
@@ -84,11 +84,12 @@ export default function Header() {
           {
             (!appState.isInRoom.value) &&
             <div className="ms-3 me-3">
-              <InputForm
+              <InputField
                 classNames={`form-control form-control rounded-3  ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
                 placeholder={"Username (min. 3 chars)"}
                 value={appState.username.value}
                 trim={true}
+                maxCharacters={25}
                 isEnabled={true}
                 onChange={(value: string) => {
                   appState.username.value = value;

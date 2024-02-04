@@ -6,15 +6,20 @@ export interface InputFormProps {
   value: string;
   trim: boolean;
   isEnabled: boolean;
+  maxCharacters: number;
   onChange: (value: string) => void;
   onKeyDown?: (key: string) => void;
 };
 
-export const InputForm = forwardRef(
-  ({ classNames, placeholder, value, trim, isEnabled, onChange, onKeyDown}: InputFormProps,
+export const InputField = forwardRef(
+  ({ classNames, placeholder, value, trim, isEnabled, maxCharacters, onChange, onKeyDown}: InputFormProps,
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.value.length > maxCharacters) {
+        return;
+      }
+      
       onChange(trim ? event.target.value.trim() : event.target.value);
     }
 

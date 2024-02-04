@@ -38,6 +38,13 @@ public partial class RoomHub : Hub
             return;
         }
 
+        int maxChatMessageTextLength = 200;
+
+        if (chatMessage.Text.Length > maxChatMessageTextLength)
+        {
+            return;
+        }
+
         DateTime utcNow = DateTime.UtcNow.AddDays(0);
         TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
         DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);

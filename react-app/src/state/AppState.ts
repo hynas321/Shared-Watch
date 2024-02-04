@@ -36,6 +36,7 @@ export function createAppState() {
   //Auxilary control panel data
   const unreadChatMessagesCount = signal<number>(0);
   const activePanel = signal<PanelsEnum>(PanelsEnum.Chat);
+  const maxPlaylistVideos = signal<number>(10);
 
   //Url
   const joinedViaView = signal<boolean>(false);
@@ -45,7 +46,7 @@ export function createAppState() {
     username, isAdmin, isInRoom,
     roomHash, roomName, roomPassword, roomType, maxUsers,
     chatMessages, playlistVideos, users, userPermissions, videoPlayerState,
-    unreadChatMessagesCount, activePanel,
+    unreadChatMessagesCount, activePanel, maxPlaylistVideos,
     joinedViaView
   }
 }

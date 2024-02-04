@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Button from "./Button"
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import { HttpManager } from "../classes/HttpManager";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
@@ -118,23 +118,25 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
             <div className="modal-body bg-light">
               <div className="d-block">
                 <h6 className="text-dark text-center mb-3"><b>Room name</b></h6>
-                  <InputForm
+                  <InputField
                     classNames="form-control rounded-0"
                     placeholder="Enter room name (min 3 characters)"
                     value={roomName.value}
                     trim={false}
                     isEnabled={true}
+                    maxCharacters={55}
                     onChange={(value: string) => {roomName.value = value}}
                   />
               </div>
               <div className="d-block mt-3">
               <h6 className="text-dark text-center mb-3"><b>Room password (optional)</b></h6>
-                <InputForm
+                <InputField
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
                   value={roomPassword.value}
                   trim={true}
                   isEnabled={true}
+                  maxCharacters={35}
                   onChange={(value: string) => {roomPassword.value = value}}
                 />
               </div>

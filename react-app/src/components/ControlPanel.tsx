@@ -116,7 +116,7 @@ export default function ControlPanel() {
       } 
       else if (isCurrentUser && updatedUser.isAdmin === false) {
         appState.isAdmin.value = updatedUser.isAdmin;
-        
+
         toast.clearWaitingQueue({
             containerId: ToastNotificationEnum.Room
           }
@@ -217,12 +217,12 @@ export default function ControlPanel() {
             onClick={() => handlePanelButtonClick(PanelsEnum.Chat)} 
           />
           <Button 
-            text={<><span className="badge rounded-pill bg-success mt-2">{appState.playlistVideos.value?.length}</span> Playlist</>}
+            text={<><span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>{appState.playlistVideos.value?.length}/{appState.maxPlaylistVideos.value}</span> Playlist</>}
             classNames={appState.activePanel.value === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
           />
           <Button 
-            text={<><span className="badge rounded-pill bg-success mt-2">{appState.users.value?.length}/{appState.maxUsers.value}</span> Users</>}
+            text={<><span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>{appState.users.value?.length}/{appState.maxUsers.value}</span> Users</>}
             classNames={appState.activePanel.value === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Users)} 
           />

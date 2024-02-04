@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Switch from "./Switch";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 import { AppStateContext, roomHub } from "../context/RoomHubContext";
@@ -99,12 +99,13 @@ export default function Settings() {
             <div className="d-block mb-3">
               <h6 className="text-orange text-center mb-3">Room settings</h6>
               <div className="d-flex">
-                <InputForm
+                <InputField
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
                   value={inputFormPassword}
                   trim={false}
                   isEnabled={true}
+                  maxCharacters={35}
                   onChange={(value: string) => setInputFormPassword(value)}
                   onKeyDown={handleSetRoomPrivateEnterClick}
                 />

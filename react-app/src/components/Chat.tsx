@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { ChatMessage } from "../types/ChatMessage";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import { BsSendFill } from "react-icons/bs";
 import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
 import { HubEvents } from "../classes/HubEvents";
@@ -62,12 +62,13 @@ export default function Chat() {
         {
           (appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) &&
           <div className="d-flex mb-3">
-            <InputForm
+            <InputField
               classNames="form-control rounded-0"
               value={currentChatMessageText}
               trim={false}
               placeholder="Enter your message"
               isEnabled={true}
+              maxCharacters={200}
               onChange={handleTextInputChange}
               onKeyDown={handleEnterPress}
             />
