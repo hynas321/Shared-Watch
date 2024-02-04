@@ -1,13 +1,13 @@
 import { useContext } from "react";
 import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMinus, BsShieldFillPlus } from "react-icons/bs";
 import Button from "./Button";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Users() {
   const appState = useContext(AppStateContext);
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
 
   const localStorageManager = new LocalStorageManager();
 
@@ -16,7 +16,7 @@ export default function Users() {
       return;
     }
 
-    await roomHub.invoke(
+    await appHub.invoke(
       HubEvents.SetAdminStatus,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
@@ -26,7 +26,7 @@ export default function Users() {
   }
 
   const handleKickOutUserButtonClick = async (event: any, username: string) => {
-    await roomHub.invoke(
+    await appHub.invoke(
       HubEvents.KickOut,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),

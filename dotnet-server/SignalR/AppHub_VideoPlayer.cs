@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class RoomHub : Hub
+public partial class AppHub : Hub
 {
     [HubMethodName(HubEvents.SetIsVideoPlaying)]
     public async Task SetIsVideoPlaying(string roomHash, string authorizationToken, bool isPlaying)

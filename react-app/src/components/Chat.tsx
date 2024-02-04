@@ -3,13 +3,13 @@ import Button from "./Button";
 import { ChatMessage } from "../types/ChatMessage";
 import { InputField } from "./InputField";
 import { BsSendFill } from "react-icons/bs";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Chat() {
   const appState = useContext(AppStateContext);
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
@@ -46,7 +46,7 @@ export default function Chat() {
       date: currentDate
     }
 
-    roomHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
+    appHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
 
     setCurrentChatMessageText("");
   };

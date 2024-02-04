@@ -3,7 +3,7 @@ import Switch from "./Switch";
 import { InputField } from "./InputField";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
-import { AppStateContext, roomHub } from "../context/RoomHubContext";
+import { AppStateContext, appHub } from "../context/AppContext";
 import { useContext } from "react";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
@@ -25,7 +25,7 @@ export default function Settings() {
     }
 
     if (inputFormPassword.length > 0) {
-      roomHub.invoke(
+      appHub.invoke(
         HubEvents.SetRoomPassword,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
@@ -35,7 +35,7 @@ export default function Settings() {
       setInputFormPassword("");
     }
     else {
-      roomHub.invoke(
+      appHub.invoke(
         HubEvents.SetRoomPassword,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
@@ -47,7 +47,7 @@ export default function Settings() {
   }
 
   const handleRemovePasswordButtonClick = () => {
-    roomHub.invoke(
+    appHub.invoke(
       HubEvents.SetRoomPassword,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
@@ -64,7 +64,7 @@ export default function Settings() {
   }
 
   const invokeChange = () => {
-    roomHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
+    appHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
   };
 
   const setCanAddChatMessage = (checked: boolean) => {

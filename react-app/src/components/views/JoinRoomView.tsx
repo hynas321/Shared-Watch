@@ -3,7 +3,7 @@ import { useEffect, useContext, useState } from "react";
 import { HttpManager } from "../../classes/HttpManager";
 import { HttpStatusCodes } from "../../classes/HttpStatusCodes";
 import { ClientEndpoints } from "../../classes/ClientEndpoints";
-import { AppStateContext } from "../../context/RoomHubContext";
+import { AppStateContext } from "../../context/AppContext";
 import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { animated, useSpring } from "@react-spring/web";
 import Header from "../Header";

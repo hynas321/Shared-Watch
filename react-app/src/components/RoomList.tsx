@@ -4,7 +4,7 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { InputField } from "./InputField";
 import Button from "./Button";
 import { useEffect, useState } from "react";
-import { appState } from "../context/RoomHubContext";
+import { appState } from "../context/AppContext";
 
 export interface RoomListProps {
   list: Room[];

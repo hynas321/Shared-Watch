@@ -6,7 +6,7 @@ import { HttpApiEndpoints } from "./HttpApiEndpoints";
 import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
 import { Room } from "../types/Room";
-import { appState } from "../context/RoomHubContext";
+import { appState } from "../context/AppContext";
 
 export class HttpManager {
   private httpServerUrl: string;

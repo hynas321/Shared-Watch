@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class RoomHub : Hub
+public partial class AppHub : Hub
 {
     [HubMethodName(HubEvents.AddChatMessage)]
     public async Task AddChatMessage(string roomHash, string authorizationToken, ChatMessage chatMessage)

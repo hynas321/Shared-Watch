@@ -4,13 +4,13 @@ import Button from "./Button";
 import { InputField } from "./InputField";
 import { useContext, useEffect, useRef, useState } from "react";
 import VideoIcon from './../assets/video-icon.png'
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomHelper } from "../classes/RoomHelper";
 
 export default function Playlist() {
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
   const appState = useContext(AppStateContext);
   const playlistVideosRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +61,7 @@ export default function Playlist() {
       duration: 5
     };
 
-    roomHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
+    appHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");
   }
 
@@ -73,7 +73,7 @@ export default function Playlist() {
 
   const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
     event.preventDefault();
-    roomHub.invoke(
+    appHub.invoke(
       HubEvents.DeletePlaylistVideo,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),

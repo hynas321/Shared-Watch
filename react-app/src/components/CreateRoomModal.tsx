@@ -8,7 +8,7 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { RoomState } from "../types/RoomState";
-import { appState } from "../context/RoomHubContext";
+import { appState } from "../context/AppContext";
 import { useSignal } from "@preact/signals-react";
 import { RoomHelper } from "../classes/RoomHelper";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";

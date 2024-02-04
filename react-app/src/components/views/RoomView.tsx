@@ -1,6 +1,6 @@
 import ControlPanel from "../ControlPanel";
 import VideoPlayer from "../VideoPlayer";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../../classes/ClientEndpoints";
 import Header from "../Header";
@@ -8,20 +8,25 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
 import { animated, useSpring } from "@react-spring/web";
-import { AppStateContext, roomHub } from "../../context/RoomHubContext";
+import { AppStateContext, appHub } from "../../context/AppContext";
 import { PanelsEnum } from "../../enums/PanelsEnum";
 import { useSignal } from "@preact/signals-react";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
+import { ping } from 'ldrs'
+import * as signalR from "@microsoft/signalr";
 
 export default function RoomView() {
   const appState = useContext(AppStateContext);
   const navigate = useNavigate();
+
+  const [isRoomLoading, setIsRoomLoading] = useState<boolean>(true);
 
   const isContentVisible = useSignal<boolean>(false);
 
   const httpUrlHelper = new HttpUrlHelper();
 
   useEffect(() => {
+    ping.register();
     appState.isInRoom.value = true;
   
     const hash: string = httpUrlHelper.getRoomHash(window.location.href);
@@ -58,7 +63,7 @@ export default function RoomView() {
       return;
     }
 
-    roomHub.onclose(() => {
+    appHub.onclose(() => {
       appState.connectionIssue.value = true;
     })
 
@@ -71,6 +76,17 @@ export default function RoomView() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [appState.roomHash.value]);
+
+  useEffect(() => {
+    if (appHub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    setTimeout(() => {
+      setIsRoomLoading(false);
+    }, 800)
+
+  }, [appHub.getState()]);
 
   const springs = useSpring({
     from: { y: 200 },

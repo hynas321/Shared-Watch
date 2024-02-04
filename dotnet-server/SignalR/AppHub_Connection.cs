@@ -2,22 +2,22 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class RoomHub : Hub
+public partial class AppHub : Hub
 {
-    private readonly ILogger<RoomHub> _logger;
+    private readonly ILogger<AppHub> _logger;
     private readonly RoomManager _roomManager = new RoomManager();
     private readonly ChatManager _chatManager = new ChatManager();
     private readonly PlaylistManager _playlistManager = new PlaylistManager();
     private readonly UserManager _userManager = new UserManager();
     private readonly PlaylistService _playlistService;
     private readonly YouTubeAPIService _youtubeAPIService;
-    private readonly IHubContext<RoomHub> _roomHubContext;
+    private readonly IHubContext<AppHub> _roomHubContext;
 
-    public RoomHub(
-        ILogger<RoomHub> logger,
+    public AppHub(
+        ILogger<AppHub> logger,
         PlaylistService playlistHandler,
         YouTubeAPIService youTubeAPIService,
-        IHubContext<RoomHub> roomHubContext
+        IHubContext<AppHub> roomHubContext
     )
     {
         _logger = logger;

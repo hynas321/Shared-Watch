@@ -6,5 +6,5 @@ export class HttpApiEndpoints {
   static joinRoom = "api/Room/JoinRoom";
   static leaveRoom = "api/Room/Leave";
 
-  static roomHubConnection = "/Hub/Room";
+  static appHubConnection = "/Hub/Room";
 }

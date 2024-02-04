@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.SignalR;
 public class SessionManager
 {
     private readonly ILogger<SessionManager> _logger;
-    private readonly IHubContext<RoomHub> _hubContext;
+    private readonly IHubContext<AppHub> _hubContext;
     private bool _isHandlerRunning = false;
 
     public SessionManager(
         ILogger<SessionManager> logger,
-        IHubContext<RoomHub> hubContext
+        IHubContext<AppHub> hubContext
     )
     {
         _logger = logger;

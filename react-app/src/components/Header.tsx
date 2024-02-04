@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../classes/ClientEndpoints";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { useEffect, useContext } from "react";
 import { HubEvents } from "../classes/HubEvents";
 import * as signalR from "@microsoft/signalr";
@@ -15,7 +15,7 @@ import { useSignal } from "@preact/signals-react";
 import { BsFillLayersFill } from "react-icons/bs";
 export default function Header() {
   const appState = useContext(AppStateContext);
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
 
   const navigate = useNavigate();
   const [, copy] = useClipboardApi();
@@ -32,40 +32,32 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    console.log(appState.isAdmin.value);
-  }, [appState.isAdmin.value]);
-
-
-  useEffect(() => {
-    const startRoomHubConnection = async () => {
+    const startAppHubConnection = async () => {
       try {
-        roomHub.on(HubEvents.OnReceiveConnectionId, (connectionId: string) => {
+        appHub.on(HubEvents.OnReceiveConnectionId, (connectionId: string) => {
           appState.connectionId.value = connectionId;
         });
-
-        await roomHub.start().then(() => {
-          appState.connectionId.value = roomHub.getConnection().connectionId;
-          appState.connectionIssue.value = false;
-        });
-
+  
+        await appHub.start();
+  
       } catch (error) {
         appState.connectionIssue.value = true;
       }
     };
   
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
-      startRoomHubConnection();
+    if (appHub.getState() !== signalR.HubConnectionState.Connected) {
+      startAppHubConnection();
     }
-  }, [roomHub]);
+  }, [appHub]);
 
-  const handleLeaveRoomButtonClick = async () => {
+  const handleLeaveRoomButtonClick = () => {
     httpManager.leaveRoom(appState.roomHash.value);
 
     appState.isInRoom.value = false;
     navigate(ClientEndpoints.mainMenu);
   }
 
-  const handleCopyToClipboard = async () => {
+  const handleCopyToClipboard = () => {
     const clipboardValue = window.location.href.replace("room", "joinRoom");
 
     copy(clipboardValue);

@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
 import { HttpApiEndpoints } from "./HttpApiEndpoints";
 
-export class RoomHub {
+export class AppHub {
   private connection: signalR.HubConnection;
   private httpWebSocketUrl: string;
 
@@ -10,7 +10,7 @@ export class RoomHub {
     this.httpWebSocketUrl = env.VITE_WEBSOCKET_URL;
 
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${this.httpWebSocketUrl}${HttpApiEndpoints.roomHubConnection}`, {
+      .withUrl(`${this.httpWebSocketUrl}${HttpApiEndpoints.appHubConnection}`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         withCredentials: false
