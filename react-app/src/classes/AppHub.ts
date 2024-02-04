@@ -1,11 +1,16 @@
 import * as signalR from "@microsoft/signalr";
+import { HttpApiEndpoints } from "./HttpApiEndpoints";
 
-export class RoomHub {
-  private connection: signalR.HubConnection
+export class AppHub {
+  private connection: signalR.HubConnection;
+  private httpWebSocketUrl: string;
 
-  constructor(url: string) {
+  constructor() {
+    let env = import.meta.env;
+    this.httpWebSocketUrl = env.VITE_WEBSOCKET_URL;
+
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl(url, {
+      .withUrl(`${this.httpWebSocketUrl}${HttpApiEndpoints.appHubConnection}`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         withCredentials: false

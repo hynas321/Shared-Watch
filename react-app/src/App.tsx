@@ -5,7 +5,7 @@ import RoomView from './components/views/RoomView';
 import NotFoundView from './components/views/NotFoundView';
 import { useEffect } from 'react';
 import JoinRoomView from './components/views/JoinRoomView';
-import { AppStateContext, RoomHubContext, appState, roomHub } from './context/RoomHubContext';
+import { AppStateContext, AppHubContext, appState, appHub } from './context/AppContext';
 
 function App() {
   useEffect(() => {
@@ -39,9 +39,9 @@ function App() {
 
   return (
     <AppStateContext.Provider value={appState}>
-      <RoomHubContext.Provider value={roomHub}>
+      <AppHubContext.Provider value={appHub}>
         <RouterProvider router={router}/>
-      </RoomHubContext.Provider>
+      </AppHubContext.Provider>
     </AppStateContext.Provider>
   )
 }

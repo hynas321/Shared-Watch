@@ -1,16 +1,16 @@
-import { BsPlusCircleFill, BsXCircle } from "react-icons/bs";
+import { BsFillXCircleFill, BsPlusCircleFill } from "react-icons/bs";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import Button from "./Button";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import { useContext, useEffect, useRef, useState } from "react";
 import VideoIcon from './../assets/video-icon.png'
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomHelper } from "../classes/RoomHelper";
 
 export default function Playlist() {
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
   const appState = useContext(AppStateContext);
   const playlistVideosRef = useRef<HTMLDivElement>(null);
 
@@ -61,7 +61,7 @@ export default function Playlist() {
       duration: 5
     };
 
-    roomHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
+    appHub.invoke(HubEvents.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");
   }
 
@@ -73,7 +73,7 @@ export default function Playlist() {
 
   const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
     event.preventDefault();
-    roomHub.invoke(
+    appHub.invoke(
       HubEvents.DeletePlaylistVideo,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
@@ -87,12 +87,13 @@ export default function Playlist() {
       {
         (appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) &&
         <div className="d-flex mb-3">
-          <InputForm
+          <InputField
             classNames={`form-control rounded-0 ${!isInputFormEnabled && "border-5 border-danger"}`}
             value={currentVideoUrlText}
             trim={true}
             placeholder={inputFormPlaceholderText}
             isEnabled={isInputFormEnabled}
+            maxCharacters={200}
             onChange={handleTextInputChange}
             onKeyDown={handleEnterPress}
           />
@@ -126,8 +127,8 @@ export default function Playlist() {
                     (appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) &&
                     <div>
                       <Button
-                        text={<BsXCircle/>}
-                        classNames="btn btn-outline-danger btn-sm"
+                        text={<BsFillXCircleFill/>}
+                        classNames="btn btn-danger btn-sm"
                         onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
                       />
                     </div>

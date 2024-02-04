@@ -1,10 +1,10 @@
 import { BsFillLockFill, BsFillPeopleFill } from "react-icons/bs";
 import { Room } from "../types/Room";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import Button from "./Button";
 import { useEffect, useState } from "react";
-import { appState } from "../context/RoomHubContext";
+import { appState } from "../context/AppContext";
 
 export interface RoomListProps {
   list: Room[];
@@ -51,12 +51,13 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
               (room.occupiedSlots !== room.totalSlots && room.roomType === RoomTypesEnum.private && appState.username.value.length >= 3) &&
                 <div className="collapse" id={`collapseExample-${room.roomHash}`}>
                   <div className="d-flex">
-                    <InputForm
+                    <InputField
                       classNames={"form-control mx-1"}
                       placeholder={"Enter password"}
                       value={privateRoomPassword}
                       trim={true}
                       isEnabled={true}
+                      maxCharacters={35}
                       onChange={(value: string) => setPrivateRoomPassword(value)}
                     />
                     <Button

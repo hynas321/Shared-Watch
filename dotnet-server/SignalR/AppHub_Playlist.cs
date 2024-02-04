@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class RoomHub : Hub
+public partial class AppHub : Hub
 {
     [HubMethodName(HubEvents.AddPlaylistVideo)]
     public async Task AddPlaylistVideo(string roomHash, string authorizationToken, PlaylistVideo playlistVideo)

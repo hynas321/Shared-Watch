@@ -3,7 +3,7 @@ import { useEffect, useContext, useState } from "react";
 import { HttpManager } from "../../classes/HttpManager";
 import { HttpStatusCodes } from "../../classes/HttpStatusCodes";
 import { ClientEndpoints } from "../../classes/ClientEndpoints";
-import { AppStateContext } from "../../context/RoomHubContext";
+import { AppStateContext } from "../../context/AppContext";
 import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { animated, useSpring } from "@react-spring/web";
 import Header from "../Header";
@@ -12,7 +12,7 @@ import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
 import { useSignal } from "@preact/signals-react";
 import { Room } from "../../types/Room";
 import { BsFillLockFill, BsFillPeopleFill } from "react-icons/bs";
-import { InputForm } from "../InputForm";
+import { InputField } from "../InputField";
 import Button from "../Button";
 import { RoomState } from "../../types/RoomState";
 import { RoomHelper } from "../../classes/RoomHelper";
@@ -61,8 +61,6 @@ export default function JoinRoomView() {
     appState.roomType.value = responseData?.roomType as RoomTypesEnum;
     appState.isInRoom.value = false;
   }
-
-  //appState.roomType.value
 
   useEffect(() => {
     initializeView();
@@ -146,12 +144,13 @@ export default function JoinRoomView() {
                   (room.value.occupiedSlots !== room.value.totalSlots && room.value.roomType === RoomTypesEnum.private && appState.username.value.length >= 3) &&
                   <div className="collapse" id={`collapseExample-${room.value.roomHash}`}>
                     <div className="d-flex">
-                      <InputForm
+                      <InputField
                         classNames={"form-control mx-1"}
                         placeholder={"Enter password"}
                         value={privateRoomPassword}
                         trim={true}
                         isEnabled={true}
+                        maxCharacters={35}
                         onChange={(value: string) => setPrivateRoomPassword(value)}
                       />
                       <Button

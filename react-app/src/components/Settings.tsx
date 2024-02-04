@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import Switch from "./Switch";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
-import { AppStateContext, roomHub } from "../context/RoomHubContext";
+import { AppStateContext, appHub } from "../context/AppContext";
 import { useContext } from "react";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
@@ -25,7 +25,7 @@ export default function Settings() {
     }
 
     if (inputFormPassword.length > 0) {
-      roomHub.invoke(
+      appHub.invoke(
         HubEvents.SetRoomPassword,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
@@ -35,7 +35,7 @@ export default function Settings() {
       setInputFormPassword("");
     }
     else {
-      roomHub.invoke(
+      appHub.invoke(
         HubEvents.SetRoomPassword,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
@@ -47,7 +47,7 @@ export default function Settings() {
   }
 
   const handleRemovePasswordButtonClick = () => {
-    roomHub.invoke(
+    appHub.invoke(
       HubEvents.SetRoomPassword,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
@@ -64,7 +64,7 @@ export default function Settings() {
   }
 
   const invokeChange = () => {
-    roomHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
+    appHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
   };
 
   const setCanAddChatMessage = (checked: boolean) => {
@@ -97,14 +97,15 @@ export default function Settings() {
           {
             appState.isAdmin.value &&
             <div className="d-block mb-3">
-              <h6 className="text-info text-center mb-3">Room settings</h6>
+              <h6 className="text-orange text-center mb-3">Room settings</h6>
               <div className="d-flex">
-                <InputForm
+                <InputField
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
                   value={inputFormPassword}
                   trim={false}
                   isEnabled={true}
+                  maxCharacters={35}
                   onChange={(value: string) => setInputFormPassword(value)}
                   onKeyDown={handleSetRoomPrivateEnterClick}
                 />
@@ -128,7 +129,7 @@ export default function Settings() {
             </div>
           }
       <div className="d-block">
-        <h6 className="text-info text-center">User permissions</h6>
+        <h6 className="text-orange text-center">User permissions</h6>
         <div className="mt-3">
           <Switch 
             label={"Send chat messages"}

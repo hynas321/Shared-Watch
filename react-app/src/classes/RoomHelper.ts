@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { appState } from "../context/RoomHubContext";
+import { appState } from "../context/AppContext";
 import { HttpStatusCodes } from "./HttpStatusCodes";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { ChatMessage } from "../types/ChatMessage";

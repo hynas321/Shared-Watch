@@ -1,15 +1,15 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { ChatMessage } from "../types/ChatMessage";
-import { InputForm } from "./InputForm";
+import { InputField } from "./InputField";
 import { BsSendFill } from "react-icons/bs";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Chat() {
   const appState = useContext(AppStateContext);
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
 
   const messagesRef = useRef<HTMLDivElement>(null);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
@@ -46,7 +46,7 @@ export default function Chat() {
       date: currentDate
     }
 
-    roomHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
+    appHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
 
     setCurrentChatMessageText("");
   };
@@ -62,12 +62,13 @@ export default function Chat() {
         {
           (appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) &&
           <div className="d-flex mb-3">
-            <InputForm
+            <InputField
               classNames="form-control rounded-0"
               value={currentChatMessageText}
               trim={false}
               placeholder="Enter your message"
               isEnabled={true}
+              maxCharacters={200}
               onChange={handleTextInputChange}
               onKeyDown={handleEnterPress}
             />

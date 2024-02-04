@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Dotnet.Server.Hubs;
 
-public partial class RoomHub : Hub
+public partial class AppHub : Hub
 {
     [HubMethodName(HubEvents.AddChatMessage)]
     public async Task AddChatMessage(string roomHash, string authorizationToken, ChatMessage chatMessage)
@@ -35,6 +35,13 @@ public partial class RoomHub : Hub
                 $"{roomHash} AddChatMessage: User does not have the permission. Authorization Token: {authorizationToken}"
             );
 
+            return;
+        }
+
+        int maxChatMessageTextLength = 200;
+
+        if (chatMessage.Text.Length > maxChatMessageTextLength)
+        {
             return;
         }
 

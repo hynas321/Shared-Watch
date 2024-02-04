@@ -43,7 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapHub<RoomHub>("/Hub/Room");
+app.MapHub<AppHub>("/Hub/Room");
 app.UseCors("AllowReactApplication");
 app.UseHttpsRedirection();
 app.UseAuthorization();

@@ -1,13 +1,13 @@
 import { useContext } from "react";
 import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMinus, BsShieldFillPlus } from "react-icons/bs";
 import Button from "./Button";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Users() {
   const appState = useContext(AppStateContext);
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
 
   const localStorageManager = new LocalStorageManager();
 
@@ -16,7 +16,7 @@ export default function Users() {
       return;
     }
 
-    await roomHub.invoke(
+    await appHub.invoke(
       HubEvents.SetAdminStatus,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
@@ -26,7 +26,7 @@ export default function Users() {
   }
 
   const handleKickOutUserButtonClick = async (event: any, username: string) => {
-    await roomHub.invoke(
+    await appHub.invoke(
       HubEvents.KickOut,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
@@ -53,7 +53,7 @@ export default function Users() {
                   (user.isAdmin && appState.isAdmin.value === true &&appState.username.value != user.username) &&
                     <Button
                       text={<BsShieldFillMinus />}
-                      classNames="btn btn-outline-warning me-2"
+                      classNames="btn btn-success me-2 text-orange"
                       onClick={() => handleAdminStatusButtonClick(false, user.username)}
                     />
                 }
@@ -61,7 +61,7 @@ export default function Users() {
                   (!user.isAdmin && appState.isAdmin.value === true && appState.username.value != user.username) &&
                   <Button
                     text={<BsShieldFillPlus />}
-                    classNames="btn btn-outline-warning me-2"
+                    classNames="btn btn-success me-2"
                     onClick={() => handleAdminStatusButtonClick(true, user.username)}
                   />
                 }
@@ -69,7 +69,7 @@ export default function Users() {
                   (appState.isAdmin.value === true && appState.username.value != user.username) &&
                   <Button
                     text={<BsFillPersonXFill />}
-                    classNames="btn btn-outline-danger"
+                    classNames="btn btn-danger"
                     onClick={() => handleKickOutUserButtonClick(event, user.username)}
                   />
                 }

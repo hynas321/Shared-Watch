@@ -12,19 +12,19 @@ public class RoomController : ControllerBase
 {
     private readonly ILogger<RoomController> _logger;
     private readonly IConfiguration _configuration;
-    private readonly IHubContext<RoomHub> _roomHubContext;
+    private readonly IHubContext<AppHub> _appHubContext;
     private readonly RoomManager _roomManager = new RoomManager();
     private readonly UserManager _userManager = new UserManager();
 
     public RoomController(
         ILogger<RoomController> logger,
         IConfiguration configuration,
-        IHubContext<RoomHub> roomHubContext
+        IHubContext<AppHub> appHubContext
     )
     {
         _logger = logger;
         _configuration = configuration;
-        _roomHubContext = roomHubContext;
+        _appHubContext = appHubContext;
     }
 
     [HttpPost("Create")]
@@ -121,7 +121,7 @@ public class RoomController : ControllerBase
             if (!ModelState.IsValid || roomHash == "" || signalRConnectionId == null)
             {   
                 _logger.LogInformation(
-                    $"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
+                    $"{roomHash} Join: Status 400. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
                 );
     
                 return StatusCode(StatusCodes.Status400BadRequest);
@@ -189,7 +189,7 @@ public class RoomController : ControllerBase
             }
             else
             {
-                newUser = new User(input.Username, isUserAdmin);
+                newUser = new User(input.Username, isUserAdmin, signalRConnectionId: signalRConnectionId);
             }
 
             UserDTO newUserDTO = new UserDTO(newUser.Username, newUser.IsAdmin);
@@ -199,7 +199,7 @@ public class RoomController : ControllerBase
                 room.AdminTokens.Add(newUser.AuthorizationToken);
             }
 
-            var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
+            var hubContext = _appHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
 
             bool isNewUserAdded = _userManager.AddUser(roomHash, newUser);
 
@@ -224,11 +224,11 @@ public class RoomController : ControllerBase
                 VideoPlayerState = room.VideoPlayerState
             };
 
-            _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
+            _appHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnJoinRoom, newUserDTO);
 
             IEnumerable<RoomDTO> rooms = _roomManager.GetRoomsDTO();
 
-            _roomHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
+            _appHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
 
             _logger.LogInformation(
                 $"{roomHash} Join: Status 200. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
@@ -304,15 +304,15 @@ public class RoomController : ControllerBase
                 _roomManager.DeleteRoom(roomHash);
             }
 
+            _appHubContext.Groups.RemoveFromGroupAsync(signalRConnectionId, roomHash);
+
             UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
 
-            var hubContext = _roomHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
-
-            _roomHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
+            _appHubContext.Clients.Group(roomHash).SendAsync(HubEvents.OnLeaveRoom, userDTO);
 
             IEnumerable<RoomDTO> rooms = _roomManager.GetRoomsDTO();
 
-            _roomHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
+            _appHubContext.Clients.All.SendAsync(HubEvents.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
 
             _logger.LogInformation(
                 $"{roomHash} Leave: Status 200. AuthorizationToken: {authorizationToken}"

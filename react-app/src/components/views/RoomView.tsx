@@ -1,32 +1,33 @@
 import ControlPanel from "../ControlPanel";
 import VideoPlayer from "../VideoPlayer";
-import { useContext, useEffect } from "react";
-import { HttpManager } from "../../classes/HttpManager";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../../classes/ClientEndpoints";
 import Header from "../Header";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
-import { ping } from "ldrs"
 import { animated, useSpring } from "@react-spring/web";
-import { AppStateContext, roomHub } from "../../context/RoomHubContext";
+import { AppStateContext, appHub } from "../../context/AppContext";
 import { PanelsEnum } from "../../enums/PanelsEnum";
 import { useSignal } from "@preact/signals-react";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
+import { ping } from 'ldrs'
+import * as signalR from "@microsoft/signalr";
 
 export default function RoomView() {
   const appState = useContext(AppStateContext);
   const navigate = useNavigate();
 
+  const [isRoomLoading, setIsRoomLoading] = useState<boolean>(true);
+
   const isContentVisible = useSignal<boolean>(false);
 
-  const httpManager = new HttpManager();
   const httpUrlHelper = new HttpUrlHelper();
 
   useEffect(() => {
-    appState.isInRoom.value = true;
     ping.register();
+    appState.isInRoom.value = true;
   
     const hash: string = httpUrlHelper.getRoomHash(window.location.href);
 
@@ -36,7 +37,7 @@ export default function RoomView() {
           containerId: ToastNotificationEnum.Main
         }
       );
-      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
+      navigate(`${ClientEndpoints.mainMenu}`);
       return;
     }
 
@@ -57,12 +58,12 @@ export default function RoomView() {
     }
 
     const handleBeforeUnload = async () => {
-      httpManager.leaveRoom(appState.roomHash.value);
+      //await httpManager.leaveRoom(appState.roomHash.value);
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
 
-    roomHub.onclose(() => {
+    appHub.onclose(() => {
       appState.connectionIssue.value = true;
     })
 
@@ -75,6 +76,17 @@ export default function RoomView() {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [appState.roomHash.value]);
+
+  useEffect(() => {
+    if (appHub.getState() !== signalR.HubConnectionState.Connected) {
+      return;
+    }
+
+    setTimeout(() => {
+      setIsRoomLoading(false);
+    }, 800)
+
+  }, [appHub.getState()]);
 
   const springs = useSpring({
     from: { y: 200 },

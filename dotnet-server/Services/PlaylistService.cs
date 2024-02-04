@@ -6,14 +6,14 @@ public class PlaylistService
     private readonly ILogger<PlaylistService> _logger;
     private readonly RoomManager _roomManager = new RoomManager();
     private readonly PlaylistManager _playlistManager = new PlaylistManager();
-    private readonly IHubContext<RoomHub> _hubContext;
+    private readonly IHubContext<AppHub> _hubContext;
     private YouTubeAPIService _youtubeAPIService;
     
     public bool IsHandlerRunning {get; set; } = false;
 
     public PlaylistService(
         ILogger<PlaylistService> logger,
-        IHubContext<RoomHub> hubContext,
+        IHubContext<AppHub> hubContext,
         YouTubeAPIService youTubeAPIService
 
     )

@@ -1,6 +1,6 @@
 import ReactPlayer from "react-player";
 import { useContext, useEffect, useRef, useState } from "react";
-import { AppStateContext, RoomHubContext } from "../context/RoomHubContext";
+import { AppStateContext, AppHubContext } from "../context/AppContext";
 import * as signalR from "@microsoft/signalr";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
@@ -9,7 +9,7 @@ import { BsCameraVideoOffFill } from "react-icons/bs";
 
 export default function VideoPlayer() {
   const appState = useContext(AppStateContext);
-  const roomHub = useContext(RoomHubContext);
+  const appHub = useContext(AppHubContext);
 
   const videoPlayerRef = useRef<ReactPlayer>(null);
   const [videoUrl, setVideoUrl] = useState<string | undefined>(appState.videoPlayerState.value?.playlistVideo.url ?? undefined);
@@ -20,11 +20,11 @@ export default function VideoPlayer() {
   const localStorageManager = new LocalStorageManager();
 
   useEffect(() => {
-    if (roomHub.getState() !== signalR.HubConnectionState.Connected) {
+    if (appHub.getState() !== signalR.HubConnectionState.Connected) {
       return;
     }
 
-    roomHub.on(HubEvents.OnSetIsVideoPlaying, (isPlaying: boolean) => {
+    appHub.on(HubEvents.OnSetIsVideoPlaying, (isPlaying: boolean) => {
       if (appState.videoPlayerState.value === null) {
         return;
       }
@@ -33,7 +33,7 @@ export default function VideoPlayer() {
       setIsVideoPlaying(isPlaying);
     });
 
-    roomHub.on(HubEvents.OnSetPlayedSeconds, (newTime: number) => {
+    appHub.on(HubEvents.OnSetPlayedSeconds, (newTime: number) => {
       if (appState.videoPlayerState.value === null) {
         return;
       }
@@ -56,7 +56,7 @@ export default function VideoPlayer() {
       }
     });
 
-    roomHub.on(HubEvents.OnSetVideoUrl, async (url: string) => {
+    appHub.on(HubEvents.OnSetVideoUrl, async (url: string) => {
       if (appState.videoPlayerState.value == null) {
         return;
       }
@@ -66,14 +66,14 @@ export default function VideoPlayer() {
     });
 
     return () => {
-      roomHub.off(HubEvents.OnSetIsVideoPlaying);
-      roomHub.off(HubEvents.OnSetPlayedSeconds);
-      roomHub.off(HubEvents.OnSetVideoUrl);
+      appHub.off(HubEvents.OnSetIsVideoPlaying);
+      appHub.off(HubEvents.OnSetPlayedSeconds);
+      appHub.off(HubEvents.OnSetVideoUrl);
     };
-  }, [roomHub.getState()]);
+  }, [appHub.getState()]);
   
   const setUserVideoState = async (isPlaying: boolean) => {
-    await roomHub.invoke(
+    await appHub.invoke(
       HubEvents.SetIsVideoPlaying,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
@@ -91,7 +91,7 @@ export default function VideoPlayer() {
   
   const handleOnProgress = async (state: OnProgressProps) => {
     if (isVideoCurrentTimeDifferenceLarge && appState.isAdmin.value) {
-      await roomHub.invoke(
+      await appHub.invoke(
         HubEvents.SetPlayedSeconds,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
