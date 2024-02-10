@@ -13,15 +13,12 @@ import { PanelsEnum } from "../../enums/PanelsEnum";
 import { useSignal } from "@preact/signals-react";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { ping } from 'ldrs'
-import * as signalR from "@microsoft/signalr";
 
 export default function RoomView() {
   const appState = useContext(AppStateContext);
   const navigate = useNavigate();
 
-  const [isRoomLoading, setIsRoomLoading] = useState<boolean>(true);
-
-  const isContentVisible = useSignal<boolean>(false);
+  const isRoomLoading = useSignal<boolean>(true);
 
   const httpUrlHelper = new HttpUrlHelper();
 
@@ -57,6 +54,10 @@ export default function RoomView() {
       return;
     }
 
+    setTimeout(() => {
+      isRoomLoading.value = false;
+    }, 800)
+
     const handleBeforeUnload = async () => {
       //await httpManager.leaveRoom(appState.roomHash.value);
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
@@ -64,12 +65,10 @@ export default function RoomView() {
     }
 
     appHub.onclose(() => {
-      appState.connectionIssue.value = true;
+      appState.connectionId.value = null;
     })
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-
-    isContentVisible.value = true;
 
     return () => {
       handleBeforeUnload();
@@ -77,32 +76,31 @@ export default function RoomView() {
     };
   }, [appState.roomHash.value]);
 
-  useEffect(() => {
-    if (appHub.getState() !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
-    setTimeout(() => {
-      setIsRoomLoading(false);
-    }, 800)
-
-  }, [appHub.getState()]);
-
   const springs = useSpring({
-    from: { y: 200 },
+    from: { y: 400 },
     to: { y: 0 },
     config: {
-      mass: 1,
-      tension: 250,
-      friction:15
-    },
-    //delay: 1000
-  })
+      mass: 1.75,
+      tension: 150,
+      friction: 20,
+    }
+  });
 
   return (
     <>
       {
-        isContentVisible &&
+        isRoomLoading.value ?
+        <div className="container-fluid d-flex justify-content-center align-items-center vh-100">
+          <div className="col-md-6 text-center">
+            <l-ping
+              size="100"
+              speed="1.25" 
+              color="white" 
+            ></l-ping>
+            <h5 className="text-white">Joining the room...</h5>
+          </div>
+        </div>
+        :
         <>
           <Header />
           <ToastContainer
@@ -117,7 +115,7 @@ export default function RoomView() {
             style={{top: '0px', opacity: 0.9}}
             limit={1}
           />
-          <div className="container-fluid-md container-lg">
+          <div className=" container-lg">
             <div className="row">
               <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-3 mb-3">
                 <VideoPlayer />

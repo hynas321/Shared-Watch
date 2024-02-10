@@ -12,6 +12,7 @@ import { appState } from "../context/AppContext";
 import { useSignal } from "@preact/signals-react";
 import { RoomHelper } from "../classes/RoomHelper";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
+import { ping } from 'ldrs'
 
 export interface CreateRoomModalProps {
   acceptText: string;
@@ -22,12 +23,15 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
   const roomName = useSignal<string>("");
   const roomPassword = useSignal<string>("");
+  const isCreateButtonClicked = useSignal<boolean>(false);
   const navigate = useNavigate();
 
   const httpManager = new HttpManager();
   const roomHelper = new RoomHelper();
   
   useEffect(() => {
+    ping.register();
+
     return () => {
       clearInputFields();
     }
@@ -142,10 +146,14 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
               </div>
             </div>
             <div className="modal-footer bg-light">
+              {
+                isCreateButtonClicked.value === true &&
+                <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              }
               <span className="rounded-1" {...(isAcceptButtonEnabled ? {'data-bs-dismiss': 'modal'} : {})}>
                 <Button
-                  text={acceptText}
-                  classNames={`btn btn-primary ${!isAcceptButtonEnabled && "disabled"}`}
+                  text={`${isCreateButtonClicked.value === true ? "Creating..." : acceptText }`}
+                  classNames={`btn btn-primary ${(!isAcceptButtonEnabled || isCreateButtonClicked.value === true) && "disabled"}`}
                   onClick={handleCreateRoomButtonClick}
                 />
               </span>

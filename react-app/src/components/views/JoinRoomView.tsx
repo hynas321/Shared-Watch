@@ -7,7 +7,7 @@ import { AppStateContext } from "../../context/AppContext";
 import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { animated, useSpring } from "@react-spring/web";
 import Header from "../Header";
-import { ToastContainer } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
 import { useSignal } from "@preact/signals-react";
 import { Room } from "../../types/Room";
@@ -16,6 +16,7 @@ import { InputField } from "../InputField";
 import Button from "../Button";
 import { RoomState } from "../../types/RoomState";
 import { RoomHelper } from "../../classes/RoomHelper";
+import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 
 export default function JoinRoomView() {
   const appState = useContext(AppStateContext);
@@ -52,6 +53,11 @@ export default function JoinRoomView() {
     const [responseStatus, responseData] = await httpManager.getRoom(hash);
 
     if (responseStatus !== HttpStatusCodes.OK) {
+      toast.error(
+        "Room not found", {
+          containerId: ToastNotificationEnum.Main
+        }
+      );
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }

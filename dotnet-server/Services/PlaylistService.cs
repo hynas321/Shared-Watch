@@ -115,8 +115,6 @@ public class PlaylistService
 
             while (room.VideoPlayerState.IsPlaying && room.VideoPlayerState.CurrentTime <= durationTime)
             {
-                _logger.LogInformation(room.VideoPlayerState.CurrentTime.ToString());
-
                 if (room.PlaylistVideos.Count == 0 ||
                     room.PlaylistVideos[0].Hash != currentVideoHash ||
                     room.Users.Count == 0

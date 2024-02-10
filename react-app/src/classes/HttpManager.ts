@@ -30,7 +30,11 @@ export class HttpManager {
       return [response.status, response.data];
     }
     catch (error: any) {
-      return [error.response.status ?? 500, undefined]
+      if (error.response === undefined) {
+        return [500, undefined];
+      }
+
+      return [error.response.status, undefined]
     }
   }
 
@@ -58,7 +62,11 @@ export class HttpManager {
       return [response.status, response.data] as [number, RoomCreateOutput];
     }
     catch (error: any) {
-      return [error.response.status ?? 500, undefined]
+      if (error.response === undefined) {
+        return [500, undefined];
+      }
+
+      return [error.response.status, undefined]
     }
   }
 
@@ -75,7 +83,11 @@ export class HttpManager {
       return [response.status, response.data] as [number, Room]
     }
     catch (error: any) {
-      return [error.response.status ?? 500, undefined];
+      if (error.response === undefined) {
+        return [500, undefined];
+      }
+
+      return [error.response.status, undefined];
     }
   }
 
@@ -102,7 +114,11 @@ export class HttpManager {
       return [response.status, response.data] as [number, RoomJoinOutput]
 
     } catch (error: any) {
-      return [error.response.status ?? 500, undefined];
+      if (error.response === undefined) {
+        return [500, undefined];
+      }
+
+      return [error.response.status, undefined];
     }
   }
 
@@ -124,7 +140,11 @@ export class HttpManager {
       return response.status as number;
 
     } catch (error: any) {
-      return error.response.status ?? 500 as number;
+      if (error.response === undefined) {
+        return 500;
+      }
+
+      return error.response.status;
     }
   }
 }

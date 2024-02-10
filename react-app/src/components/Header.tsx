@@ -13,6 +13,9 @@ import { HttpManager } from "../classes/HttpManager";
 import useClipboardApi from "use-clipboard-api";
 import { useSignal } from "@preact/signals-react";
 import { BsFillLayersFill } from "react-icons/bs";
+import { toast } from "react-toastify";
+import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
+
 export default function Header() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
@@ -37,11 +40,11 @@ export default function Header() {
         appHub.on(HubEvents.OnReceiveConnectionId, (connectionId: string) => {
           appState.connectionId.value = connectionId;
         });
-  
+
         await appHub.start();
   
       } catch (error) {
-        appState.connectionIssue.value = true;
+        appState.connectionId.value = null;
       }
     };
   
@@ -63,6 +66,12 @@ export default function Header() {
     copy(clipboardValue);
     buttonColor.value = "success";
 
+    toast.success(
+      "Invitation URL copied to clipboard", {
+        containerId: ToastNotificationEnum.Room
+      }
+    );
+
     setTimeout(() => {
       buttonColor.value = "primary";
     }, 500);
@@ -72,7 +81,7 @@ export default function Header() {
     <div>
       <nav className="navbar navbar-dark mb-2 mt-2">
         <div className="d-flex align-items-center">
-          <a className="navbar-brand ms-3" href="/"><i><b>Shared Watch</b></i> <BsFillCameraReelsFill /></a>
+          <div className="navbar-brand ms-3"><i><b>Shared Watch</b></i> <BsFillCameraReelsFill /></div>
           {
             (!appState.isInRoom.value) &&
             <div className="ms-3 me-3">

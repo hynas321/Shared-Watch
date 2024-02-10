@@ -7,12 +7,13 @@ export interface InputFormProps {
   trim: boolean;
   isEnabled: boolean;
   maxCharacters: number;
+  type?: string;
   onChange: (value: string) => void;
   onKeyDown?: (key: string) => void;
 };
 
 export const InputField = forwardRef(
-  ({ classNames, placeholder, value, trim, isEnabled, maxCharacters, onChange, onKeyDown}: InputFormProps,
+  ({ classNames, placeholder, value, trim, isEnabled, maxCharacters, type, onChange, onKeyDown}: InputFormProps,
     ref: React.ForwardedRef<HTMLInputElement>
   ) => {
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +34,7 @@ export const InputField = forwardRef(
       <input
         className={`${classNames} ${isEnabled ? "available-element" : "unavailable-element"}`}
         ref={ref}
-        type="text"
+        type={type ?? "text"}
         value={value} 
         placeholder={placeholder}
         onChange={handleInputChange}
