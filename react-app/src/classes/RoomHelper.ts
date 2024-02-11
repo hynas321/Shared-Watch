@@ -13,10 +13,24 @@ import { VideoPlayerState } from "../types/VideoPlayerState";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 
 export class RoomHelper {
-  private httpManager = new HttpManager();
-  private localStorageManager = new LocalStorageManager();
-  
-  joinRoom = async (roomState: RoomState): Promise<boolean> => {
+  private static instance: RoomHelper;
+
+  private httpManager: HttpManager;
+  private localStorageManager: LocalStorageManager;
+
+  private constructor() {
+    this.httpManager = new HttpManager();
+    this.localStorageManager = new LocalStorageManager();
+  }
+
+  public static getInstance(): RoomHelper {
+    if (!RoomHelper.instance) {
+      RoomHelper.instance = new RoomHelper();
+    }
+    return RoomHelper.instance;
+  }
+
+  public joinRoom = async (roomState: RoomState): Promise<boolean> => {
       const [responseStatusCode, roomInformation] = await this.httpManager.joinRoom(
         roomState.roomHash,
         roomState.password,

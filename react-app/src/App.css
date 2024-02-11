@@ -1,14 +1,6 @@
-.background-image {
-  position: relative;
-  background-image: url('./assets/background.jpg');
-  background-size: cover;
-  background-position: center;
-  height: 100vh;
-}
-
 .background-gradient {
   background: linear-gradient(-45deg, #d56441, #c82d69, #1965c8, #0973a7);
-  height: 100vh;
+  height: 98.8lvh;
 }
 
 .background-dark {

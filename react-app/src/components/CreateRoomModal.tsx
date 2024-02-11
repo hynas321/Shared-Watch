@@ -8,11 +8,12 @@ import { HttpStatusCodes } from "../classes/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { RoomState } from "../types/RoomState";
-import { appState } from "../context/AppContext";
+import { appHub, appState } from "../context/AppContext";
 import { useSignal } from "@preact/signals-react";
 import { RoomHelper } from "../classes/RoomHelper";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 import { ping } from 'ldrs'
+import { HubEvents } from "../classes/HubEvents";
 
 export interface CreateRoomModalProps {
   acceptText: string;
@@ -27,7 +28,7 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
   const navigate = useNavigate();
 
   const httpManager = new HttpManager();
-  const roomHelper = new RoomHelper();
+  const roomHelper = RoomHelper.getInstance();
   
   useEffect(() => {
     ping.register();
@@ -94,6 +95,8 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
       roomName: roomName.value as string,
       password: roomPassword.value as string
     };
+
+    appHub.off(HubEvents.onListOfRoomsUpdated);
     
     const canJoin = await roomHelper.joinRoom(roomState);
 

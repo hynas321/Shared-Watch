@@ -19,7 +19,7 @@ export default function Playlist() {
   const [inputFormPlaceholderText, setInputFormPlaceholderText] = useState<string>("Paste Youtube Video URL");
 
   const localStorageManager = new LocalStorageManager();
-  const roomHelper = new RoomHelper();
+  const roomHelper = RoomHelper.getInstance();
   
   const videoThumbnailStyle = {
     width: "40px",

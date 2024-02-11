@@ -11,12 +11,13 @@ import { ToastContainer, toast } from "react-toastify";
 import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
 import { useSignal } from "@preact/signals-react";
 import { Room } from "../../types/Room";
-import { BsFillLockFill, BsFillPeopleFill } from "react-icons/bs";
+import { BsFillLockFill, BsFillPeopleFill, BsFillPersonLinesFill } from "react-icons/bs";
 import { InputField } from "../InputField";
 import Button from "../Button";
 import { RoomState } from "../../types/RoomState";
 import { RoomHelper } from "../../classes/RoomHelper";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
+import { ping } from "ldrs";
 
 export default function JoinRoomView() {
   const appState = useContext(AppStateContext);
@@ -24,6 +25,7 @@ export default function JoinRoomView() {
 
   const [privateRoomPassword, setPrivateRoomPassword] = useState<string>("");
   const [isEnterPrivateRoomButtonEnabled, setIsEnterPrivateRoomButtonEnabled] = useState<boolean>(false);
+  const [isRoomLoading, setIsRoomLoading] = useState<boolean>(true);
 
   const room = useSignal<Room>({
     roomHash: "",
@@ -33,7 +35,7 @@ export default function JoinRoomView() {
     totalSlots: 0
   });
 
-  const roomHelper = new RoomHelper();
+  const roomHelper = RoomHelper.getInstance();
 
   useEffect(() => {
     if (privateRoomPassword.length > 0) {
@@ -62,6 +64,8 @@ export default function JoinRoomView() {
       return;
     }
 
+    setIsRoomLoading(false);
+
     room.value = responseData as Room;
   
     appState.roomType.value = responseData?.roomType as RoomTypesEnum;
@@ -69,16 +73,17 @@ export default function JoinRoomView() {
   }
 
   useEffect(() => {
+    ping.register();
     initializeView();
   }, []);
 
   const springs = useSpring({
-    from: { y: 200 },
+    from: { y: 400 },
     to: { y: 0 },
     config: {
-      mass: 1,
-      tension: 250,
-      friction: 15
+      mass: 1.75,
+      tension: 150,
+      friction: 20,
     }
   });
 
@@ -112,74 +117,95 @@ export default function JoinRoomView() {
 
   return (
     <>
-    <Header />
-    <ToastContainer
-      position="top-right"
-      autoClose={3000}
-      hideProgressBar={true}
-      closeOnClick={true}
-      draggable={true}
-      pauseOnHover={false}
-      theme="dark"
-      style={{opacity: 0.9}}
-    />
-    <div className="container">
-      <div className="row justify-content-center">
-        <animated.div className="mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
-          <h3 className="text-white text-center mt-3 mb-3">Join the room</h3>
-          <div className="row d-flex justify-content-between align-items-center">
-            <div className="list-group rounded-3">
-              <div
-                className={`list-group-item mt-1 py-2 ${(room.value.occupiedSlots === room.value.totalSlots || appState.username.value.length < 3) ? "unavailable-element" : "available-element"}`}
-                style={(room.value.occupiedSlots === room.value.totalSlots || appState.username.value.length < 3) ? {color: "darkgray"} : {}}
-                onClick={(room.value.occupiedSlots !== room.value.totalSlots && room.value.roomType === RoomTypesEnum.public && appState.username.value.length >= 3) ? () => handlePublicRoomListItemClick(room.value) : undefined}
-              >
-                <div
+      <Header />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={true}
+        closeOnClick={true}
+        draggable={true}
+        pauseOnHover={false}
+        theme="dark"
+        style={{opacity: 0.9}}
+      />
+      <div className="container">
+        <div className="row justify-content-center">
+          <animated.div className="mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
+            <h3 className="text-white text-center mt-3 mb-3">Join the room</h3>
+            <div className="row d-flex justify-content-between align-items-center">
+              <div className="list-group rounded-3">
                 {
-                  ...room.value.roomType === RoomTypesEnum.private ? {
-                    'data-bs-toggle': 'collapse',
-                    'data-bs-target': `#collapseExample-${room.value.roomHash}`,
-                    'aria-expanded': false
-                  } : {}
+                  (appState.username.value.length < 3 && isRoomLoading === false) &&
+                  <div className="mt-3 mb-4">
+                    <h1 className="text-white text-center"><BsFillPersonLinesFill /></h1>
+                    <h5 className="text-white text-center">Enter your username</h5>
+                    <h6 className="text-white text-center">To gain access to the room</h6>
+                  </div>
                 }
-                >
-                  <h5>{room.value.roomType === RoomTypesEnum.private && <BsFillLockFill />} {room.value.roomName}</h5>
-                  <h6><BsFillPeopleFill /> {`${room.value.occupiedSlots}/${room.value.totalSlots}`}</h6>
-                </div>
                 {
-                  (room.value.occupiedSlots !== room.value.totalSlots && room.value.roomType === RoomTypesEnum.private && appState.username.value.length >= 3) &&
-                  <div className="collapse" id={`collapseExample-${room.value.roomHash}`}>
-                    <div className="d-flex">
-                      <InputField
-                        classNames={"form-control mx-1"}
-                        placeholder={"Enter password"}
-                        value={privateRoomPassword}
-                        trim={true}
-                        isEnabled={true}
-                        maxCharacters={35}
-                        onChange={(value: string) => setPrivateRoomPassword(value)}
-                      />
-                      <Button
-                        text={"Enter"}
-                        classNames={`btn btn-primary mx-1 ${!isEnterPrivateRoomButtonEnabled && "disabled"}`}
-                        onClick={() => handlePrivateRoomListItemClick(room.value, privateRoomPassword)}
-                      />
+                  (isRoomLoading === true) &&
+                  <h1 className="text-white text-center" style={{marginTop: "2rem", marginBottom: "1.2rem"}}>
+                    <l-ping
+                      size="100"
+                      speed="1.25" 
+                      color="white" 
+                    ></l-ping>
+                  </h1>
+                }
+                {
+                  (appState.username.value.length >= 3 && isRoomLoading === false) &&
+                  <div
+                    className="list-group-item py-2 "
+                    style={{marginTop: "2rem", marginBottom: "2.9rem"}}
+                    onClick={(room.value.occupiedSlots !== room.value.totalSlots && room.value.roomType === RoomTypesEnum.public && appState.username.value.length >= 3) ? () => handlePublicRoomListItemClick(room.value) : undefined}
+                  >
+                    <div
+                    {
+                      ...room.value.roomType === RoomTypesEnum.private ? {
+                        'data-bs-toggle': 'collapse',
+                        'data-bs-target': `#collapseExample-${room.value.roomHash}`,
+                        'aria-expanded': false
+                      } : {}
+                    }
+                    >
+                      <h5>{room.value.roomType === RoomTypesEnum.private && <BsFillLockFill />} {room.value.roomName}</h5>
+                      <h6><BsFillPeopleFill /> {`${room.value.occupiedSlots}/${room.value.totalSlots}`}</h6>
                     </div>
+                    {
+                      (room.value.occupiedSlots !== room.value.totalSlots && room.value.roomType === RoomTypesEnum.private && appState.username.value.length >= 3) &&
+                      <div className="collapse" id={`collapseExample-${room.value.roomHash}`}>
+                        <div className="d-flex">
+                          <InputField
+                            classNames={"form-control mx-1"}
+                            placeholder={"Enter password"}
+                            value={privateRoomPassword}
+                            trim={true}
+                            isEnabled={true}
+                            maxCharacters={35}
+                            onChange={(value: string) => setPrivateRoomPassword(value)}
+                          />
+                          <Button
+                            text={"Enter"}
+                            classNames={`btn btn-primary mx-1 ${!isEnterPrivateRoomButtonEnabled && "disabled"}`}
+                            onClick={() => handlePrivateRoomListItemClick(room.value, privateRoomPassword)}
+                          />
+                        </div>
+                      </div>
+                    }
                   </div>
                 }
               </div>
             </div>
-          </div>
-          <div className="d-flex justify-content-center">
-            <Button
-              text={"Go to Main Menu"}
-              classNames={`btn btn-primary mx-1 mt-4 mb-2`}
-              onClick={() => navigate(`${ClientEndpoints.mainMenu}`, { replace: true })}
-            />
-          </div>
-        </animated.div>
+            <div className="d-flex justify-content-center">
+              <Button
+                text={"Go to Main Menu"}
+                classNames={`btn btn-primary mx-1 mt-2 mb-4`}
+                onClick={() => navigate(`${ClientEndpoints.mainMenu}`, { replace: true })}
+              />
+            </div>
+          </animated.div>
+        </div>
       </div>
-    </div>
     </>
   )
 }
