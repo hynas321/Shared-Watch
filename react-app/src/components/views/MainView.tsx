@@ -20,7 +20,7 @@ import { HubEvents } from "../../classes/HubEvents";
 import { BsDoorOpenFill, BsExclamationTriangleFill } from "react-icons/bs";
 import { BsFillPersonLinesFill } from "react-icons/bs";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
-import { helix } from 'ldrs'
+import { helix, ping } from 'ldrs'
 
 export default function MainView() {
   const appState = useContext(AppStateContext);
@@ -30,6 +30,7 @@ export default function MainView() {
   const [displayedRooms, setDisplayedRooms] = useState<Room[]>([]);
   const [displayOnlyAvailableRooms, setDisplayOnlyAvailableRooms] = useState<boolean>(false);
   const [searchText, setSearchText] = useState<string>("");
+  const [areRoomsFetched, setAreRoomsFetched] = useState<boolean>(false);
 
   const httpManager: HttpManager = new HttpManager();
   const roomHelper = RoomHelper.getInstance();
@@ -63,12 +64,18 @@ export default function MainView() {
 
     setRooms(responseData ?? []);
     setDisplayedRooms(responseData ?? []);
+
+    setTimeout(() => {
+      setAreRoomsFetched(true);
+    }, 500);
+
     setSearchText(".");
     setSearchText("");
   }
   
   useEffect(() => {
     helix.register();
+    ping.register();
     appState.isInRoom.value = false;
     fetchRooms();
 
@@ -228,14 +235,18 @@ export default function MainView() {
               </h1>
             }
             {
-              (displayedRooms.length === 0 && appState.username.value.length >= 3 && appState.connectionId.value != undefined) &&
+              (displayedRooms.length === 0 &&
+                appState.username.value.length >= 3 &&
+                appState.connectionId.value != undefined &&
+                areRoomsFetched === true) &&
                 <>
                   <h1 className="text-white text-center" style={{marginTop: "4rem"}}><BsDoorOpenFill /></h1>
                   <h5 className="text-white text-center">No rooms to display</h5>
                 </>
             }
             {
-              (appState.username.value.length < 3 && appState.connectionId.value != undefined) &&
+              (appState.username.value.length < 3 &&
+                appState.connectionId.value != undefined) &&
               <>
                 <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsFillPersonLinesFill /></h1>
                 <h5 className="text-white text-center">Enter your username</h5>
@@ -251,7 +262,20 @@ export default function MainView() {
               </>
             }
             {
-              (displayedRooms.length !== 0 && appState.username.value.length >= 3 && appState.connectionId.value !== null) &&
+              appState.connectionId.value != null && areRoomsFetched === false &&
+              <h1 className="text-white text-center" style={{marginTop: "6rem"}}>
+                <l-ping
+                  size="100"
+                  speed="1.25" 
+                  color="white" 
+                ></l-ping>
+              </h1>
+            }
+            {
+              (displayedRooms.length !== 0 &&
+                appState.username.value.length >= 3 &&
+                appState.connectionId.value != null &&
+                areRoomsFetched === true) &&
               <div className="main-menu-list mb-3">
                 <RoomList
                   list={displayedRooms}

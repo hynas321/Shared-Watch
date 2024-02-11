@@ -64,7 +64,9 @@ export default function JoinRoomView() {
       return;
     }
 
-    setIsRoomLoading(false);
+    setTimeout(() => {
+      setIsRoomLoading(false);
+    }, 550);
 
     room.value = responseData as Room;
   

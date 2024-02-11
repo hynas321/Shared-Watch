@@ -49,7 +49,7 @@ export default function Header() {
     };
   
     if (appHub.getState() !== signalR.HubConnectionState.Connected) {
-      startAppHubConnection();
+      setTimeout(startAppHubConnection, 550);
     }
   }, [appHub]);
 
