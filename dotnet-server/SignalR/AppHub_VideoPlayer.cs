@@ -29,7 +29,7 @@ public partial class AppHub : Hub
             return;
         }
 
-        if (user.IsAdmin == false && room.UserPermissions.canStartOrPauseVideo == false)
+        if (user.IsAdmin == false && room.UserPermissions.CanStartOrPauseVideo == false)
         {
             _logger.LogInformation(
                 $"{roomHash} SetIsVideoPlaying: User does not have the permission. Authorization Token: {authorizationToken}"
@@ -72,7 +72,7 @@ public partial class AppHub : Hub
             return;
         }
 
-        if (user.IsAdmin == false && room.UserPermissions.canSkipVideo == false)
+        if (user.IsAdmin == false && room.UserPermissions.CanSkipVideo == false)
         {
             _logger.LogInformation(
                 $"{roomHash} SetPlayedSeconds: User does not have the permission. Authorization Token: {authorizationToken}"
@@ -81,7 +81,8 @@ public partial class AppHub : Hub
             return;
         }
         
-        room.VideoPlayerState.CurrentTime = Math.Round(playedSeconds);
+        room.VideoPlayerState.SetPlayedSecondsCalled = true;
+        room.VideoPlayerState.CurrentTime = playedSeconds;
 
         _logger.LogInformation(
             $"{roomHash} SetPlayedSeconds: {playedSeconds}s. Authorization Token: {authorizationToken}"

@@ -94,79 +94,77 @@ export default function Settings() {
 
   return (
     <>
-          {
-            appState.isAdmin.value &&
-            <div className="d-block mb-3">
-              <h6 className="text-orange text-center mb-3">Room settings</h6>
-              <div className="d-flex">
-                <InputField
-                  classNames="form-control rounded-0"
-                  placeholder={"Enter password (private room)"}
-                  value={inputFormPassword}
-                  trim={false}
-                  isEnabled={true}
-                  maxCharacters={35}
-                  onChange={(value: string) => setInputFormPassword(value)}
-                  onKeyDown={handleSetRoomPrivateEnterClick}
-                />
-                <Button
-                  text={<><BsSaveFill /></>}
-                  classNames="btn btn-primary rounded-0"
-                  onClick={handleSetRoomPrivateButtonClick}
-                />
-              </div>
-              { 
-                (appState.roomPassword.value.length > 0) && 
-                <div className="mt-2">
-                  <span className="text-white room-password">Current password: {appState.roomPassword.value} </span>
-                  <Button
-                    text={"Remove password"}
-                    classNames="text-orange button-text"
-                    onClick={handleRemovePasswordButtonClick}
-                  />
-                </div>
-              }
+      {appState.isAdmin.value && (
+        <div className="d-block mb-3">
+          <h6 className="text-orange text-center mb-3">Room settings</h6>
+          <div className="d-flex">
+            <InputField
+              classNames="form-control rounded-0"
+              placeholder={"Enter password (private room)"}
+              value={inputFormPassword}
+              trim={false}
+              isEnabled={true}
+              maxCharacters={35}
+              onChange={(value: string) => setInputFormPassword(value)}
+              onKeyDown={handleSetRoomPrivateEnterClick}
+            />
+            <Button
+              text={<><BsSaveFill /></>}
+              classNames="btn btn-primary rounded-0"
+              onClick={handleSetRoomPrivateButtonClick}
+            />
+          </div>
+          {appState.roomPassword.value.length > 0 && (
+            <div className="mt-2">
+              <span className="text-white room-password">Current password: {appState.roomPassword.value} </span>
+              <Button
+                text={"Remove password"}
+                classNames="text-orange button-text"
+                onClick={handleRemovePasswordButtonClick}
+              />
             </div>
-          }
+          )}
+        </div>
+      )}
       <div className="d-block">
         <h6 className="text-orange text-center">User permissions</h6>
         <div className="mt-3">
-          <Switch 
+          <Switch
             label={"Send chat messages"}
             isChecked={userPermissions?.canAddChatMessage as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setCanAddChatMessage(checked)} 
-          />
-        </div>
-        <div className="mt-3"> 
-          <Switch 
-            label={"Add videos to the playlist"}
-            isChecked={appState.userPermissions.value?.canAddVideo as boolean}
-            isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setCanAddVideo(checked)} 
-          />
-          <Switch 
-            label={"Remove videos from the playlist"}
-            isChecked={appState.userPermissions.value?.canRemoveVideo as boolean}
-            isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setCanRemoveVideo(checked)} 
+            onCheckChange={(checked: boolean) => setCanAddChatMessage(checked)}
           />
         </div>
         <div className="mt-3">
-          <Switch 
+          <Switch
+            label={"Add videos to the playlist"}
+            isChecked={appState.userPermissions.value?.canAddVideo as boolean}
+            isEnabled={appState.isAdmin.value}
+            onCheckChange={(checked: boolean) => setCanAddVideo(checked)}
+          />
+          <Switch
+            label={"Remove videos from the playlist"}
+            isChecked={appState.userPermissions.value?.canRemoveVideo as boolean}
+            isEnabled={appState.isAdmin.value}
+            onCheckChange={(checked: boolean) => setCanRemoveVideo(checked)}
+          />
+        </div>
+        <div className="mt-3">
+          <Switch
             label={"Start/Pause videos"}
             isChecked={appState.userPermissions.value?.canStartOrPauseVideo as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setCanStartOrPauseVideo(checked)} 
+            onCheckChange={(checked: boolean) => setCanStartOrPauseVideo(checked)}
           />
-          <Switch 
+          <Switch
             label={"Skip videos"}
             isChecked={appState.userPermissions.value?.canSkipVideo as boolean}
             isEnabled={appState.isAdmin.value}
-            onCheckChange={(checked: boolean) => setCanSkipVideo(checked)} 
+            onCheckChange={(checked: boolean) => setCanSkipVideo(checked)}
           />
         </div>
       </div>
     </>
-  )
+  );
 }

@@ -11,7 +11,11 @@ import { ToastContainer, toast } from "react-toastify";
 import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
 import { useSignal } from "@preact/signals-react";
 import { Room } from "../../types/Room";
-import { BsFillLockFill, BsFillPeopleFill, BsFillPersonLinesFill } from "react-icons/bs";
+import {
+  BsFillLockFill,
+  BsFillPeopleFill,
+  BsFillPersonLinesFill,
+} from "react-icons/bs";
 import { InputField } from "../InputField";
 import Button from "../Button";
 import { RoomState } from "../../types/RoomState";
@@ -21,7 +25,7 @@ import { ping } from "ldrs";
 
 export default function JoinRoomView() {
   const appState = useContext(AppStateContext);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [privateRoomPassword, setPrivateRoomPassword] = useState<string>("");
   const [isEnterPrivateRoomButtonEnabled, setIsEnterPrivateRoomButtonEnabled] = useState<boolean>(false);
@@ -32,7 +36,7 @@ export default function JoinRoomView() {
     roomName: "-",
     roomType: RoomTypesEnum.public,
     occupiedSlots: 0,
-    totalSlots: 0
+    totalSlots: 0,
   });
 
   const roomHelper = RoomHelper.getInstance();
@@ -46,7 +50,6 @@ export default function JoinRoomView() {
     }
   }, [privateRoomPassword]);
 
-
   const httpManager = new HttpManager();
   const httpUrlHelper = new HttpUrlHelper();
 
@@ -55,11 +58,10 @@ export default function JoinRoomView() {
     const [responseStatus, responseData] = await httpManager.getRoom(hash);
 
     if (responseStatus !== HttpStatusCodes.OK) {
-      toast.error(
-        "Room not found", {
-          containerId: ToastNotificationEnum.Main
-        }
-      );
+      toast.error("Room not found", {
+        containerId: ToastNotificationEnum.Main,
+      });
+
       navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
       return;
     }
@@ -69,10 +71,10 @@ export default function JoinRoomView() {
     }, 550);
 
     room.value = responseData as Room;
-  
+
     appState.roomType.value = responseData?.roomType as RoomTypesEnum;
     appState.isInRoom.value = false;
-  }
+  };
 
   useEffect(() => {
     ping.register();
@@ -86,14 +88,14 @@ export default function JoinRoomView() {
       mass: 1.75,
       tension: 150,
       friction: 20,
-    }
+    },
   });
 
   const handlePublicRoomListItemClick = async (item: Room) => {
     const roomState: RoomState = {
       roomHash: item.roomHash,
       roomName: item.roomName,
-      password: ""
+      password: "",
     };
 
     const canJoin = await roomHelper.joinRoom(roomState);
@@ -107,7 +109,7 @@ export default function JoinRoomView() {
     const roomState: RoomState = {
       roomHash: item.roomHash,
       roomName: item.roomName,
-      password: password
+      password: password,
     };
 
     const canJoin = await roomHelper.joinRoom(roomState);
@@ -115,7 +117,7 @@ export default function JoinRoomView() {
     if (canJoin) {
       navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
-  }
+  };
 
   return (
     <>
@@ -128,53 +130,71 @@ export default function JoinRoomView() {
         draggable={true}
         pauseOnHover={false}
         theme="dark"
-        style={{opacity: 0.9}}
+        style={{ opacity: 0.9 }}
       />
       <div className="container">
         <div className="row justify-content-center">
-          <animated.div className="mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
+          <animated.div
+            className="mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4"
+            style={{ ...springs }}
+          >
             <h3 className="text-white text-center mt-3 mb-3">Join the room</h3>
             <div className="row d-flex justify-content-between align-items-center">
               <div className="list-group rounded-3">
-                {
-                  (appState.username.value.length < 3 && isRoomLoading === false) &&
+                {(appState.username.value.length < 3 && isRoomLoading === false) && (
                   <div className="mt-3 mb-4">
-                    <h1 className="text-white text-center"><BsFillPersonLinesFill /></h1>
+                    <h1 className="text-white text-center">
+                      <BsFillPersonLinesFill />
+                    </h1>
                     <h5 className="text-white text-center">Enter your username</h5>
-                    <h6 className="text-white text-center">To gain access to the room</h6>
+                    <h6 className="text-white text-center">
+                      To gain access to the room
+                    </h6>
                   </div>
-                }
-                {
-                  (isRoomLoading === true) &&
-                  <h1 className="text-white text-center" style={{marginTop: "2rem", marginBottom: "1.2rem"}}>
-                    <l-ping
-                      size="100"
-                      speed="1.25" 
-                      color="white" 
-                    ></l-ping>
+                )}
+                {isRoomLoading === true && (
+                  <h1
+                    className="text-white text-center"
+                    style={{ marginTop: "2rem", marginBottom: "1.2rem" }}
+                  >
+                    <l-ping size="100" speed="1.25" color="white"></l-ping>
                   </h1>
-                }
-                {
-                  (appState.username.value.length >= 3 && isRoomLoading === false) &&
+                )}
+                {appState.username.value.length >= 3 && isRoomLoading === false && (
                   <div
                     className="list-group-item py-2 "
-                    style={{marginTop: "2rem", marginBottom: "2.9rem"}}
-                    onClick={(room.value.occupiedSlots !== room.value.totalSlots && room.value.roomType === RoomTypesEnum.public && appState.username.value.length >= 3) ? () => handlePublicRoomListItemClick(room.value) : undefined}
+                    style={{ marginTop: "2rem", marginBottom: "2.9rem" }}
+                    onClick={
+                      room.value.occupiedSlots !== room.value.totalSlots &&
+                      room.value.roomType === RoomTypesEnum.public &&
+                      appState.username.value.length >= 3
+                        ? () => handlePublicRoomListItemClick(room.value)
+                        : undefined
+                    }
                   >
                     <div
-                    {
-                      ...room.value.roomType === RoomTypesEnum.private ? {
-                        'data-bs-toggle': 'collapse',
-                        'data-bs-target': `#collapseExample-${room.value.roomHash}`,
-                        'aria-expanded': false
-                      } : {}
-                    }
+                      {...(room.value.roomType === RoomTypesEnum.private
+                        ? {
+                            "data-bs-toggle": "collapse",
+                            "data-bs-target": `#collapseExample-${room.value.roomHash}`,
+                            "aria-expanded": false,
+                          }
+                        : {})}
                     >
-                      <h5>{room.value.roomType === RoomTypesEnum.private && <BsFillLockFill />} {room.value.roomName}</h5>
-                      <h6><BsFillPeopleFill /> {`${room.value.occupiedSlots}/${room.value.totalSlots}`}</h6>
+                      <h5>
+                        {room.value.roomType === RoomTypesEnum.private && (
+                          <BsFillLockFill />
+                        )}{" "}
+                        {room.value.roomName}
+                      </h5>
+                      <h6>
+                        <BsFillPeopleFill />{" "}
+                        {`${room.value.occupiedSlots}/${room.value.totalSlots}`}
+                      </h6>
                     </div>
-                    {
-                      (room.value.occupiedSlots !== room.value.totalSlots && room.value.roomType === RoomTypesEnum.private && appState.username.value.length >= 3) &&
+                    {room.value.occupiedSlots !== room.value.totalSlots &&
+                      room.value.roomType === RoomTypesEnum.private &&
+                      appState.username.value.length >= 3 && (
                       <div className="collapse" id={`collapseExample-${room.value.roomHash}`}>
                         <div className="d-flex">
                           <InputField
@@ -188,14 +208,18 @@ export default function JoinRoomView() {
                           />
                           <Button
                             text={"Enter"}
-                            classNames={`btn btn-primary mx-1 ${!isEnterPrivateRoomButtonEnabled && "disabled"}`}
-                            onClick={() => handlePrivateRoomListItemClick(room.value, privateRoomPassword)}
+                            classNames={`btn btn-primary mx-1 ${
+                              !isEnterPrivateRoomButtonEnabled && "disabled"
+                            }`}
+                            onClick={() =>
+                              handlePrivateRoomListItemClick(room.value, privateRoomPassword)
+                            }
                           />
                         </div>
                       </div>
-                    }
+                    )}
                   </div>
-                }
+                )}
               </div>
             </div>
             <div className="d-flex justify-content-center">
@@ -209,5 +233,5 @@ export default function JoinRoomView() {
         </div>
       </div>
     </>
-  )
+  );
 }

@@ -24,7 +24,7 @@ export default function Header() {
   const [, copy] = useClipboardApi();
 
   const buttonColor = useSignal<string>("primary");
-  
+
   const httpManager = new HttpManager();
   const localStorageManager = new LocalStorageManager();
   const httpUrlHelper = new HttpUrlHelper();
@@ -42,12 +42,12 @@ export default function Header() {
         });
 
         await appHub.start();
-  
+
       } catch (error) {
         appState.connectionId.value = null;
       }
     };
-  
+
     if (appHub.getState() !== signalR.HubConnectionState.Connected) {
       setTimeout(startAppHubConnection, 550);
     }
@@ -58,7 +58,7 @@ export default function Header() {
 
     appState.isInRoom.value = false;
     navigate(ClientEndpoints.mainMenu);
-  }
+  };
 
   const handleCopyToClipboard = () => {
     const clipboardValue = window.location.href.replace("room", "joinRoom");
@@ -68,22 +68,23 @@ export default function Header() {
 
     toast.success(
       "Invitation URL copied to clipboard", {
-        containerId: ToastNotificationEnum.Room
-      }
+      containerId: ToastNotificationEnum.Room
+    }
     );
 
     setTimeout(() => {
       buttonColor.value = "primary";
     }, 500);
-  }
+  };
 
   return (
     <div>
       <nav className="navbar navbar-dark mb-2 mt-2">
         <div className="d-flex align-items-center">
-          <div className="navbar-brand ms-3"><i><b>Shared Watch</b></i> <BsFillCameraReelsFill /></div>
-          {
-            (!appState.isInRoom.value) &&
+          <div className="navbar-brand ms-3">
+            <i><b>Shared Watch</b></i> <BsFillCameraReelsFill />
+          </div>
+          {!appState.isInRoom.value && (
             <div className="ms-3 me-3">
               <InputField
                 classNames={`form-control form-control rounded-3  ${appState.username.value.length < 3 ? "is-invalid" : "is-valid"}`}
@@ -98,20 +99,18 @@ export default function Header() {
                 }}
               />
             </div>
-          }
-          {
-            (appState.isInRoom.value) &&
+          )}
+          {appState.isInRoom.value && (
             <div className="text-white ms-3 me-3">
-              { appState.isAdmin.value ? <BsShieldFillCheck /> : <BsFillPersonFill /> }
+              {appState.isAdmin.value ? <BsShieldFillCheck /> : <BsFillPersonFill />}
               <span className="text-break text-orange ms-2">
                 <b>{appState.username.value}</b>
               </span>
             </div>
-          }
+          )}
         </div>
         <div className="d-flex justify-content-end">
-          {
-            appState.isInRoom.value &&
+          {appState.isInRoom.value && (
             <div className="justify-content-end me-3 mt-header">
               <Button
                 text={<><BsFillLayersFill /> Copy URL</>}
@@ -124,7 +123,7 @@ export default function Header() {
                 onClick={handleLeaveRoomButtonClick}
               />
             </div>
-          }
+          )}
         </div>
       </nav>
     </div>

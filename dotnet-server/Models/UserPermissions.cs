@@ -1,17 +1,17 @@
 public class UserPermissions {
  
-    public bool canAddChatMessage { get; set; }
-    public bool canAddVideo { get; set; }
-    public bool canRemoveVideo { get; set; }
-    public bool canStartOrPauseVideo { get; set; }
-    public bool canSkipVideo { get; set; }
+    public bool CanAddChatMessage { get; set; }
+    public bool CanAddVideo { get; set; }
+    public bool CanRemoveVideo { get; set; }
+    public bool CanStartOrPauseVideo { get; set; }
+    public bool CanSkipVideo { get; set; }
 
     public UserPermissions()
     {
-        canAddChatMessage = true;
-        canAddVideo = true;
-        canRemoveVideo = true;
-        canStartOrPauseVideo = true;
-        canSkipVideo = false;
+        CanAddChatMessage = true;
+        CanAddVideo = true;
+        CanRemoveVideo = true;
+        CanStartOrPauseVideo = true;
+        CanSkipVideo = false;
     }
 }

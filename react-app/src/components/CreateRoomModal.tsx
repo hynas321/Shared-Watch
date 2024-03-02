@@ -29,13 +29,13 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
 
   const httpManager = new HttpManager();
   const roomHelper = RoomHelper.getInstance();
-  
+
   useEffect(() => {
     ping.register();
 
     return () => {
       clearInputFields();
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -45,13 +45,12 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
     else {
       setIsAcceptButtonEnabled(false);
     }
-
   }, [roomName.value]);
 
   const clearInputFields = () => {
     roomName.value = "";
     roomPassword.value = "";
-  }
+  };
 
   const handleCreateRoomButtonClick = async () => {
     const [responseStatusCode, roomInformation]: [number, RoomCreateOutput | undefined] =
@@ -60,33 +59,28 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
         roomPassword.value,
         appState.username.value
       );
-    
-    if (responseStatusCode !== HttpStatusCodes.CREATED) {
 
-      switch(responseStatusCode) {
+    if (responseStatusCode !== HttpStatusCodes.CREATED) {
+      switch (responseStatusCode) {
         case HttpStatusCodes.CONFLICT:
           toast.error(
             "The room with this name already exists", {
-              containerId: ToastNotificationEnum.Main
-            }
-          );
+            containerId: ToastNotificationEnum.Main
+          });
           break;
         case HttpStatusCodes.UNAUTHORIZED:
           toast.error(
             "You are already in a different room", {
-              containerId: ToastNotificationEnum.Main
-            }
-          )
+            containerId: ToastNotificationEnum.Main
+          });
           break;
         default:
           toast.error(
             "Could not create the room", {
-              containerId: ToastNotificationEnum.Main
-            }
-          );
+            containerId: ToastNotificationEnum.Main
+          });
           break;
       }
-
       return;
     }
 
@@ -97,13 +91,13 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
     };
 
     appHub.off(HubEvents.onListOfRoomsUpdated);
-    
+
     const canJoin = await roomHelper.joinRoom(roomState);
 
     if (canJoin) {
       navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }
-  }
+  };
 
   return (
     <>
@@ -116,7 +110,7 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
           />
         </span>
       </div>
-      <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog" style={{marginTop: '3.75rem', backgroundColor: 'rgba(0,0,0,.0001)'}}>
+      <div className="modal fade" id="exampleModal" tabIndex={-1} role="dialog" style={{ marginTop: '3.75rem', backgroundColor: 'rgba(0,0,0,.0001)' }}>
         <div className="modal-dialog" role="document">
           <div className="modal-content">
             <div className="modal-header bg-light">
@@ -125,18 +119,18 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
             <div className="modal-body bg-light">
               <div className="d-block">
                 <h6 className="text-dark text-center mb-3"><b>Room name</b></h6>
-                  <InputField
-                    classNames="form-control rounded-0"
-                    placeholder="Enter room name (min 3 characters)"
-                    value={roomName.value}
-                    trim={false}
-                    isEnabled={true}
-                    maxCharacters={55}
-                    onChange={(value: string) => {roomName.value = value}}
-                  />
+                <InputField
+                  classNames="form-control rounded-0"
+                  placeholder="Enter room name (min 3 characters)"
+                  value={roomName.value}
+                  trim={false}
+                  isEnabled={true}
+                  maxCharacters={55}
+                  onChange={(value: string) => { roomName.value = value }}
+                />
               </div>
               <div className="d-block mt-3">
-              <h6 className="text-dark text-center mb-3"><b>Room password (optional)</b></h6>
+                <h6 className="text-dark text-center mb-3"><b>Room password (optional)</b></h6>
                 <InputField
                   classNames="form-control rounded-0"
                   placeholder={"Enter password (private room)"}
@@ -144,18 +138,17 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
                   trim={true}
                   isEnabled={true}
                   maxCharacters={35}
-                  onChange={(value: string) => {roomPassword.value = value}}
+                  onChange={(value: string) => { roomPassword.value = value }}
                 />
               </div>
             </div>
             <div className="modal-footer bg-light">
-              {
-                isCreateButtonClicked.value === true &&
+              {isCreateButtonClicked.value === true &&
                 <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
               }
-              <span className="rounded-1" {...(isAcceptButtonEnabled ? {'data-bs-dismiss': 'modal'} : {})}>
+              <span className="rounded-1" {...(isAcceptButtonEnabled ? { 'data-bs-dismiss': 'modal' } : {})}>
                 <Button
-                  text={`${isCreateButtonClicked.value === true ? "Creating..." : acceptText }`}
+                  text={`${isCreateButtonClicked.value === true ? "Creating..." : acceptText}`}
                   classNames={`btn btn-primary ${(!isAcceptButtonEnabled || isCreateButtonClicked.value === true) && "disabled"}`}
                   onClick={handleCreateRoomButtonClick}
                 />
@@ -172,5 +165,5 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
         </div>
       </div>
     </>
-  )
+  );
 }

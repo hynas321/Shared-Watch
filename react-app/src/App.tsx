@@ -9,13 +9,9 @@ import { AppStateContext, AppHubContext, appState, appHub } from './context/AppC
 
 function App() {
   useEffect(() => {
-    const backgroundClass = appState.isInRoom.value ? 'background-gradient' : 'background-gradient';
+    const backgroundClass = 'background-gradient';
 
     document.body.className = backgroundClass;
-
-    return () => {
-      document.body.className = '';
-    };
   }, [appState.isInRoom]);
   
   const router = createBrowserRouter([

@@ -111,8 +111,6 @@ public class PlaylistService
 
             string currentVideoHash = currentVideo.Hash;
 
-            _logger.LogInformation(durationTime.ToString() + " duration");
-
             while (room.VideoPlayerState.IsPlaying && room.VideoPlayerState.CurrentTime <= durationTime)
             {
                 if (room.PlaylistVideos.Count == 0 ||
@@ -122,7 +120,7 @@ public class PlaylistService
                 {
                     return false;
                 }
-                
+
                 await _hubContext.Clients.Group(room.RoomHash).SendAsync(HubEvents.OnSetPlayedSeconds, room.VideoPlayerState.CurrentTime);
 
                 await Task.Delay(TimeSpan.FromMilliseconds(500));

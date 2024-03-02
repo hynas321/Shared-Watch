@@ -21,15 +21,13 @@ export default function RoomView() {
   useEffect(() => {
     appState.isInRoom.value = true;
   
-    const hash: string = httpUrlHelper.getRoomHash(window.location.href);
+    const hash = httpUrlHelper.getRoomHash(window.location.href);
 
     if (!hash || hash.length === 0) {
-      toast.error(
-        "Room not found", {
-          containerId: ToastNotificationEnum.Main
-        }
-      );
-      navigate(`${ClientEndpoints.mainMenu}`);
+      toast.error("Room not found", {
+        containerId: ToastNotificationEnum.Main
+      });
+      navigate(ClientEndpoints.mainMenu);
       return;
     }
 
@@ -41,7 +39,7 @@ export default function RoomView() {
 
     return () => {
       appState.activePanel.value = PanelsEnum.Chat;
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -50,13 +48,13 @@ export default function RoomView() {
     }
 
     const handleBeforeUnload = async () => {
-      navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
+      navigate(ClientEndpoints.mainMenu, { replace: true });
       return;
-    }
+    };
 
     appHub.onclose(() => {
       appState.connectionId.value = null;
-    })
+    });
 
     window.addEventListener('beforeunload', handleBeforeUnload);
 
@@ -88,10 +86,10 @@ export default function RoomView() {
         draggable={true}
         pauseOnHover={false}
         theme="dark"
-        style={{top: '0px', opacity: 0.9}}
+        style={{ top: '0px', opacity: 0.9 }}
         limit={1}
       />
-      <div className=" container-lg">
+      <div className="container-lg">
         <div className="row">
           <animated.div style={{ ...springs }} className="col-xl-8 col-lg-12 col-xs-12 mt-3 mb-3">
             <VideoPlayer />
@@ -102,5 +100,5 @@ export default function RoomView() {
         </div>
       </div>
     </>
-  )
+  );
 }

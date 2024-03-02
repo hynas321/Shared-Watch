@@ -29,7 +29,7 @@ public partial class AppHub : Hub
             return;
         }
 
-        if (user.IsAdmin == false && room.UserPermissions.canAddChatMessage == false)
+        if (user.IsAdmin == false && room.UserPermissions.CanAddChatMessage == false)
         {
             _logger.LogInformation(
                 $"{roomHash} AddChatMessage: User does not have the permission. Authorization Token: {authorizationToken}"

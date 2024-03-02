@@ -59,29 +59,27 @@ export default function Chat() {
 
   return (
     <>
-        {
-          (appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) &&
-          <div className="d-flex mb-3">
-            <InputField
-              classNames="form-control rounded-0"
-              value={currentChatMessageText}
-              trim={false}
-              placeholder="Enter your message"
-              isEnabled={true}
-              maxCharacters={200}
-              onChange={handleTextInputChange}
-              onKeyDown={handleEnterPress}
-            />
-            <Button
-              text={<BsSendFill />}
-              classNames="btn btn-primary rounded-0"
-              onClick={handleSendMessage}
-            />
-          </div>
-        }
+      {(appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) && (
+        <div className="d-flex mb-3">
+          <InputField
+            classNames="form-control rounded-0"
+            value={currentChatMessageText}
+            trim={false}
+            placeholder="Enter your message"
+            isEnabled={true}
+            maxCharacters={200}
+            onChange={handleTextInputChange}
+            onKeyDown={handleEnterPress}
+          />
+          <Button
+            text={<BsSendFill />}
+            classNames="btn btn-primary rounded-0"
+            onClick={handleSendMessage}
+          />
+        </div>
+      )}
       <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
-      {
-        appState.chatMessages.value.length !== 0 ? (
+        {appState.chatMessages.value.length !== 0 ? (
           appState.chatMessages.value.map((chatMessage, index) => (
             <li 
               key={index}
@@ -89,15 +87,17 @@ export default function Chat() {
             >
               <div className="d-block chat-message">
                 <small className="text-muted">{`(${chatMessage.date})`} </small>
-                <span className={`${appState.username.value == chatMessage.username ? "text-orange" : "text-primary" } `}><b>{chatMessage.username}: </b> </span>
+                <span className={`${appState.username.value === chatMessage.username ? "text-orange" : "text-primary"}`}>
+                  <b>{chatMessage.username}: </b>
+                </span>
                 <span className="text-dark">{chatMessage.text}</span>
               </div>
             </li>
           ))
-        ) :
-        <h6 className="text-white text-center">No messages to display</h6>
-      }
+        ) : (
+          <h6 className="text-white text-center">No messages to display</h6>
+        )}
       </div>
     </>
-  )
+  );
 }

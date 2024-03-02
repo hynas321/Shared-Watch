@@ -40,5 +40,4 @@ export class HubEvents {
   //UserPermissions
   static SetUserPermissions: string = "SetUserPermissions";
   static OnSetUserPermissions: string = "OnSetUserPermissions";
-
 }

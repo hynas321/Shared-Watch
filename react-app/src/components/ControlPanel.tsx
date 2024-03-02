@@ -178,7 +178,6 @@ export default function ControlPanel() {
       appState.roomType.value = roomType;
     });
 
-
     return () => {
       appHub.off(HubEvents.OnAddChatMessage);
       appHub.off(HubEvents.OnAddPlaylistVideo);
@@ -198,7 +197,7 @@ export default function ControlPanel() {
         <div className="d-flex align-items-center">
           <div className="text-center flex-grow-1">
             <h5 className="text-white">
-            {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />}{appState.roomName.value}
+              {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />} {appState.roomName.value}
             </h5> 
           </div>
         </div>
@@ -208,7 +207,9 @@ export default function ControlPanel() {
           <Button 
             text={
               appState.unreadChatMessagesCount.value !== 0 ? (
-                <><span className="badge rounded-pill bg-danger mt-2">{appState.unreadChatMessagesCount.value}</span> Chat</>
+                <>
+                  <span className="badge rounded-pill bg-danger mt-2">{appState.unreadChatMessagesCount.value}</span> Chat
+                </>
               ) : (
                 <><BsFillChatTextFill /> Chat</>
               )
@@ -217,19 +218,29 @@ export default function ControlPanel() {
             onClick={() => handlePanelButtonClick(PanelsEnum.Chat)} 
           />
           <Button 
-            text={<><span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>{appState.playlistVideos.value?.length}/{appState.maxPlaylistVideos.value}</span> Playlist</>}
+            text={
+              <>
+                <span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>
+                  {appState.playlistVideos.value?.length}/{appState.maxPlaylistVideos.value}
+                </span> Playlist
+              </>
+            }
             classNames={appState.activePanel.value === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
           />
           <Button 
-            text={<><span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>{appState.users.value?.length}/{appState.maxUsers.value}</span> Users</>}
+            text={
+              <>
+                <span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>
+                  {appState.users.value?.length}/{appState.maxUsers.value}
+                </span> Users
+              </>
+            }
             classNames={appState.activePanel.value === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Users)} 
           />
           <Button 
-            text={
-              <><BsGearFill /> Settings</>
-            }
+            text={<><BsGearFill /> Settings</>}
             classNames={appState.activePanel.value === PanelsEnum.Settings ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
             onClick={() => handlePanelButtonClick(PanelsEnum.Settings)} 
           />
@@ -238,9 +249,9 @@ export default function ControlPanel() {
       <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-4 pb-4 px-4">
         { appState.activePanel.value === PanelsEnum.Chat && <Chat /> }
         { appState.activePanel.value === PanelsEnum.Playlist && <Playlist /> }
-        { appState.activePanel.value === PanelsEnum.Users && <Users  /> }
+        { appState.activePanel.value === PanelsEnum.Users && <Users /> }
         { appState.activePanel.value === PanelsEnum.Settings && <Settings /> }
       </div>
     </div>
-  )
+  );
 }

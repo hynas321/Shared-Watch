@@ -55,8 +55,7 @@ export default function MainView() {
     const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();
 
     if (responseStatusCode !== HttpStatusCodes.OK) {
-      toast.error(
-        "Could not load the rooms", {
+      toast.error("Could not load the rooms", {
           containerId: ToastNotificationEnum.Main
         }
       );
@@ -186,33 +185,29 @@ export default function MainView() {
         draggable={true}
         pauseOnHover={false}
         theme="dark"
-        style={{top: '0px', opacity: 0.9}}
+        style={{ top: '0px', opacity: 0.9 }}
       />
       <div className="container">
         <div className="row justify-content-center">
-          <animated.div className="main-menu-panel mt-3 col-xl-6 col-lg-7 col-md-9 col-11 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{...springs}}>
+          <animated.div className="main-menu-panel mt-3 col-xl-6 col-lg-7 col-md-9 col-11 bg-dark bg-opacity-50 py-3 px-5 rounded-4" style={{ ...springs }}>
             <h3 className="text-white text-center mt-3 mb-3">Rooms</h3>
-            {
-              (appState.username.value.length >= 3 && appState.connectionId.value != undefined) &&
+            {appState.username.value.length >= 3 && appState.connectionId.value != undefined && (
               <div className="mt-4">
                 <div className="row d-flex justify-content-between align-items-center text-center">
-                <div className="col-6">
-                  <InputField
-                    classNames="form-control rounded-3 disabled"
-                    placeholder="Search room name"
-                    value={searchText}
-                    trim={false}
-                    isEnabled={true}
-                    maxCharacters={60}
-                    onChange={(value: string) => setSearchText(value)}
-                  />
-                </div>
-                <div className="col-6 text-end">
-                <CreateRoomModal
-                  acceptText="Create"
-                  declineText="Go back"
-                />
-                </div>
+                  <div className="col-6">
+                    <InputField
+                      classNames="form-control rounded-3 disabled"
+                      placeholder="Search room name"
+                      value={searchText}
+                      trim={false}
+                      isEnabled={true}
+                      maxCharacters={60}
+                      onChange={(value: string) => setSearchText(value)}
+                    />
+                  </div>
+                  <div className="col-6 text-end">
+                    <CreateRoomModal acceptText="Create" declineText="Go back" />
+                  </div>
                 </div>
                 <div className="mt-3 mb-3">
                   <Switch
@@ -223,70 +218,58 @@ export default function MainView() {
                   />
                 </div>
               </div>
-            }
-            {
-              appState.connectionId.value === undefined &&
-              <h1 className="text-white text-center" style={{marginTop: "9rem"}}>
-                <l-helix
-                  size="100"
-                  speed="1.25" 
-                  color="white" 
-                ></l-helix>
+            )}
+            {appState.connectionId.value === undefined && (
+              <h1 className="text-white text-center" style={{ marginTop: '9rem' }}>
+                <l-helix size="100" speed="1.25" color="white"></l-helix>
               </h1>
-            }
-            {
-              (displayedRooms.length === 0 &&
-                appState.username.value.length >= 3 &&
-                appState.connectionId.value != undefined &&
-                areRoomsFetched === true) &&
-                <>
-                  <h1 className="text-white text-center" style={{marginTop: "4rem"}}><BsDoorOpenFill /></h1>
-                  <h5 className="text-white text-center">No rooms to display</h5>
-                </>
-            }
-            {
-              (appState.username.value.length < 3 &&
-                appState.connectionId.value != undefined) &&
+            )}
+            {displayedRooms.length === 0 && appState.username.value.length >= 3 && appState.connectionId.value != undefined && areRoomsFetched === true && (
               <>
-                <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsFillPersonLinesFill /></h1>
+                <h1 className="text-white text-center" style={{ marginTop: '4rem' }}>
+                  <BsDoorOpenFill />
+                </h1>
+                <h5 className="text-white text-center">No rooms to display</h5>
+              </>
+            )}
+            {appState.username.value.length < 3 && appState.connectionId.value != undefined && (
+              <>
+                <h1 className="text-white text-center" style={{ marginTop: '9rem' }}>
+                  <BsFillPersonLinesFill />
+                </h1>
                 <h5 className="text-white text-center">Enter your username</h5>
                 <h6 className="text-white text-center">To gain access to room functionalities</h6>
               </>
-            }
-            {
-              (appState.connectionId.value === null) &&
+            )}
+            {appState.connectionId.value === null && (
               <>
-                <h1 className="text-white text-center" style={{marginTop: "9rem"}}><BsExclamationTriangleFill /></h1>
+                <h1 className="text-white text-center" style={{ marginTop: '9rem' }}>
+                  <BsExclamationTriangleFill />
+                </h1>
                 <h5 className="text-white text-center">Connection Issue</h5>
                 <h6 className="text-white text-center">Check your internet connection or refresh the page</h6>
               </>
-            }
-            {
-              appState.connectionId.value != null && areRoomsFetched === false &&
-              <h1 className="text-white text-center" style={{marginTop: "6rem"}}>
-                <l-ping
-                  size="100"
-                  speed="1.25" 
-                  color="white" 
-                ></l-ping>
+            )}
+            {appState.connectionId.value != null && areRoomsFetched === false && (
+              <h1 className="text-white text-center" style={{ marginTop: '6rem' }}>
+                <l-ping size="100" speed="1.25" color="white"></l-ping>
               </h1>
-            }
-            {
-              (displayedRooms.length !== 0 &&
-                appState.username.value.length >= 3 &&
-                appState.connectionId.value != null &&
-                areRoomsFetched === true) &&
-              <div className="main-menu-list mb-3">
-                <RoomList
-                  list={displayedRooms}
-                  onPublicRoomClick={handlePublicRoomListItemClick}
-                  onPrivateRoomClick={handlePrivateRoomListItemClick}
-                />
-              </div>
-            }
+            )}
+            {displayedRooms.length !== 0 &&
+              appState.username.value.length >= 3 &&
+              appState.connectionId.value != null &&
+              areRoomsFetched === true && (
+                <div className="main-menu-list mb-3">
+                  <RoomList
+                    list={displayedRooms}
+                    onPublicRoomClick={handlePublicRoomListItemClick}
+                    onPrivateRoomClick={handlePrivateRoomListItemClick}
+                  />
+                </div>
+              )}
           </animated.div>
         </div>
       </div>
     </>
-  )
+  );
 }

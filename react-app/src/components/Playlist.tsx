@@ -83,9 +83,7 @@ export default function Playlist() {
 
   return (
     <>
-      
-      {
-        (appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) &&
+      {(appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) && (
         <div className="d-flex mb-3">
           <InputField
             classNames={`form-control rounded-0 ${!isInputFormEnabled && "border-5 border-danger"}`}
@@ -103,16 +101,15 @@ export default function Playlist() {
             onClick={handleAddVideoUrlButtonClick}
           />
         </div>
-      }
+      )}
       <div className="list-group rounded-3 control-panel-list" ref={playlistVideosRef}>
-      {
-        appState.playlistVideos.value.length !== 0 ? (
+        {appState.playlistVideos.value.length !== 0 ? (
           appState.playlistVideos.value.map((playlistVideo, index) => (
             <a 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"
               href={playlistVideo.url.startsWith('http') ? playlistVideo.url : `http://${playlistVideo.url}`}
-              target={"_blank"}
+              target="_blank"
               style={index === 0 ? { backgroundColor: "#DAF7A6" } : {}}
             >
               <div className="row">
@@ -120,27 +117,26 @@ export default function Playlist() {
                   <img src={playlistVideo.thumbnailUrl === null ? VideoIcon : playlistVideo.thumbnailUrl} alt="Video" style={videoThumbnailStyle} />
                 </div>
                 <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
-                 <small style={{wordWrap: 'break-word', maxWidth: '200px'}}>
-                  <b>{playlistVideo.title === null ? playlistVideo.url : playlistVideo.title}</b>
-                </small>
-                 {
-                    (appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) &&
+                  <small style={{ wordWrap: 'break-word', maxWidth: '200px' }}>
+                    <b>{playlistVideo.title === null ? playlistVideo.url : playlistVideo.title}</b>
+                  </small>
+                  {(appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) && (
                     <div>
                       <Button
-                        text={<BsFillXCircleFill/>}
+                        text={<BsFillXCircleFill />}
                         classNames="btn btn-danger btn-sm"
                         onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
                       />
                     </div>
-                  }
+                  )}
                 </div>
               </div>
             </a>
           ))
-        ) :
-        <h6 className="text-white text-center">No videos to display</h6>
-      }
+        ) : (
+          <h6 className="text-white text-center">No videos to display</h6>
+        )}
       </div>
     </>
-  )
+  );
 }
