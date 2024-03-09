@@ -139,8 +139,8 @@ export default function JoinRoomView() {
             style={{ ...springs }}
           >
             <h3 className="text-white text-center mt-3 mb-3">Join the room</h3>
-            <div className="row d-flex justify-content-between align-items-center">
-              <div className="list-group rounded-3">
+            <div className="row d-flex justify-content-center align-items-center">
+              <div className="list-group rounded-3" style={{ paddingRight: 0}}>
                 {(appState.username.value.length < 3 && isRoomLoading === false) && (
                   <div className="mt-3 mb-4">
                     <h1 className="text-white text-center">
@@ -162,7 +162,7 @@ export default function JoinRoomView() {
                 )}
                 {appState.username.value.length >= 3 && isRoomLoading === false && (
                   <div
-                    className="list-group-item py-2 "
+                    className="list-group-item py-2 available-element"
                     style={{ marginTop: "2rem", marginBottom: "2.9rem" }}
                     onClick={
                       room.value.occupiedSlots !== room.value.totalSlots &&
