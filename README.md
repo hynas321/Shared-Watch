@@ -36,7 +36,7 @@ The key needs to be set in _the dotnet-server/appsettings.json_ file if the appl
 ### Backend
 + **ASP.NET Core** (REST API)
 
-### NuGet Packages:
+#### NuGet Packages:
 + **Google.Apis.Youtube.v3** - access to Youtube API methods
 + **SignalR** - bi-directional, real-time communication
 
