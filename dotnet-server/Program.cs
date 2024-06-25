@@ -5,7 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
-builder.Services.AddSingleton(sp =>
+builder.Services.AddSingleton<IYouTubeAPIService, YouTubeAPIService>(sp =>
     {
         var youtubeAPIServiceInitializer = new BaseClientService.Initializer
         {
@@ -15,7 +15,7 @@ builder.Services.AddSingleton(sp =>
         return new YouTubeAPIService(youtubeAPIServiceInitializer);
     }
 );
-builder.Services.AddScoped<PlaylistService>();
+builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors(options => 
