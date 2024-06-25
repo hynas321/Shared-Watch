@@ -80,7 +80,7 @@ export default function Header() {
   return (
     <div>
       <nav className="navbar navbar-dark mb-2 mt-2">
-        <div className="d-flex align-items-center">
+        <div className="d-flex align-items-center justify-content-center">
           <div className="navbar-brand ms-3">
             <i><b>Shared Watch</b></i> <BsFillCameraReelsFill />
           </div>
