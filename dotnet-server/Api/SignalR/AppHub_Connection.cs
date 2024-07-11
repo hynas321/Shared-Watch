@@ -17,18 +17,21 @@ public partial class AppHub : Hub
         ILogger<AppHub> logger,
         IPlaylistService playlistHandler,
         IYouTubeAPIService youTubeAPIService,
-        IHubContext<AppHub> roomHubContext
+        IHubContext<AppHub> roomHubContext,
+        IRoomRepository roomRepository,
+        IChatRepository chatRepository,
+        IPlaylistRepository playlistRepository,
+        IUserRepository userRepository
     )
     {
         _logger = logger;
         _playlistService = playlistHandler;
         _youtubeAPIService = youTubeAPIService;
         _roomHubContext = roomHubContext;
-
-        _roomRepository = new RoomRepository();
-        _chatRepository = new ChatRepository(_roomRepository);
-        _playlistRepository = new PlaylistRepository(_roomRepository);
-        _userRepository = new UserRepository(_roomRepository);
+        _roomRepository = roomRepository;
+        _chatRepository = chatRepository;
+        _playlistRepository = playlistRepository;
+        _userRepository = userRepository;
     }
 
     public override async Task OnConnectedAsync()
@@ -49,16 +52,16 @@ public partial class AppHub : Hub
     {
         try
         {
-            (IUser removedUser, string roomHash) = _userRepository.DeleteUserByConnectionId(Context.ConnectionId);
+            (User removedUser, string roomHash) = _userRepository.DeleteUserByConnectionId(Context.ConnectionId);
 
             if (removedUser != null && roomHash != null)
             {
                 UserDTO userDTO = new UserDTO(removedUser.Username, removedUser.IsAdmin);
                 await _roomHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
 
-                IRoom room = _roomRepository.GetRoom(roomHash);
+                Room room = _roomRepository.GetRoom(roomHash);
 
-                if (!room.Users.Any())
+                if (room.Users.Count == 0)
                 {
                     _roomRepository.DeleteRoom(roomHash);
 

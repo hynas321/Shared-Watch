@@ -1,21 +1,21 @@
-public class Room : IRoom
+public class Room
 {
     public string RoomHash { get; set; }
-    public IEnumerable<string> AdminTokens { get; set; }
-    public IEnumerable<IChatMessage> ChatMessages { get; set; }
-    public IEnumerable<IPlaylistVideo> PlaylistVideos { get; set; }
-    public IEnumerable<IUser> Users { get; set; }
-    public IRoomSettings RoomSettings { get; set; }
-    public IUserPermissions UserPermissions { get; set; }
-    public IVideoPlayerState VideoPlayerState { get; set; }
+    public List<string> AdminTokens { get; set; }
+    public List<ChatMessage> ChatMessages { get; set; }
+    public List<PlaylistVideo> PlaylistVideos { get; set; }
+    public List<User> Users { get; set; }
+    public RoomSettings RoomSettings { get; set; }
+    public UserPermissions UserPermissions { get; set; }
+    public VideoPlayerState VideoPlayerState { get; set; }
 
     public Room(string roomName, string roomPassword, RoomTypes roomType)
     {
         RoomHash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
         AdminTokens = new List<string>();
-        ChatMessages = new List<IChatMessage>();
-        PlaylistVideos = new List<IPlaylistVideo>();
-        Users = new List<IUser>();
+        ChatMessages = new List<ChatMessage>();
+        PlaylistVideos = new List<PlaylistVideo>();
+        Users = new List<User>();
         RoomSettings = new RoomSettings(roomName, roomPassword, roomType);
         UserPermissions = new UserPermissions();
         VideoPlayerState = new VideoPlayerState();

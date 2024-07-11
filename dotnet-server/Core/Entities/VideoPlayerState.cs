@@ -1,5 +1,5 @@
-public class VideoPlayerState : IVideoPlayerState {
-    public IPlaylistVideo PlaylistVideo { get; set; }
+public class VideoPlayerState {
+    public PlaylistVideo PlaylistVideo { get; set; }
     public bool IsPlaying { get; set; }
     public double CurrentTime { get; set; }
     public bool SetPlayedSecondsCalled { get; set; }

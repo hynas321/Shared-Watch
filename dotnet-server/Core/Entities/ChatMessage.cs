@@ -1,4 +1,4 @@
-public class ChatMessage : IChatMessage
+public class ChatMessage
 {
     public string Username { get; set; }
     public string Text { get; set; }

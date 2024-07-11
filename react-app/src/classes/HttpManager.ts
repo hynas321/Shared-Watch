@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { RoomCreateInput } from "../types/HttpTypes/Input/RoomCreateInput";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { LocalStorageManager } from "./LocalStorageManager";
@@ -53,7 +53,7 @@ export class HttpManager {
         requestBody, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authorizationToken}`,
+            'Authorization': `${authorizationToken}`,
             'X-SignalR-ConnectionId': appState.connectionId.value
           },
         }
@@ -105,7 +105,7 @@ export class HttpManager {
         requestBody, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authorizationToken}`,
+            'Authorization': `${authorizationToken}`,
             'X-SignalR-ConnectionId': appState.connectionId.value
           },
         }
@@ -131,7 +131,7 @@ export class HttpManager {
         `${this.httpServerUrl}/${HttpApiEndpoints.leaveRoom}/${roomHash}`, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${authorizationToken}`,
+            'Authorization': `${authorizationToken}`,
             'X-SignalR-ConnectionId': appState.connectionId.value
           }
         }

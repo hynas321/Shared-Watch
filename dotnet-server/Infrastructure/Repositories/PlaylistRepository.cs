@@ -7,29 +7,36 @@ public class PlaylistRepository : IPlaylistRepository
         _roomRepository = roomRepository;
     }
 
-    public bool AddPlaylistVideo(string roomHash, IPlaylistVideo playlistVideo)
+    public bool AddPlaylistVideo(string roomHash, PlaylistVideo playlistVideo)
     {
-        IRoom room = _roomRepository.GetRoom(roomHash);
+        Room room = _roomRepository.GetRoom(roomHash);
 
-        if (room == null) return false;
+        if (room == null)
+        {
+            return false;
+        }
 
-        room.PlaylistVideos = room.PlaylistVideos.Concat([playlistVideo]);
-
+        room.PlaylistVideos.Add(playlistVideo);
         return true;
     }
 
-    public IPlaylistVideo DeletePlaylistVideo(string roomHash, string videoHash)
+    public PlaylistVideo DeletePlaylistVideo(string roomHash, string videoHash)
     {
-        IRoom room = _roomRepository.GetRoom(roomHash);
+        Room room = _roomRepository.GetRoom(roomHash);
 
-        if (room == null) return null;
+        if (room == null)
+        {
+            return null;
+        }
 
-        IPlaylistVideo playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
+        PlaylistVideo playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
 
-        if (playlistVideo == null) return null;
+        if (playlistVideo == null)
+        {
+            return null;
+        }
 
-        room.PlaylistVideos = room.PlaylistVideos.Where(v => v.Hash != videoHash);
-
+        room.PlaylistVideos.Remove(playlistVideo);
         return playlistVideo;
     }
 }

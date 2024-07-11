@@ -7,13 +7,16 @@ public class ChatRepository : IChatRepository
         _roomRepository = roomRepository;
     }
 
-    public bool AddChatMessage(string roomHash, IChatMessage chatMessage)
+    public bool AddChatMessage(string roomHash, ChatMessage chatMessage)
     {
-        IRoom room = _roomRepository.GetRoom(roomHash);
+        Room room = _roomRepository.GetRoom(roomHash);
 
-        if (room == null) return false;
+        if (room == null)
+        {
+            return false;
+        }
 
-        room.ChatMessages = room.ChatMessages.Concat([chatMessage]);
+        room.ChatMessages.Add(chatMessage);
 
         return true;
     }

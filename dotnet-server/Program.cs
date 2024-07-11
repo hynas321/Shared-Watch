@@ -1,4 +1,5 @@
 using Dotnet.Server.Hubs;
+using dotnet_server.Infrastructure;
 using Google.Apis.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,9 +16,16 @@ builder.Services.AddSingleton<IYouTubeAPIService, YouTubeAPIService>(sp =>
         return new YouTubeAPIService(youtubeAPIServiceInitializer);
     }
 );
+
+builder.Services.AddSingleton<AppData>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
+builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
+builder.Services.AddSingleton<IChatRepository, ChatRepository>();
+builder.Services.AddSingleton<IPlaylistRepository, PlaylistRepository>();
+builder.Services.AddSingleton<IUserRepository, UserRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddCors(options => 
     {
         options.AddPolicy("AllowReactApplication",
@@ -28,11 +36,17 @@ builder.Services.AddCors(options =>
     }
 ); 
 
-builder.Services.AddControllers()
-    .AddJsonOptions(options => 
-    {
-        options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
-    });
+builder.Services.AddControllers(options =>
+{
+    //options.Filters.Add<SignalRConnectionIdFilter>();
+    //options.Filters.Add<AuthorizationTokenFilter>();
+})
+
+.AddJsonOptions(options => 
+{
+    options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
+});
+
 builder.Services.AddSignalR(); 
 
 var app = builder.Build();

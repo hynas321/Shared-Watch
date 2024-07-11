@@ -10,7 +10,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            IRoom room = _roomRepository.GetRoom(roomHash);
+            Room room = _roomRepository.GetRoom(roomHash);
 
             if (room == null)
             {
@@ -33,7 +33,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            IUser user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
+            User user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
 
             if (user == null)
             {
@@ -96,7 +96,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            if (room.PlaylistVideos.Count() == 1 && _playlistService.IsHandlerRunning == false)
+            if (room.PlaylistVideos.Count() == 1 && _playlistService.IsServiceRunning == false)
             {
                 _playlistService.StartPlaylistService(roomHash);
             }
@@ -114,7 +114,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            IRoom room = _roomRepository.GetRoom(roomHash);
+            Room room = _roomRepository.GetRoom(roomHash);
 
             if (room == null)
             {
@@ -125,7 +125,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            IUser user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
+            User user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
 
             if (user == null)
             {
@@ -143,7 +143,7 @@ public partial class AppHub : Hub
                 );
             }
 
-            IPlaylistVideo deletePlaylistVideo = _playlistRepository.DeletePlaylistVideo(roomHash, videoHash);
+            PlaylistVideo deletePlaylistVideo = _playlistRepository.DeletePlaylistVideo(roomHash, videoHash);
 
             if (deletePlaylistVideo == null)
             {

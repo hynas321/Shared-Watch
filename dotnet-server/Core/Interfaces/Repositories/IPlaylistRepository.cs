@@ -1,5 +1,5 @@
 public interface IPlaylistRepository
 {
-    bool AddPlaylistVideo(string roomHash, IPlaylistVideo playlistVideo);
-    IPlaylistVideo DeletePlaylistVideo(string roomHash, string videoHash);
+    bool AddPlaylistVideo(string roomHash, PlaylistVideo playlistVideo);
+    PlaylistVideo DeletePlaylistVideo(string roomHash, string videoHash);
 }

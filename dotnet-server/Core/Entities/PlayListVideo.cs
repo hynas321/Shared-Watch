@@ -1,4 +1,4 @@
-public class PlaylistVideo : IPlaylistVideo
+public class PlaylistVideo
 {
     public string Hash { get; set; }
     public string Url { get; set; }

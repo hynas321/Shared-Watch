@@ -9,7 +9,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            IRoom room = _roomRepository.GetRoom(roomHash);
+            Room room = _roomRepository.GetRoom(roomHash);
 
             if (room == null)
             {
@@ -20,7 +20,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            IUser user = _userRepository.GetUserByAuthorizationToken(authorizationToken);
+            User user = _userRepository.GetUserByAuthorizationToken(authorizationToken);
 
             if (user == null)
             {
@@ -40,7 +40,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            IUser userToKickOut = _userRepository.GetUserByUsername(roomHash, usernameToKickOut);
+            User userToKickOut = _userRepository.GetUserByUsername(roomHash, usernameToKickOut);
 
             if (userToKickOut == null)
             {
@@ -55,7 +55,7 @@ public partial class AppHub : Hub
                 $"{roomHash} KickOut: {userToKickOut.Username} {userToKickOut.IsAdmin} {userToKickOut.AuthorizationToken}. Authorization Token: {authorizationToken}"
             );
 
-            IUser kickedOutUser = _userRepository.DeleteUser(roomHash, userToKickOut.AuthorizationToken);
+            User kickedOutUser = _userRepository.DeleteUser(roomHash, userToKickOut.AuthorizationToken);
 
             if (kickedOutUser == null)
             {
@@ -81,7 +81,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            IRoom room = _roomRepository.GetRoom(roomHash);
+            Room room = _roomRepository.GetRoom(roomHash);
 
             if (room == null)
             {
@@ -92,7 +92,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            IUser user = _userRepository.GetUserByAuthorizationToken(authorizationToken);
+            User user = _userRepository.GetUserByAuthorizationToken(authorizationToken);
 
             if (user == null)
             {
@@ -112,7 +112,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            IUser updatedUser = _userRepository.GetUserByUsername(roomHash, usernameToSetAdminStatus);
+            User updatedUser = _userRepository.GetUserByUsername(roomHash, usernameToSetAdminStatus);
 
             if (updatedUser == null)
             {
@@ -127,7 +127,7 @@ public partial class AppHub : Hub
 
             if (isAdmin)
             {
-                room.AdminTokens = room.AdminTokens.Concat(new[] { updatedUser.AuthorizationToken }).ToList();
+                room.AdminTokens.Add(updatedUser.AuthorizationToken);
             }
             else
             {

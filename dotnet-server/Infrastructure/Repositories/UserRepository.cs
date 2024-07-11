@@ -7,33 +7,42 @@ public class UserRepository : IUserRepository
         _roomRepository = roomRepository;
     }
 
-    public bool AddUser(string roomHash, IUser user)
+    public bool AddUser(string roomHash, User user)
     {
         var room = _roomRepository.GetRoom(roomHash);
 
-        if (room == null) return false;
+        if (room == null)
+        {
+            return false;
+        }
 
-        room.Users = room.Users.Concat([user]);
+        room.Users.Add(user);
 
         return true;
     }
 
-    public IUser DeleteUser(string roomHash, string authorizationToken)
+    public User DeleteUser(string roomHash, string authorizationToken)
     {
         var room = _roomRepository.GetRoom(roomHash);
 
-        if (room == null) return null;
+        if (room == null)
+        {
+            return null;
+        }
 
         var user = room.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
 
-        if (user == null) return null;
+        if (user == null)
+        {
+            return null;
+        }
 
-        room.Users = room.Users.Where(u => u.AuthorizationToken != authorizationToken);
+        room.Users = room.Users.Where(u => u.AuthorizationToken != authorizationToken).ToList();
 
         return user;
     }
 
-    public (IUser user, string roomHash) DeleteUserByConnectionId(string connectionId)
+    public (User user, string roomHash) DeleteUserByConnectionId(string connectionId)
     {
         foreach (var room in _roomRepository.GetRooms())
         {
@@ -48,13 +57,13 @@ public class UserRepository : IUserRepository
         return (null, null);
     }
 
-    public IUser GetUserByAuthorizationToken(string roomHash, string authorizationToken)
+    public User GetUserByAuthorizationToken(string roomHash, string authorizationToken)
     {
         var room = _roomRepository.GetRoom(roomHash);
         return room?.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
     }
 
-    public IUser GetUserByAuthorizationToken(string authorizationToken)
+    public User GetUserByAuthorizationToken(string authorizationToken)
     {
         foreach (var room in _roomRepository.GetRooms())
         {
@@ -70,13 +79,13 @@ public class UserRepository : IUserRepository
         return null;
     }
 
-    public IUser GetUserByUsername(string roomHash, string username)
+    public User GetUserByUsername(string roomHash, string username)
     {
         var room = _roomRepository.GetRoom(roomHash);
         return room?.Users.FirstOrDefault(u => u.Username == username);
     }
 
-    public IUser GetUserByConnectionId(string connectionId)
+    public User GetUserByConnectionId(string connectionId)
     {
         foreach (var room in _roomRepository.GetRooms())
         {

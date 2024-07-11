@@ -1,8 +1,8 @@
 public interface IRoomRepository
 {
-    bool AddRoom(IRoom room);
-    IRoom DeleteRoom(string roomHash);
-    IRoom GetRoom(string roomHash);
-    IEnumerable<IRoom> GetRooms();
+    bool AddRoom(Room room);
+    Room DeleteRoom(string roomHash);
+    Room GetRoom(string roomHash);
+    List<Room> GetRooms();
     IEnumerable<RoomDTO> GetRoomsDTO();
 }

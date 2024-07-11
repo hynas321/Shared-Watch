@@ -1,4 +1,4 @@
-public class UserPermissions : IUserPermissions {
+public class UserPermissions {
  
     public bool CanAddChatMessage { get; set; }
     public bool CanAddVideo { get; set; }

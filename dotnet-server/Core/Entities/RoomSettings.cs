@@ -1,4 +1,4 @@
-public class RoomSettings : IRoomSettings
+public class RoomSettings
 {
     public string RoomName { get; set; }
     public string RoomPassword { get; set; }

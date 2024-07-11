@@ -1,42 +1,55 @@
+using dotnet_server.Infrastructure;
+
 public class RoomRepository : IRoomRepository
 {
-    private static List<IRoom> rooms = new List<IRoom>();
+    private readonly AppData _appData;
 
-    public bool AddRoom(IRoom room)
+    public RoomRepository(AppData appData)
     {
-        bool roomExists = rooms.Any(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
+        _appData = appData;
+    }
 
-        if (roomExists) return false;
+    public bool AddRoom(Room room)
+    {
+        bool roomExists = _appData.Rooms.Any(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
 
-        rooms.Add(room);
+        if (roomExists)
+        {
+            return false;
+        }
+
+        _appData.Rooms.Add(room);
 
         return true;
     }
 
-    public IRoom DeleteRoom(string roomHash)
+    public Room DeleteRoom(string roomHash)
     {
-        IRoom room = GetRoom(roomHash);
+        Room room = GetRoom(roomHash);
 
-        if (room == null) return null;
+        if (room == null)
+        {
+            return null;
+        }
 
-        rooms.Remove(room);
+        _appData.Rooms.Remove(room);
 
         return room;
     }
 
-    public IRoom GetRoom(string roomHash)
+    public Room GetRoom(string roomHash)
     {
-        return rooms.FirstOrDefault(r => r.RoomHash == roomHash);
+        return _appData.Rooms.FirstOrDefault(r => r.RoomHash == roomHash);
     }
 
-    public IEnumerable<IRoom> GetRooms()
+    public List<Room> GetRooms()
     {
-        return rooms;
+        return _appData.Rooms;
     }
 
     public IEnumerable<RoomDTO> GetRoomsDTO()
     {
-        foreach (var room in rooms)
+        foreach (var room in _appData.Rooms)
         {
             RoomDTO roomDTO = new RoomDTO(
                 room.RoomHash,

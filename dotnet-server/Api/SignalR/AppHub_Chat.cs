@@ -9,7 +9,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            IRoom room = _roomRepository.GetRoom(roomHash);
+            Room room = _roomRepository.GetRoom(roomHash);
 
             if (room == null)
             {
@@ -20,7 +20,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            IUser user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
+            User user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
 
             if (user == null)
             {
