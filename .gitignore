@@ -400,3 +400,5 @@ FodyWeavers.xsd
 # Ignore appsettings
 dotnet-server/appsettings.Development.json
 dotnet-server/appsettings.json
+/dotnet-server/appsettings.json
+/dotnet-server/appsettings.Development.json

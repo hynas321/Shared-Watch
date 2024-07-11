@@ -67,7 +67,7 @@ export default function Header() {
     buttonColor.value = "success";
 
     toast.success(
-      "Invitation URL copied to clipboard", {
+      "Invitation link copied to clipboard", {
       containerId: ToastNotificationEnum.Room
     }
     );
@@ -78,7 +78,10 @@ export default function Header() {
   };
 
   return (
-    <div>
+    <div
+      className={ !appState.isInRoom.value ? "container d-flex justify-content-center align-items-center" : "mx-5" }
+      style={{ paddingLeft: '5rem', paddingRight: '5rem' }}
+    >
       <nav className="navbar navbar-dark mb-2 mt-2">
         <div className="d-flex align-items-center justify-content-center">
           <div className="navbar-brand ms-3">
@@ -113,7 +116,7 @@ export default function Header() {
           {appState.isInRoom.value && (
             <div className="justify-content-end me-3 mt-header">
               <Button
-                text={<><BsFillLayersFill /> Copy URL</>}
+                text={<><BsFillLayersFill /> Copy invitation link</>}
                 classNames={`btn btn-${buttonColor.value} btn-sm me-4 ms-3`}
                 onClick={handleCopyToClipboard}
               />
