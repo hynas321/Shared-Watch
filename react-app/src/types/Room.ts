@@ -1,6 +1,6 @@
 import { RoomTypesEnum } from "../enums/RoomTypesEnum"
 
-export type Room = {
+export interface Room {
   roomHash: string,
   roomName: string,
   roomType: RoomTypesEnum,

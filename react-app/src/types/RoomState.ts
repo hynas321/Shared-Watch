@@ -1,4 +1,4 @@
-export type RoomState = {
+export interface RoomState {
   roomHash: string;
   roomName: string;
   password: string;

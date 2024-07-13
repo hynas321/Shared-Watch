@@ -1,6 +1,6 @@
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
-export type RoomSettings = {
+export interface RoomSettings {
   roomName: string;
   roomPassword: string;
   roomType: RoomTypesEnum;

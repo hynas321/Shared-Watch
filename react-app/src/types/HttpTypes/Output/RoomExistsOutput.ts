@@ -1,5 +1,5 @@
 import { RoomTypesEnum } from "../../../enums/RoomTypesEnum"
 
-export type RoomExistsOutput = {
+export interface RoomExistsOutput {
   roomType: RoomTypesEnum;
 }

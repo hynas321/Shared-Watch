@@ -1,6 +1,6 @@
 import { PlaylistVideo } from "./PlaylistVideo"
 
-export type VideoPlayerState = {
+export interface VideoPlayerState {
   playlistVideo: PlaylistVideo,
   isPlaying: boolean,
   currentTime: number

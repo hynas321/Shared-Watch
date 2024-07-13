@@ -1,3 +1,3 @@
-export type RoomCreateOutput = {
+export interface RoomCreateOutput {
   roomHash: string
 }

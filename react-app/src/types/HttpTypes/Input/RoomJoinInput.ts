@@ -1,4 +1,4 @@
-export type RoomJoinInput = {
+export interface RoomJoinInput {
   roomPassword: string,
   username: string
 }

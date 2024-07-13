@@ -1,4 +1,4 @@
-export type UserPermissions = {
+export interface UserPermissions {
   canAddChatMessage: boolean,
   canAddVideo: boolean,
   canRemoveVideo: boolean,

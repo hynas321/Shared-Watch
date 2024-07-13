@@ -5,7 +5,7 @@ import { User } from "../../User";
 import { VideoPlayerState } from "../../VideoPlayerState";
 import { RoomSettings } from "../../RoomSettings";
 
-export type RoomJoinOutput = {
+export interface RoomJoinOutput {
   //User fields
   authorizationToken: string,
   isAdmin: boolean,

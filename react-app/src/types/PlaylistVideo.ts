@@ -1,4 +1,4 @@
-export type PlaylistVideo = {
+export interface PlaylistVideo {
   hash?: string,
   url: string,
   duration: number,
