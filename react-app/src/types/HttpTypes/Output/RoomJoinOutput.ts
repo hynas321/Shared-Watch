@@ -2,7 +2,7 @@ import { ChatMessage } from "../../ChatMessage";
 import { PlaylistVideo } from "../../PlaylistVideo";
 import { UserPermissions } from "../../UserPermissions";
 import { User } from "../../User";
-import { VideoPlayerState } from "../../VideoPlayerState";
+import { VideoPlayer } from "../../VideoPlayer";
 import { RoomSettings } from "../../RoomSettings";
 
 export interface RoomJoinOutput {
@@ -15,5 +15,5 @@ export interface RoomJoinOutput {
   users: User[],
   roomSettings: RoomSettings,
   userPermissions: UserPermissions,
-  videoPlayerState: VideoPlayerState
+  videoPlayer: VideoPlayer
 }

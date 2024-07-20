@@ -69,10 +69,7 @@ public partial class AppHub : Hub
 
             if (room == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetUserPermissions: Room does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetUserPermissions: Room does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -80,27 +77,19 @@ public partial class AppHub : Hub
 
             if (user == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetUserPermissions: User does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetUserPermissions: User does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
             if (user.IsAdmin == false)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetUserPermissions: User does not have the permission. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetUserPermissions: User does not have the permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
             room.UserPermissions = userPermissions;
 
-            _logger.LogInformation(
-                $"{roomHash} User permissions set. Authorization Token: {authorizationToken}"
-            );
+            _logger.LogInformation($"{roomHash} User permissions set. Authorization Token: {authorizationToken}");
 
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetUserPermissions, JsonHelper.Serialize(userPermissions));
         }

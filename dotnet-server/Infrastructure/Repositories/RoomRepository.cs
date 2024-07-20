@@ -39,7 +39,7 @@ public class RoomRepository : IRoomRepository
 
     public Room GetRoom(string roomHash)
     {
-        return _appData.Rooms.FirstOrDefault(r => r.RoomHash == roomHash);
+        return _appData.Rooms.FirstOrDefault(r => r.Hash == roomHash);
     }
 
     public List<Room> GetRooms()
@@ -52,7 +52,7 @@ public class RoomRepository : IRoomRepository
         foreach (var room in _appData.Rooms)
         {
             RoomDTO roomDTO = new RoomDTO(
-                room.RoomHash,
+                room.Hash,
                 room.RoomSettings.RoomName,
                 room.RoomSettings.RoomPassword == "" ? RoomTypes.Public : RoomTypes.Private,
                 room.Users.Count(),

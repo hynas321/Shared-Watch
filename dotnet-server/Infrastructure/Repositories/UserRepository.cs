@@ -42,7 +42,7 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public (User user, string roomHash) DeleteUserByConnectionId(string connectionId)
+    public (User user, string roomHash) DeleteUser(string connectionId)
     {
         foreach (var room in _roomRepository.GetRooms())
         {
@@ -50,7 +50,7 @@ public class UserRepository : IUserRepository
             if (userToRemove != null)
             {
                 room.Users = room.Users.Where(u => u.SignalRConnectionId != connectionId).ToList();
-                return (userToRemove, room.RoomHash);
+                return (userToRemove, room.Hash);
             }
         }
 

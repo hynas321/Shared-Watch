@@ -1,5 +1,4 @@
 ﻿using Dotnet.Server.Hubs;
-using dotnet_server.Controllers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
@@ -37,10 +36,7 @@ namespace dotnet_server.Api.Controllers
             {
                 if (!ModelState.IsValid || roomHash == "" || signalRConnectionId == null)
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Join: Status 400. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Join: Status 400. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                     return StatusCode(StatusCodes.Status400BadRequest);
                 }
 
@@ -48,45 +44,31 @@ namespace dotnet_server.Api.Controllers
 
                 if (room == null)
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Join: Status 404. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Join: Status 404. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                     return StatusCode(StatusCodes.Status404NotFound);
                 }
 
                 if (room.RoomSettings.RoomPassword != input.RoomPassword)
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Join: Status 401. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Join: Status 401. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                     return StatusCode(StatusCodes.Status401Unauthorized);
                 }
 
                 if (room.RoomSettings.MaxUsers == room.Users.Count())
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Join: Status 403. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Join: Status 403. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                     return StatusCode(StatusCodes.Status403Forbidden);
                 }
 
                 if (room.Users.Any(u => u.Username == input.Username))
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                     return StatusCode(StatusCodes.Status409Conflict);
                 }
 
                 if (room.Users.Any(u => u.AuthorizationToken == authorizationToken))
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                    );
+                    _logger.LogInformation($"{roomHash} Join: Status 409. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
 
                     return StatusCode(StatusCodes.Status409Conflict);
                 }
@@ -116,10 +98,7 @@ namespace dotnet_server.Api.Controllers
 
                 if (!isNewUserAdded)
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Join: Status 500. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 }
 
@@ -127,12 +106,12 @@ namespace dotnet_server.Api.Controllers
                 {
                     AuthorizationToken = newUser.AuthorizationToken,
                     IsAdmin = newUser.IsAdmin,
-                    ChatMessages = room.ChatMessages.Cast<ChatMessage>().ToList(),
-                    PlaylistVideos = room.PlaylistVideos.Cast<PlaylistVideo>().ToList(),
+                    ChatMessages = room.ChatMessages,
+                    PlaylistVideos = room.PlaylistVideos,
                     Users = _userRepository.GetUsersDTO(roomHash).ToList(),
                     RoomSettings = room.RoomSettings,
                     UserPermissions = room.UserPermissions,
-                    VideoPlayerState = room.VideoPlayerState
+                    VideoPlayer = room.VideoPlayer
                 };
 
                 _appHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnJoinRoom, newUserDTO);
@@ -141,10 +120,7 @@ namespace dotnet_server.Api.Controllers
 
                 _appHubContext.Clients.All.SendAsync(HubMessages.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
 
-                _logger.LogInformation(
-                    $"{roomHash} Join: Status 200. RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                );
-
+                _logger.LogInformation($"{roomHash} Join: Status 200. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
             }
             catch (Exception ex)
@@ -164,10 +140,7 @@ namespace dotnet_server.Api.Controllers
             {
                 if (roomHash == "" || authorizationToken == "" || signalRConnectionId == null)
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Leave: Status 400. AuthorizationToken: {authorizationToken}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Leave: Status 400. AuthorizationToken: {authorizationToken}");
                     return StatusCode(StatusCodes.Status400BadRequest);
                 }
 
@@ -175,10 +148,7 @@ namespace dotnet_server.Api.Controllers
 
                 if (room == null)
                 {
-                    _logger.LogInformation(
-                        $"{roomHash} Leave: Status 404. AuthorizationToken: {authorizationToken}"
-                    );
-
+                    _logger.LogInformation($"{roomHash} Leave: Status 404. AuthorizationToken: {authorizationToken}");
                     return StatusCode(StatusCodes.Status404NotFound);
                 }
 
@@ -187,7 +157,6 @@ namespace dotnet_server.Api.Controllers
                 if (user == null)
                 {
                     _logger.LogInformation($"{roomHash} Leave: Status 401. AuthorizationToken: {authorizationToken}");
-
                     return StatusCode(StatusCodes.Status401Unauthorized);
                 }
 
@@ -196,7 +165,6 @@ namespace dotnet_server.Api.Controllers
                 if (deletedUser == null)
                 {
                     _logger.LogInformation($"{roomHash} Leave: Status 500. AuthorizationToken: {authorizationToken}");
-
                     return StatusCode(StatusCodes.Status500InternalServerError);
                 }
 
@@ -205,7 +173,6 @@ namespace dotnet_server.Api.Controllers
                 if (updatedRoom.Users.Count == 0)
                 {
                     _logger.LogInformation($"Room {roomHash} has been deleted");
-
                     _roomRepository.DeleteRoom(roomHash);
                 }
 

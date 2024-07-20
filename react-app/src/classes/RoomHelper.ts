@@ -9,7 +9,7 @@ import { HttpManager } from "./HttpManager";
 import { LocalStorageManager } from "./LocalStorageManager";
 import { User } from "../types/User";
 import { UserPermissions } from "../types/UserPermissions";
-import { VideoPlayerState } from "../types/VideoPlayerState";
+import { VideoPlayer } from "../types/VideoPlayer";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 
 export class RoomHelper {
@@ -91,7 +91,7 @@ export class RoomHelper {
       appState.playlistVideos.value =  roomInformation?.playlistVideos as PlaylistVideo[];
       appState.userPermissions.value = roomInformation?.userPermissions as UserPermissions;
       appState.users.value = roomInformation?.users as User[];
-      appState.videoPlayerState.value = roomInformation?.videoPlayerState as VideoPlayerState;
+      appState.videoPlayer.value = roomInformation?.videoPlayer as VideoPlayer;
   
       appState.joinedViaView.value = true;
 

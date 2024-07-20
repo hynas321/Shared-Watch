@@ -13,10 +13,7 @@ public partial class AppHub : Hub
 
             if (room == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} AddChatMessage: Room does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} AddChatMessage: Room does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -24,19 +21,13 @@ public partial class AppHub : Hub
 
             if (user == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} AddChatMessage: User does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} AddChatMessage: User does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
             if (user.IsAdmin == false && room.UserPermissions.CanAddChatMessage == false)
             {
-                _logger.LogInformation(
-                    $"{roomHash} AddChatMessage: User does not have the permission. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} AddChatMessage: User does not have the permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -44,10 +35,7 @@ public partial class AppHub : Hub
 
             if (chatMessage.Text.Length > maxChatMessageTextLength)
             {
-                _logger.LogInformation(
-                    $"{roomHash} AddChatMessage: Maximum length of a message reached. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} AddChatMessage: Maximum length of a message reached. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -57,18 +45,13 @@ public partial class AppHub : Hub
 
             chatMessage.Date = localTime.ToString("HH:mm:ss");
 
-            _logger.LogInformation(
-                $"{roomHash} AddChatMessage: {chatMessage.Date} {chatMessage.Username}: {chatMessage.Text}. Authorization Token: {authorizationToken}"
-            );
+            _logger.LogInformation($"{roomHash} AddChatMessage: {chatMessage.Date} {chatMessage.Username}: {chatMessage.Text}. Authorization Token: {authorizationToken}");
 
             bool isChatMessageAdded = _chatRepository.AddChatMessage(roomHash, chatMessage);
 
             if (!isChatMessageAdded)
             {
-                _logger.LogInformation(
-                    $"{roomHash} AddChatMessage: Error when adding a chat message. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} AddChatMessage: Error when adding a chat message. Authorization Token: {authorizationToken}");
                 return;
             }
 

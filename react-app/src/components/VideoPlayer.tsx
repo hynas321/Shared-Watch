@@ -12,9 +12,9 @@ export default function VideoPlayer() {
   const appHub = useContext(AppHubContext);
 
   const videoPlayerRef = useRef<ReactPlayer>(null);
-  const [videoUrl, setVideoUrl] = useState<string | undefined>(appState.videoPlayerState.value?.playlistVideo.url ?? undefined);
+  const [videoUrl, setVideoUrl] = useState<string | undefined>(appState.videoPlayer.value?.playlistVideo.url ?? undefined);
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayerState.value?.isPlaying ?? false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayer.value?.isPlaying ?? false);
   const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] = useState<boolean>(false);
 
   const localStorageManager = new LocalStorageManager();
@@ -25,21 +25,21 @@ export default function VideoPlayer() {
     }
 
     const handleSetIsVideoPlaying = (isPlaying: boolean) => {
-      if (appState.videoPlayerState.value === null) {
+      if (appState.videoPlayer.value === null) {
         return;
       }
 
-      appState.videoPlayerState.value.isPlaying = isPlaying;
+      appState.videoPlayer.value.isPlaying = isPlaying;
       setIsVideoPlaying(isPlaying);
     };
 
     const handleSetPlayedSeconds = (newTime: number) => {
-      if (appState.videoPlayerState.value === null) {
+      if (appState.videoPlayer.value === null) {
         return;
       }
 
       setIsVideoCurrentTimeDifferenceLarge(false);
-      appState.videoPlayerState.value.currentTime = newTime;
+      appState.videoPlayer.value.currentTime = newTime;
 
       const currentVideoTime = videoPlayerRef.current?.getCurrentTime();
       if (currentVideoTime != null && Math.abs(currentVideoTime - newTime) > 1) {
@@ -52,11 +52,11 @@ export default function VideoPlayer() {
     };
 
     const handleSetVideoUrl = async (url: string) => {
-      if (appState.videoPlayerState.value == null) {
+      if (appState.videoPlayer.value == null) {
         return;
       }
 
-      appState.videoPlayerState.value.playlistVideo.url = url;
+      appState.videoPlayer.value.playlistVideo.url = url;
       setVideoUrl(url);
     };
 

@@ -1,7 +1,6 @@
 using Dotnet.Server.Configuration;
-using Dotnet.Server.Hubs;
+using dotnet_server.Api.Handlers.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace dotnet_server.Controllers;
 
@@ -13,17 +12,21 @@ public class RoomController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly IRoomRepository _roomRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IRoomControllerHandler _roomHandler;
 
     public RoomController(
         ILogger<RoomController> logger,
         IConfiguration configuration,
         IRoomRepository roomRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IRoomControllerHandler roomHandler)
     {
         _logger = logger;
         _configuration = configuration;
         _roomRepository = roomRepository;
         _userRepository = userRepository;
+        _roomHandler = roomHandler;
+
     }
 
     [HttpPost("Create")]
@@ -36,10 +39,7 @@ public class RoomController : ControllerBase
         {
             if (!ModelState.IsValid || string.IsNullOrEmpty(signalRConnectionId))
             {
-                _logger.LogInformation(
-                    $"Create: Status 400. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                );
-
+                _logger.LogInformation($"Create: Status 400. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status400BadRequest);
             }
 
@@ -47,38 +47,26 @@ public class RoomController : ControllerBase
 
             if (isUserConnectedInOtherRoom)
             {
-                _logger.LogInformation(
-                    $"Create: Status 401. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-                );
-
+                _logger.LogInformation($"Create: Status 401. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
-            RoomTypes roomType = input.RoomPassword.Length == 0 ? RoomTypes.Public : RoomTypes.Private;
-            Room room = new Room(input.RoomName, input.RoomPassword, roomType);
+            Room room = _roomHandler.CreateRoom(input);
 
-            bool roomAdded = _roomRepository.AddRoom(room);
-
-            if (!roomAdded)
+            if (room == null)
             {
                 string roomPasswordInfo = input.RoomPassword.Length > 0 ? input.RoomPassword : "<No password>";
 
-                _logger.LogInformation(
-                    $"Create: Status 409. RoomName: {input.RoomName}, RoomPassword: {roomPasswordInfo}, Username: {input.Username}"
-                );
-
+                _logger.LogInformation($"Create: Status 409. RoomName: {input.RoomName}, RoomPassword: {roomPasswordInfo}, Username: {input.Username}");
                 return StatusCode(StatusCodes.Status409Conflict);
             }
 
             RoomCreateOutput output = new RoomCreateOutput()
             {
-                RoomHash = room.RoomHash
+                RoomHash = room.Hash
             };
 
-            _logger.LogInformation(
-                $"Create: Status 201. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}"
-            );
-
+            _logger.LogInformation($"Create: Status 201. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(output));
         }
         catch (Exception ex)
@@ -121,20 +109,18 @@ public class RoomController : ControllerBase
             if (room == null)
             {
                 _logger.LogInformation($"{roomHash} Get: Status 404.");
-
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
             RoomDTO roomDTO = new RoomDTO(
-                room.RoomHash,
+                room.Hash,
                 room.RoomSettings.RoomName,
                 room.RoomSettings.RoomType,
-                room.Users.Count(),
+                room.Users.Count,
                 room.RoomSettings.MaxUsers
             );
 
             _logger.LogInformation($"GetAll: Status 200.");
-
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomDTO));
         }
         catch (Exception ex)
@@ -152,7 +138,6 @@ public class RoomController : ControllerBase
             IEnumerable<RoomDTO> roomsDTO = _roomRepository.GetRoomsDTO();
 
             _logger.LogInformation($"GetAll: Status 200.");
-
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomsDTO));
         }
         catch (Exception ex)
@@ -170,14 +155,12 @@ public class RoomController : ControllerBase
             if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
             {
                 _logger.LogInformation("GetAllDetails: Status 401");
-
                 return StatusCode(StatusCodes.Status401Unauthorized);
             }
 
             List<Room> rooms = _roomRepository.GetRooms();
 
             _logger.LogInformation("GetAllDetails: Status 200");
-
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(rooms));
         }
         catch (Exception ex)

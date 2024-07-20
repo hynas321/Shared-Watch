@@ -13,10 +13,7 @@ public partial class AppHub : Hub
 
             if (room == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} KickOut: Room does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} KickOut: Room does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -24,19 +21,13 @@ public partial class AppHub : Hub
 
             if (user == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} KickOut: User does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} KickOut: User does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
             if (user.IsAdmin == false)
             {
-                _logger.LogInformation(
-                    $"{roomHash} KickOut: User does not have the permission. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} KickOut: User does not have the permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -44,10 +35,7 @@ public partial class AppHub : Hub
 
             if (userToKickOut == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} KickOut: User does not exist {usernameToKickOut}. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} KickOut: User does not exist {usernameToKickOut}. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -59,10 +47,7 @@ public partial class AppHub : Hub
 
             if (kickedOutUser == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} KickOut: Error when kicking out a user. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} KickOut: Error when kicking out a user. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -85,10 +70,7 @@ public partial class AppHub : Hub
 
             if (room == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetAdminStatus: Room does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetAdminStatus: Room does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -96,19 +78,13 @@ public partial class AppHub : Hub
 
             if (user == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetAdminStatus: User does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetAdminStatus: User does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
             if (user.IsAdmin == false)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetAdminStatus: User does not have the permission. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetAdminStatus: User does not have the permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -116,10 +92,7 @@ public partial class AppHub : Hub
 
             if (updatedUser == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetAdminStatus: User does not exist {usernameToSetAdminStatus}. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetAdminStatus: User does not exist {usernameToSetAdminStatus}. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -136,9 +109,7 @@ public partial class AppHub : Hub
 
             UserDTO updatedUserDTO = new UserDTO(updatedUser.Username, updatedUser.IsAdmin);
 
-            _logger.LogInformation(
-                $"{roomHash} SetAdminStatus: {updatedUser.Username} {updatedUser.IsAdmin} {updatedUser.AuthorizationToken}. Authorization Token: {authorizationToken}"
-            );
+            _logger.LogInformation($"{roomHash} SetAdminStatus: {updatedUser.Username} {updatedUser.IsAdmin} {updatedUser.AuthorizationToken}. Authorization Token: {authorizationToken}");
 
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetAdminStatus, JsonHelper.Serialize(updatedUserDTO));
         }

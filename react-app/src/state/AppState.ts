@@ -2,7 +2,7 @@ import { ChatMessage } from "../types/ChatMessage";
 import { User } from "../types/User";
 import { UserPermissions } from "../types/UserPermissions";
 import { signal } from "@preact/signals-react";
-import { VideoPlayerState } from "../types/VideoPlayerState";
+import { VideoPlayer } from "../types/VideoPlayer";
 import { PanelsEnum } from "../enums/PanelsEnum";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
@@ -30,7 +30,7 @@ export function createAppState() {
   const playlistVideos = signal<PlaylistVideo[]>([]);
   const users = signal<User[]>([]);
   const userPermissions = signal<UserPermissions | null>(null);
-  const videoPlayerState = signal<VideoPlayerState | null>(null);
+  const videoPlayer = signal<VideoPlayer | null>(null);
 
   //Auxilary control panel data
   const unreadChatMessagesCount = signal<number>(0);
@@ -44,7 +44,7 @@ export function createAppState() {
     connectionId,
     username, isAdmin, isInRoom,
     roomHash, roomName, roomPassword, roomType, maxUsers,
-    chatMessages, playlistVideos, users, userPermissions, videoPlayerState,
+    chatMessages, playlistVideos, users, userPermissions, videoPlayer: videoPlayer,
     unreadChatMessagesCount, activePanel, maxPlaylistVideos,
     joinedViaView
   }
