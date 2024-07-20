@@ -6,6 +6,7 @@ import { BsSendFill } from "react-icons/bs";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
+import MessageOnChat from "./ChatMessage";
 
 export default function Chat() {
   const appState = useContext(AppStateContext);
@@ -80,19 +81,13 @@ export default function Chat() {
       )}
       <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
         {appState.chatMessages.value.length !== 0 ? (
-          appState.chatMessages.value.map((chatMessage, index) => (
-            <li 
-              key={index}
-              className="border border-secondary list-group-item bg-muted border-2"
-            >
-              <div className="d-block chat-message">
-                <small className="text-muted">{`(${chatMessage.date})`} </small>
-                <span className={`${appState.username.value === chatMessage.username ? "text-orange" : "text-primary"}`}>
-                  <b>{chatMessage.username}: </b>
-                </span>
-                <span className="text-dark">{chatMessage.text}</span>
-              </div>
-            </li>
+          appState.chatMessages.value.map((chatMessage: ChatMessage, index: number) => (
+          <li 
+            key={index}
+            className="border border-secondary list-group-item bg-muted border-2"
+          >
+            <MessageOnChat chatMessage={chatMessage} />
+          </li>
           ))
         ) : (
           <h6 className="text-white text-center">No messages to display</h6>

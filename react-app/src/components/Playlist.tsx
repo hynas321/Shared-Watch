@@ -3,11 +3,11 @@ import { PlaylistVideo } from "../types/PlaylistVideo";
 import Button from "./Button";
 import { InputField } from "./InputField";
 import { useContext, useEffect, useRef, useState } from "react";
-import VideoIcon from './../assets/video-icon.png'
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubEvents } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { RoomHelper } from "../classes/RoomHelper";
+import VideoOnPlaylist from "./PlaylistVideo";
 
 export default function Playlist() {
   const appHub = useContext(AppHubContext);
@@ -20,11 +20,6 @@ export default function Playlist() {
 
   const localStorageManager = new LocalStorageManager();
   const roomHelper = RoomHelper.getInstance();
-  
-  const videoThumbnailStyle = {
-    width: "40px",
-    height: "40px"
-  };
   
   useEffect(() => {
     if (playlistVideosRef.current) {
@@ -71,16 +66,6 @@ export default function Playlist() {
     }
   }
 
-  const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
-    event.preventDefault();
-    appHub.invoke(
-      HubEvents.DeletePlaylistVideo,
-      appState.roomHash.value,
-      localStorageManager.getAuthorizationToken(),
-      appState.playlistVideos.value[index].hash
-    );
-  }
-
   return (
     <>
       {(appState.userPermissions.value?.canAddVideo || appState.isAdmin.value) && (
@@ -104,7 +89,7 @@ export default function Playlist() {
       )}
       <div className="list-group rounded-3 control-panel-list" ref={playlistVideosRef}>
         {appState.playlistVideos.value.length !== 0 ? (
-          appState.playlistVideos.value.map((playlistVideo, index) => (
+          appState.playlistVideos.value.map((playlistVideo: PlaylistVideo, index: number) => (
             <a 
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"
@@ -112,25 +97,10 @@ export default function Playlist() {
               target="_blank"
               style={index === 0 ? { backgroundColor: "#DAF7A6" } : {}}
             >
-              <div className="row">
-                <div className="col-auto">
-                  <img src={playlistVideo.thumbnailUrl === null ? VideoIcon : playlistVideo.thumbnailUrl} alt="Video" style={videoThumbnailStyle} />
-                </div>
-                <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
-                  <small style={{ wordWrap: 'break-word', maxWidth: '200px' }}>
-                    <b>{playlistVideo.title === null ? playlistVideo.url : playlistVideo.title}</b>
-                  </small>
-                  {(appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) && (
-                    <div>
-                      <Button
-                        text={<BsFillXCircleFill />}
-                        classNames="btn btn-danger btn-sm"
-                        onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
+              <VideoOnPlaylist
+                index={index}
+                playlistVideo={playlistVideo}
+              />
             </a>
           ))
         ) : (
