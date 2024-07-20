@@ -7,7 +7,7 @@ import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { HttpUrlHelper } from "../classes/HttpUrlHelper";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { useEffect, useContext } from "react";
-import { HubEvents } from "../classes/HubEvents";
+import { HubMessages } from "../classes/HubEvents";
 import * as signalR from "@microsoft/signalr";
 import { HttpManager } from "../classes/HttpManager";
 import useClipboardApi from "use-clipboard-api";
@@ -26,7 +26,7 @@ export default function Header() {
   const buttonColor = useSignal<string>("primary");
 
   const httpManager = new HttpManager();
-  const localStorageManager = new LocalStorageManager();
+  const localStorageManager = LocalStorageManager.getInstance();
   const httpUrlHelper = new HttpUrlHelper();
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function Header() {
   useEffect(() => {
     const startAppHubConnection = async () => {
       try {
-        appHub.on(HubEvents.OnReceiveConnectionId, (connectionId: string) => {
+        appHub.on(HubMessages.OnReceiveConnectionId, (connectionId: string) => {
           appState.connectionId.value = connectionId;
         });
 

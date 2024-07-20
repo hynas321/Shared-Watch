@@ -1,4 +1,4 @@
-export class HubEvents {
+export class HubMessages {
   //Connection
   static OnReceiveConnectionId: string = "OnReceiveConnectionId";
   static SendHeartbeat: string = "SendHeartbeat";

@@ -4,7 +4,7 @@ import { ChatMessage } from "../types/ChatMessage";
 import { InputField } from "./InputField";
 import { BsSendFill } from "react-icons/bs";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
-import { HubEvents } from "../classes/HubEvents";
+import { HubMessages } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import MessageOnChat from "./ChatMessage";
 
@@ -15,7 +15,7 @@ export default function Chat() {
   const messagesRef = useRef<HTMLDivElement>(null);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
 
-  const localStorageManager = new LocalStorageManager();
+  const localStorageManager = LocalStorageManager.getInstance();
 
   useEffect(() => {
     if (appState.unreadChatMessagesCount.value !== 0) {
@@ -47,7 +47,7 @@ export default function Chat() {
       date: currentDate
     }
 
-    appHub.invoke(HubEvents.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
+    appHub.invoke(HubMessages.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
 
     setCurrentChatMessageText("");
   };

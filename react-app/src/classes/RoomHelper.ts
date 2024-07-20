@@ -20,7 +20,7 @@ export class RoomHelper {
 
   private constructor() {
     this.httpManager = new HttpManager();
-    this.localStorageManager = new LocalStorageManager();
+    this.localStorageManager = LocalStorageManager.getInstance();
   }
 
   public static getInstance(): RoomHelper {

@@ -9,7 +9,7 @@ import Settings from "./Settings";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { AppHubContext, appState } from "../context/AppContext";
 import * as signalR from "@microsoft/signalr";
-import { HubEvents } from "../classes/HubEvents";
+import { HubMessages as HubMessages } from "../classes/HubEvents";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import { User } from "../types/User";
 import { toast } from "react-toastify";
@@ -34,7 +34,7 @@ export default function ControlPanel() {
       return;
     }
 
-    appHub.on(HubEvents.OnAddChatMessage, (chatMessageSerialized: string) => {
+    appHub.on(HubMessages.OnAddChatMessage, (chatMessageSerialized: string) => {
       const chatMessage = JSON.parse(chatMessageSerialized);
 
       appState.chatMessages.value = [...appState.chatMessages.value, chatMessage];
@@ -44,7 +44,7 @@ export default function ControlPanel() {
       }
     });
 
-    appHub.on(HubEvents.OnAddPlaylistVideo, (playlistVideoSerialized: string | null) => {
+    appHub.on(HubMessages.OnAddPlaylistVideo, (playlistVideoSerialized: string | null) => {
       if (playlistVideoSerialized == null) {
         return;
       }
@@ -54,23 +54,23 @@ export default function ControlPanel() {
       appState.playlistVideos.value = [...appState.playlistVideos.value, playlistVideo];
     });
 
-    appHub.on(HubEvents.OnDeletePlaylistVideo, (playlistVideoHash: string) => {
+    appHub.on(HubMessages.OnDeletePlaylistVideo, (playlistVideoHash: string) => {
       appState.playlistVideos.value = appState.playlistVideos.value.filter(
         (video) => video.hash !== playlistVideoHash
       );
     });
 
-    appHub.on(HubEvents.OnJoinRoom, (newUser: User) => {
+    appHub.on(HubMessages.OnJoinRoom, (newUser: User) => {
       appState.users.value = [...appState.users.value, newUser];
     });
 
-    appHub.on(HubEvents.OnLeaveRoom, (removedUser: User) => {
+    appHub.on(HubMessages.OnLeaveRoom, (removedUser: User) => {
       appState.users.value = appState.users.value.filter(
         (user) => user.username !== removedUser.username
       );
     });
 
-    appHub.on(HubEvents.OnKickOut, (removedUserSerialized: string) => {
+    appHub.on(HubMessages.OnKickOut, (removedUserSerialized: string) => {
       const removedUser: User = JSON.parse(removedUserSerialized);
       const isCurrentUser = removedUser.username === appState.username.value;
       
@@ -96,7 +96,7 @@ export default function ControlPanel() {
       );
     });
 
-    appHub.on(HubEvents.OnSetAdminStatus, (updatedUserSerialized: string) => {
+    appHub.on(HubMessages.OnSetAdminStatus, (updatedUserSerialized: string) => {
       const updatedUser: User = JSON.parse(updatedUserSerialized);
       const isCurrentUser = updatedUser.username === appState.username.value;
 
@@ -165,7 +165,7 @@ export default function ControlPanel() {
       }
     });
 
-    appHub.on(HubEvents.OnSetUserPermissions, (userPermissionsSerialized: string) => {
+    appHub.on(HubMessages.OnSetUserPermissions, (userPermissionsSerialized: string) => {
       const userPermissions: UserPermissions = JSON.parse(userPermissionsSerialized);
 
       if (appState.userPermissions.value != null) {
@@ -173,21 +173,21 @@ export default function ControlPanel() {
       }
     });
 
-    appHub.on(HubEvents.OnSetRoomPassword, (roomPassword: string, roomType: RoomTypesEnum) => {
+    appHub.on(HubMessages.OnSetRoomPassword, (roomPassword: string, roomType: RoomTypesEnum) => {
       appState.roomPassword.value = roomPassword;
       appState.roomType.value = roomType;
     });
 
     return () => {
-      appHub.off(HubEvents.OnAddChatMessage);
-      appHub.off(HubEvents.OnAddPlaylistVideo);
-      appHub.off(HubEvents.OnDeletePlaylistVideo);
-      appHub.off(HubEvents.OnJoinRoom);
-      appHub.off(HubEvents.OnLeaveRoom);
-      appHub.off(HubEvents.OnKickOut);
-      appHub.off(HubEvents.OnSetAdminStatus);
-      appHub.off(HubEvents.OnSetUserPermissions);
-      appHub.off(HubEvents.OnSetRoomPassword);
+      appHub.off(HubMessages.OnAddChatMessage);
+      appHub.off(HubMessages.OnAddPlaylistVideo);
+      appHub.off(HubMessages.OnDeletePlaylistVideo);
+      appHub.off(HubMessages.OnJoinRoom);
+      appHub.off(HubMessages.OnLeaveRoom);
+      appHub.off(HubMessages.OnKickOut);
+      appHub.off(HubMessages.OnSetAdminStatus);
+      appHub.off(HubMessages.OnSetUserPermissions);
+      appHub.off(HubMessages.OnSetRoomPassword);
     }
   }, [appHub.getState()]);
 

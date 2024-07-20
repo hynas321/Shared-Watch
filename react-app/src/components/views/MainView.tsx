@@ -16,7 +16,7 @@ import CreateRoomModal from "../CreateRoomModal";
 import { AppStateContext, appHub } from "../../context/AppContext";
 import { RoomHelper } from "../../classes/RoomHelper";
 import * as signalR from "@microsoft/signalr";
-import { HubEvents } from "../../classes/HubEvents";
+import { HubMessages } from "../../classes/HubEvents";
 import { BsDoorOpenFill, BsExclamationTriangleFill } from "react-icons/bs";
 import { BsFillPersonLinesFill } from "react-icons/bs";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
@@ -40,14 +40,14 @@ export default function MainView() {
       return;
     }
 
-    appHub.on(HubEvents.onListOfRoomsUpdated, (listOfRoomsSerialized: string) => {
+    appHub.on(HubMessages.onListOfRoomsUpdated, (listOfRoomsSerialized: string) => {
       const rooms: Room[] = JSON.parse(listOfRoomsSerialized);
 
       setRooms(rooms);
     });
 
     return () => {
-      appHub.off(HubEvents.onListOfRoomsUpdated);
+      appHub.off(HubMessages.onListOfRoomsUpdated);
     }
   }, [appHub.getState()]);
 

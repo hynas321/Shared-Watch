@@ -1,5 +1,5 @@
 import { BsFillXCircleFill } from 'react-icons/bs';
-import { HubEvents } from '../classes/HubEvents';
+import { HubMessages } from '../classes/HubEvents';
 import { LocalStorageManager } from '../classes/LocalStorageManager';
 import { appHub, appState } from '../context/AppContext';
 import { PlaylistVideo } from '../types/PlaylistVideo'
@@ -12,7 +12,7 @@ export interface VideoOnPlaylistProps {
 }
 
 export default function VideoOnPlaylist({index, playlistVideo}: VideoOnPlaylistProps) {
-  const localStorageManager = new LocalStorageManager();
+  const localStorageManager = LocalStorageManager.getInstance();
 
   const videoThumbnailStyle = {
     width: "40px",
@@ -22,7 +22,7 @@ export default function VideoOnPlaylist({index, playlistVideo}: VideoOnPlaylistP
   const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
     event.preventDefault();
     appHub.invoke(
-      HubEvents.DeletePlaylistVideo,
+      HubMessages.DeletePlaylistVideo,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
       appState.playlistVideos.value[index].hash

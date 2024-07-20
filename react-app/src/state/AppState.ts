@@ -44,7 +44,7 @@ export function createAppState() {
     connectionId,
     username, isAdmin, isInRoom,
     roomHash, roomName, roomPassword, roomType, maxUsers,
-    chatMessages, playlistVideos, users, userPermissions, videoPlayer: videoPlayer,
+    chatMessages, playlistVideos, users, userPermissions, videoPlayer,
     unreadChatMessagesCount, activePanel, maxPlaylistVideos,
     joinedViaView
   }

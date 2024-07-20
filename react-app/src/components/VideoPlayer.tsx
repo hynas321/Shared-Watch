@@ -2,7 +2,7 @@ import ReactPlayer from "react-player";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import * as signalR from "@microsoft/signalr";
-import { HubEvents } from "../classes/HubEvents";
+import { HubMessages } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 import { OnProgressProps } from "react-player/base";
 import { BsCameraVideoOffFill } from "react-icons/bs";
@@ -17,7 +17,7 @@ export default function VideoPlayer() {
   const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayer.value?.isPlaying ?? false);
   const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] = useState<boolean>(false);
 
-  const localStorageManager = new LocalStorageManager();
+  const localStorageManager = LocalStorageManager.getInstance();
 
   useEffect(() => {
     if (appHub.getState() !== signalR.HubConnectionState.Connected) {
@@ -60,20 +60,20 @@ export default function VideoPlayer() {
       setVideoUrl(url);
     };
 
-    appHub.on(HubEvents.OnSetIsVideoPlaying, handleSetIsVideoPlaying);
-    appHub.on(HubEvents.OnSetPlayedSeconds, handleSetPlayedSeconds);
-    appHub.on(HubEvents.OnSetVideoUrl, handleSetVideoUrl);
+    appHub.on(HubMessages.OnSetIsVideoPlaying, handleSetIsVideoPlaying);
+    appHub.on(HubMessages.OnSetPlayedSeconds, handleSetPlayedSeconds);
+    appHub.on(HubMessages.OnSetVideoUrl, handleSetVideoUrl);
 
     return () => {
-      appHub.off(HubEvents.OnSetIsVideoPlaying);
-      appHub.off(HubEvents.OnSetPlayedSeconds);
-      appHub.off(HubEvents.OnSetVideoUrl);
+      appHub.off(HubMessages.OnSetIsVideoPlaying);
+      appHub.off(HubMessages.OnSetPlayedSeconds);
+      appHub.off(HubMessages.OnSetVideoUrl);
     };
   }, [appHub.getState()]);
 
   const setUserVideoState = async (isPlaying: boolean) => {
     await appHub.invoke(
-      HubEvents.SetIsVideoPlaying,
+      HubMessages.SetIsVideoPlaying,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
       isPlaying
@@ -91,7 +91,7 @@ export default function VideoPlayer() {
   const handleOnProgress = async (state: OnProgressProps) => {
     if (isVideoCurrentTimeDifferenceLarge && appState.isAdmin.value) {
       await appHub.invoke(
-        HubEvents.SetPlayedSeconds,
+        HubMessages.SetPlayedSeconds,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
         state.playedSeconds

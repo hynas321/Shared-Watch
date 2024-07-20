@@ -2,14 +2,14 @@ import { useContext } from "react";
 import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMinus, BsShieldFillPlus } from "react-icons/bs";
 import Button from "./Button";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
-import { HubEvents } from "../classes/HubEvents";
+import { HubMessages } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Users() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
 
-  const localStorageManager = new LocalStorageManager();
+  const localStorageManager = LocalStorageManager.getInstance();
 
   const handleAdminStatusButtonClick = async (adminStatus: boolean, username: string) => {
     if (appState.users.value === null) {
@@ -17,7 +17,7 @@ export default function Users() {
     }
 
     await appHub.invoke(
-      HubEvents.SetAdminStatus,
+      HubMessages.SetAdminStatus,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
       username,
@@ -27,7 +27,7 @@ export default function Users() {
 
   const handleKickOutUserButtonClick = async (event: any, username: string) => {
     await appHub.invoke(
-      HubEvents.KickOut,
+      HubMessages.KickOut,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
       username

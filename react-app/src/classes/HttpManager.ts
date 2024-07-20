@@ -1,4 +1,4 @@
-import axios, { HttpStatusCode } from "axios";
+import axios from "axios";
 import { RoomCreateInput } from "../types/HttpTypes/Input/RoomCreateInput";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { LocalStorageManager } from "./LocalStorageManager";
@@ -10,7 +10,7 @@ import { appState } from "../context/AppContext";
 
 export class HttpManager {
   private httpServerUrl: string;
-  private authorizationManager = new LocalStorageManager();
+  private authorizationManager = LocalStorageManager.getInstance();
 
   constructor() {
     let env = import.meta.env;

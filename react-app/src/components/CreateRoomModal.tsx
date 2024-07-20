@@ -13,7 +13,7 @@ import { useSignal } from "@preact/signals-react";
 import { RoomHelper } from "../classes/RoomHelper";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 import { ping } from 'ldrs'
-import { HubEvents } from "../classes/HubEvents";
+import { HubMessages } from "../classes/HubEvents";
 
 export interface CreateRoomModalProps {
   acceptText: string;
@@ -90,7 +90,7 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
       password: roomPassword.value as string
     };
 
-    appHub.off(HubEvents.onListOfRoomsUpdated);
+    appHub.off(HubMessages.onListOfRoomsUpdated);
 
     const canJoin = await roomHelper.joinRoom(roomState);
 

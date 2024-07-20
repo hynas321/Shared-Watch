@@ -5,7 +5,7 @@ import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 import { AppStateContext, appHub } from "../context/AppContext";
 import { useContext } from "react";
-import { HubEvents } from "../classes/HubEvents";
+import { HubMessages } from "../classes/HubEvents";
 import { LocalStorageManager } from "../classes/LocalStorageManager";
 
 export default function Settings() {
@@ -13,7 +13,7 @@ export default function Settings() {
   const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
 
-  const localStorageManager = new LocalStorageManager();
+  const localStorageManager = LocalStorageManager.getInstance();
 
   useEffect(() => {
     setUserPermissions(appState.userPermissions.value);
@@ -26,7 +26,7 @@ export default function Settings() {
 
     if (inputFormPassword.length > 0) {
       appHub.invoke(
-        HubEvents.SetRoomPassword,
+        HubMessages.SetRoomPassword,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
         inputFormPassword
@@ -36,7 +36,7 @@ export default function Settings() {
     }
     else {
       appHub.invoke(
-        HubEvents.SetRoomPassword,
+        HubMessages.SetRoomPassword,
         appState.roomHash.value,
         localStorageManager.getAuthorizationToken(),
         ""
@@ -48,7 +48,7 @@ export default function Settings() {
 
   const handleRemovePasswordButtonClick = () => {
     appHub.invoke(
-      HubEvents.SetRoomPassword,
+      HubMessages.SetRoomPassword,
       appState.roomHash.value,
       localStorageManager.getAuthorizationToken(),
       ""
@@ -64,7 +64,7 @@ export default function Settings() {
   }
 
   const invokeChange = () => {
-    appHub.invoke(HubEvents.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
+    appHub.invoke(HubMessages.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
   };
 
   const setCanAddChatMessage = (checked: boolean) => {
