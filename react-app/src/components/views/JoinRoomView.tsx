@@ -1,14 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useContext, useState } from "react";
-import { HttpManager } from "../../classes/HttpManager";
-import { HttpStatusCodes } from "../../classes/HttpStatusCodes";
-import { ClientEndpoints } from "../../classes/ClientEndpoints";
+import { HttpService } from "../../classes/services/HttpService";
+import { HttpStatusCodes } from "../../classes/constants/HttpStatusCodes";
+import { ClientEndpoints } from "../../classes/constants/ClientEndpoints";
 import { AppStateContext } from "../../context/AppContext";
 import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { animated, useSpring } from "@react-spring/web";
 import Header from "../Header";
 import { ToastContainer, toast } from "react-toastify";
-import { HttpUrlHelper } from "../../classes/HttpUrlHelper";
+import { HttpUrlHelper } from "../../classes/helpers/HttpUrlHelper";
 import { useSignal } from "@preact/signals-react";
 import { Room } from "../../types/Room";
 import {
@@ -19,7 +19,7 @@ import {
 import { InputField } from "../InputField";
 import Button from "../Button";
 import { RoomState } from "../../types/RoomState";
-import { RoomHelper } from "../../classes/RoomHelper";
+import { RoomHelper } from "../../classes/helpers/RoomHelper";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { ping } from "ldrs";
 
@@ -50,7 +50,7 @@ export default function JoinRoomView() {
     }
   }, [privateRoomPassword]);
 
-  const httpManager = new HttpManager();
+  const httpManager = new HttpService();
   const httpUrlHelper = new HttpUrlHelper();
 
   const initializeView = async () => {

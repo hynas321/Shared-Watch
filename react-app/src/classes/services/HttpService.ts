@@ -1,16 +1,16 @@
 import axios from "axios";
-import { RoomCreateInput } from "../types/HttpTypes/Input/RoomCreateInput";
-import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
-import { LocalStorageManager } from "./LocalStorageManager";
-import { HttpApiEndpoints } from "./HttpApiEndpoints";
-import { RoomJoinInput } from "../types/HttpTypes/Input/RoomJoinInput";
-import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
-import { Room } from "../types/Room";
-import { appState } from "../context/AppContext";
+import { RoomCreateInput } from "../../types/HttpTypes/Input/RoomCreateInput";
+import { RoomCreateOutput } from "../../types/HttpTypes/Output/RoomCreateOutput";
+import { LocalStorageService } from "./LocalStorageService";
+import { HttpApiEndpoints } from "../constants/HttpApiEndpoints";
+import { RoomJoinInput } from "../../types/HttpTypes/Input/RoomJoinInput";
+import { RoomJoinOutput } from "../../types/HttpTypes/Output/RoomJoinOutput";
+import { Room } from "../../types/Room";
+import { appState } from "../../context/AppContext";
 
-export class HttpManager {
+export class HttpService {
   private httpServerUrl: string;
-  private authorizationManager = LocalStorageManager.getInstance();
+  private authorizationManager = LocalStorageService.getInstance();
 
   constructor() {
     let env = import.meta.env;

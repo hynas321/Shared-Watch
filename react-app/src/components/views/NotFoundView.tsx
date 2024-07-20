@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import Button from "../Button";
-import { ClientEndpoints } from "../../classes/ClientEndpoints";
+import { ClientEndpoints } from "../../classes/constants/ClientEndpoints";
 
 export default function NotFoundView() {
   const navigate = useNavigate();

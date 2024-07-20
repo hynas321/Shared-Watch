@@ -4,8 +4,8 @@ import { ChatMessage } from "../types/ChatMessage";
 import { InputField } from "./InputField";
 import { BsSendFill } from "react-icons/bs";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
-import { HubMessages } from "../classes/HubEvents";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { HubMessages } from "../classes/constants/HubMessages";
+import { LocalStorageService } from "../classes/services/LocalStorageService";
 import MessageOnChat from "./ChatMessage";
 
 export default function Chat() {
@@ -15,7 +15,7 @@ export default function Chat() {
   const messagesRef = useRef<HTMLDivElement>(null);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
 
-  const localStorageManager = LocalStorageManager.getInstance();
+  const localStorageManager = LocalStorageService.getInstance();
 
   useEffect(() => {
     if (appState.unreadChatMessagesCount.value !== 0) {

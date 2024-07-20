@@ -2,21 +2,21 @@ import { useContext, useEffect, useState } from "react";
 import { Room } from "../../types/Room";
 import RoomList from "../RoomList";
 import { useNavigate } from "react-router-dom";
-import { ClientEndpoints } from "../../classes/ClientEndpoints"; 
+import { ClientEndpoints } from "../../classes/constants/ClientEndpoints"; 
 import { InputField } from "../InputField";
 import Switch from "../Switch";
-import { HttpManager } from "../../classes/HttpManager";
+import { HttpService } from "../../classes/services/HttpService";
 import Header from "../Header";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { HttpStatusCodes } from "../../classes/HttpStatusCodes";
+import { HttpStatusCodes } from "../../classes/constants/HttpStatusCodes";
 import { RoomState } from "../../types/RoomState";
 import { animated, useSpring } from "@react-spring/web";
 import CreateRoomModal from "../CreateRoomModal";
 import { AppStateContext, appHub } from "../../context/AppContext";
-import { RoomHelper } from "../../classes/RoomHelper";
+import { RoomHelper } from "../../classes/helpers/RoomHelper";
 import * as signalR from "@microsoft/signalr";
-import { HubMessages } from "../../classes/HubEvents";
+import { HubMessages } from "../../classes/constants/HubMessages";
 import { BsDoorOpenFill, BsExclamationTriangleFill } from "react-icons/bs";
 import { BsFillPersonLinesFill } from "react-icons/bs";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
@@ -32,7 +32,7 @@ export default function MainView() {
   const [searchText, setSearchText] = useState<string>("");
   const [areRoomsFetched, setAreRoomsFetched] = useState<boolean>(false);
 
-  const httpManager: HttpManager = new HttpManager();
+  const httpManager: HttpService = new HttpService();
   const roomHelper = RoomHelper.getInstance();
 
   useEffect(() => {

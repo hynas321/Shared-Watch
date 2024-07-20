@@ -2,14 +2,14 @@ import { BsDoorOpenFill, BsFillCameraReelsFill, BsFillPersonFill, BsShieldFillCh
 import { InputField } from "./InputField";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
-import { ClientEndpoints } from "../classes/ClientEndpoints";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { HttpUrlHelper } from "../classes/HttpUrlHelper";
+import { ClientEndpoints } from "../classes/constants/ClientEndpoints";
+import { LocalStorageService } from "../classes/services/LocalStorageService";
+import { HttpUrlHelper } from "../classes/helpers/HttpUrlHelper";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { useEffect, useContext } from "react";
-import { HubMessages } from "../classes/HubEvents";
+import { HubMessages } from "../classes/constants/HubMessages";
 import * as signalR from "@microsoft/signalr";
-import { HttpManager } from "../classes/HttpManager";
+import { HttpService } from "../classes/services/HttpService";
 import useClipboardApi from "use-clipboard-api";
 import { useSignal } from "@preact/signals-react";
 import { BsFillLayersFill } from "react-icons/bs";
@@ -25,8 +25,8 @@ export default function Header() {
 
   const buttonColor = useSignal<string>("primary");
 
-  const httpManager = new HttpManager();
-  const localStorageManager = LocalStorageManager.getInstance();
+  const httpManager = new HttpService();
+  const localStorageManager = LocalStorageService.getInstance();
   const httpUrlHelper = new HttpUrlHelper();
 
   useEffect(() => {

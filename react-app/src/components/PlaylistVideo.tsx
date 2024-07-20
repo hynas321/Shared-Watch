@@ -1,6 +1,6 @@
 import { BsFillXCircleFill } from 'react-icons/bs';
-import { HubMessages } from '../classes/HubEvents';
-import { LocalStorageManager } from '../classes/LocalStorageManager';
+import { HubMessages } from '../classes/constants/HubMessages';
+import { LocalStorageService } from '../classes/services/LocalStorageService';
 import { appHub, appState } from '../context/AppContext';
 import { PlaylistVideo } from '../types/PlaylistVideo'
 import VideoIcon from './../assets/video-icon.png'
@@ -12,7 +12,7 @@ export interface VideoOnPlaylistProps {
 }
 
 export default function VideoOnPlaylist({index, playlistVideo}: VideoOnPlaylistProps) {
-  const localStorageManager = LocalStorageManager.getInstance();
+  const localStorageManager = LocalStorageService.getInstance();
 
   const videoThumbnailStyle = {
     width: "40px",

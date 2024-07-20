@@ -4,9 +4,9 @@ import Button from "./Button";
 import { InputField } from "./InputField";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
-import { HubMessages } from "../classes/HubEvents";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
-import { RoomHelper } from "../classes/RoomHelper";
+import { HubMessages } from "../classes/constants/HubMessages";
+import { LocalStorageService } from "../classes/services/LocalStorageService";
+import { RoomHelper } from "../classes/helpers/RoomHelper";
 import VideoOnPlaylist from "./PlaylistVideo";
 
 export default function Playlist() {
@@ -18,7 +18,7 @@ export default function Playlist() {
   const [isInputFormEnabled, setIsInputFormEnabled] = useState<boolean>(true);
   const [inputFormPlaceholderText, setInputFormPlaceholderText] = useState<string>("Paste Youtube Video URL");
 
-  const localStorageManager = LocalStorageManager.getInstance();
+  const localStorageManager = LocalStorageService.getInstance();
   const roomHelper = RoomHelper.getInstance();
   
   useEffect(() => {

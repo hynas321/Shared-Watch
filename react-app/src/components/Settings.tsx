@@ -5,15 +5,15 @@ import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 import { AppStateContext, appHub } from "../context/AppContext";
 import { useContext } from "react";
-import { HubMessages } from "../classes/HubEvents";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { HubMessages } from "../classes/constants/HubMessages";
+import { LocalStorageService } from "../classes/services/LocalStorageService";
 
 export default function Settings() {
   const appState = useContext(AppStateContext);
   const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
 
-  const localStorageManager = LocalStorageManager.getInstance();
+  const localStorageManager = LocalStorageService.getInstance();
 
   useEffect(() => {
     setUserPermissions(appState.userPermissions.value);

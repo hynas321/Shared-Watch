@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import Button from "./Button"
 import { InputField } from "./InputField";
-import { HttpManager } from "../classes/HttpManager";
+import { HttpService } from "../classes/services/HttpService";
 import { useNavigate } from "react-router-dom";
-import { ClientEndpoints } from "../classes/ClientEndpoints";
-import { HttpStatusCodes } from "../classes/HttpStatusCodes";
+import { ClientEndpoints } from "../classes/constants/ClientEndpoints";
+import { HttpStatusCodes } from "../classes/constants/HttpStatusCodes";
 import { toast } from "react-toastify";
 import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
 import { RoomState } from "../types/RoomState";
 import { appHub, appState } from "../context/AppContext";
 import { useSignal } from "@preact/signals-react";
-import { RoomHelper } from "../classes/RoomHelper";
+import { RoomHelper } from "../classes/helpers/RoomHelper";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 import { ping } from 'ldrs'
-import { HubMessages } from "../classes/HubEvents";
+import { HubMessages } from "../classes/constants/HubMessages";
 
 export interface CreateRoomModalProps {
   acceptText: string;
@@ -27,7 +27,7 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
   const isCreateButtonClicked = useSignal<boolean>(false);
   const navigate = useNavigate();
 
-  const httpManager = new HttpManager();
+  const httpManager = new HttpService();
   const roomHelper = RoomHelper.getInstance();
 
   useEffect(() => {

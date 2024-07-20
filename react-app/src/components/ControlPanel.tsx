@@ -9,13 +9,13 @@ import Settings from "./Settings";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { AppHubContext, appState } from "../context/AppContext";
 import * as signalR from "@microsoft/signalr";
-import { HubMessages as HubMessages } from "../classes/HubEvents";
+import { HubMessages as HubMessages } from "../classes/constants/HubMessages";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import { User } from "../types/User";
 import { toast } from "react-toastify";
-import { ClientEndpoints } from "../classes/ClientEndpoints";
+import { ClientEndpoints } from "../classes/constants/ClientEndpoints";
 import { useNavigate } from "react-router-dom";
-import { HttpManager } from "../classes/HttpManager";
+import { HttpService } from "../classes/services/HttpService";
 import { UserPermissions } from "../types/UserPermissions";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 
@@ -23,7 +23,7 @@ export default function ControlPanel() {
   const appHub = useContext(AppHubContext);
   const navigate = useNavigate();
 
-  const httpManager = new HttpManager();
+  const httpManager = new HttpService();
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     appState.activePanel.value = panelsEnumValue;

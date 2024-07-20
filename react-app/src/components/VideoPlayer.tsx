@@ -2,8 +2,8 @@ import ReactPlayer from "react-player";
 import { useContext, useEffect, useRef, useState } from "react";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import * as signalR from "@microsoft/signalr";
-import { HubMessages } from "../classes/HubEvents";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { HubMessages } from "../classes/constants/HubMessages";
+import { LocalStorageService } from "../classes/services/LocalStorageService";
 import { OnProgressProps } from "react-player/base";
 import { BsCameraVideoOffFill } from "react-icons/bs";
 
@@ -17,7 +17,7 @@ export default function VideoPlayer() {
   const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayer.value?.isPlaying ?? false);
   const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] = useState<boolean>(false);
 
-  const localStorageManager = LocalStorageManager.getInstance();
+  const localStorageManager = LocalStorageService.getInstance();
 
   useEffect(() => {
     if (appHub.getState() !== signalR.HubConnectionState.Connected) {

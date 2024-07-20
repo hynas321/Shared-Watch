@@ -2,14 +2,14 @@ import { useContext } from "react";
 import { BsFillPersonFill, BsFillPersonXFill, BsShieldFillCheck, BsShieldFillMinus, BsShieldFillPlus } from "react-icons/bs";
 import Button from "./Button";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
-import { HubMessages } from "../classes/HubEvents";
-import { LocalStorageManager } from "../classes/LocalStorageManager";
+import { HubMessages } from "../classes/constants/HubMessages";
+import { LocalStorageService } from "../classes/services/LocalStorageService";
 
 export default function Users() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
 
-  const localStorageManager = LocalStorageManager.getInstance();
+  const localStorageManager = LocalStorageService.getInstance();
 
   const handleAdminStatusButtonClick = async (adminStatus: boolean, username: string) => {
     if (appState.users.value === null) {

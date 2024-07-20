@@ -1,26 +1,26 @@
 import { toast } from "react-toastify";
-import { appState } from "../context/AppContext";
-import { HttpStatusCodes } from "./HttpStatusCodes";
-import { RoomTypesEnum } from "../enums/RoomTypesEnum";
-import { ChatMessage } from "../types/ChatMessage";
-import { PlaylistVideo } from "../types/PlaylistVideo";
-import { RoomState } from "../types/RoomState";
-import { HttpManager } from "./HttpManager";
-import { LocalStorageManager } from "./LocalStorageManager";
-import { User } from "../types/User";
-import { UserPermissions } from "../types/UserPermissions";
-import { VideoPlayer } from "../types/VideoPlayer";
-import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
+import { appState } from "../../context/AppContext";
+import { HttpStatusCodes } from "../constants/HttpStatusCodes";
+import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
+import { ChatMessage } from "../../types/ChatMessage";
+import { PlaylistVideo } from "../../types/PlaylistVideo";
+import { RoomState } from "../../types/RoomState";
+import { HttpService } from "../services/HttpService";
+import { LocalStorageService } from "../services/LocalStorageService";
+import { User } from "../../types/User";
+import { UserPermissions } from "../../types/UserPermissions";
+import { VideoPlayer } from "../../types/VideoPlayer";
+import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 
 export class RoomHelper {
   private static instance: RoomHelper;
 
-  private httpManager: HttpManager;
-  private localStorageManager: LocalStorageManager;
+  private httpManager: HttpService;
+  private localStorageManager: LocalStorageService;
 
   private constructor() {
-    this.httpManager = new HttpManager();
-    this.localStorageManager = LocalStorageManager.getInstance();
+    this.httpManager = new HttpService();
+    this.localStorageManager = LocalStorageService.getInstance();
   }
 
   public static getInstance(): RoomHelper {

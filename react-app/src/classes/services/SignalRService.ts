@@ -1,7 +1,7 @@
 import * as signalR from "@microsoft/signalr";
-import { HttpApiEndpoints } from "./HttpApiEndpoints";
+import { HttpApiEndpoints } from "../constants/HttpApiEndpoints";
 
-export class AppHub {
+export class SignalRService {
   private connection: signalR.HubConnection;
   private httpWebSocketUrl: string;
 
