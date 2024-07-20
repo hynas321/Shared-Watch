@@ -1,3 +1,7 @@
+using DotnetServer.Core.Enums;
+
+namespace DotnetServer.Core.Entities;
+
 public class Room
 {
     public string Hash { get; set; }

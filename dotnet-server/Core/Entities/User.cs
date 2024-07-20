@@ -1,5 +1,7 @@
 using System.Runtime.InteropServices;
 
+namespace DotnetServer.Core.Entities;
+
 public class User {
     public string Username { get; set; }
     public bool IsAdmin { get; set; }

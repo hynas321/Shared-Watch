@@ -1,3 +1,8 @@
+using DotnetServer.Api.DTO;
+using DotnetServer.Core.Entities;
+
+namespace DotnetServer.Infrastructure.Repositories;
+
 public interface IUserRepository
 {
     bool AddUser(string roomHash, User user);

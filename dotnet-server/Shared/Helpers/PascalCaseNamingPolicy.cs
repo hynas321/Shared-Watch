@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+namespace DotnetServer.Shared.Helpers;
+
 public class PascalCaseNamingPolicy : JsonNamingPolicy
 {
     public override string ConvertName(string name)

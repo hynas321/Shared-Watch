@@ -1,7 +1,9 @@
-﻿namespace dotnet_server.Infrastructure
+﻿using DotnetServer.Core.Entities;
+
+namespace DotnetServer.Infrastructure;
+
+public class AppData
 {
-    public class AppData
-    {
-        public readonly List<Room> Rooms = new List<Room>();
-    }
+    public readonly List<Room> Rooms = new List<Room>();
 }
+

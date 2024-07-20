@@ -1,3 +1,6 @@
+
+namespace DotnetServer.Core.Services;
+
 public interface IPlaylistService
 {
     bool IsServiceRunning { get; }

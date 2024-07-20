@@ -1,3 +1,5 @@
+namespace DotnetServer.Core.Entities;
+
 public class PlaylistVideo
 {
     public string Hash { get; set; }

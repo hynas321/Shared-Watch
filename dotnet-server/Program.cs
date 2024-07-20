@@ -1,7 +1,9 @@
-using Dotnet.Server.Hubs;
-using dotnet_server.Api.Handlers;
-using dotnet_server.Api.Handlers.Interfaces;
-using dotnet_server.Infrastructure;
+using DotnetServer.Api.Handlers;
+using DotnetServer.Core.Services;
+using DotnetServer.Infrastructure;
+using DotnetServer.Infrastructure.Repositories;
+using DotnetServer.Shared.Helpers;
+using DotnetServer.SignalR;
 using Google.Apis.Services;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,6 +1,10 @@
-using Dotnet.Server.Hubs;
-using dotnet_server.Infrastructure;
+using DotnetServer.Core.Entities;
+using DotnetServer.Infrastructure;
+using DotnetServer.Infrastructure.Repositories;
+using DotnetServer.SignalR;
 using Microsoft.AspNetCore.SignalR;
+
+namespace DotnetServer.Core.Services;
 
 public class PlaylistService : IPlaylistService
 {

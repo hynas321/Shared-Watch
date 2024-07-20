@@ -1,3 +1,5 @@
+namespace DotnetServer.Core.Entities;
+
 public class VideoPlayer {
     public PlaylistVideo PlaylistVideo { get; set; }
     public bool IsPlaying { get; set; }

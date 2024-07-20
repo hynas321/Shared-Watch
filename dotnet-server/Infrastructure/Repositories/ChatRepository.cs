@@ -1,3 +1,7 @@
+using DotnetServer.Core.Entities;
+
+namespace DotnetServer.Infrastructure.Repositories;
+
 public class ChatRepository : IChatRepository
 {
     private readonly IRoomRepository _roomRepository;

@@ -1,7 +1,9 @@
-﻿namespace dotnet_server.Api.Handlers.Interfaces
+﻿using DotnetServer.Api.HttpClasses.Input;
+using DotnetServer.Core.Entities;
+
+namespace DotnetServer.Api.Handlers;
+
+public interface IRoomControllerHandler
 {
-    public interface IRoomControllerHandler
-    {
-        Room CreateRoom(RoomCreateInput input);
-    }
+    Room CreateRoom(RoomCreateInput input);
 }

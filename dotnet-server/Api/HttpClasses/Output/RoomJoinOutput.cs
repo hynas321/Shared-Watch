@@ -1,3 +1,8 @@
+using DotnetServer.Api.DTO;
+using DotnetServer.Core.Entities;
+
+namespace DotnetServer.Api.HttpClasses.Output;
+
 public class RoomJoinOutput
 {
     public string AuthorizationToken { get; set; }

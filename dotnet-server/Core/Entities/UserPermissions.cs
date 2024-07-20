@@ -1,3 +1,5 @@
+namespace DotnetServer.Core.Entities;
+
 public class UserPermissions {
  
     public bool CanAddChatMessage { get; set; }

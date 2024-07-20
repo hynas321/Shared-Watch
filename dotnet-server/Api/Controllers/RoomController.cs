@@ -1,8 +1,15 @@
-using Dotnet.Server.Configuration;
-using dotnet_server.Api.Handlers.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using DotnetServer.Infrastructure.Repositories;
+using DotnetServer.Api.Handlers;
+using DotnetServer.Api.HttpClasses.Input;
+using DotnetServer.Core.Entities;
+using DotnetServer.Api.HttpClasses.Output;
+using DotnetServer.Core.Enums;
+using DotnetServer.Api.DTO;
+using DotnetServer.Shared.Helpers;
+using DotnetServer.Shared.Constants;
 
-namespace dotnet_server.Controllers;
+namespace DotnetServer.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

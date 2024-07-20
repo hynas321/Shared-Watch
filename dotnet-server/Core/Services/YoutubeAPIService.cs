@@ -3,6 +3,8 @@ using System.Xml;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 
+namespace DotnetServer.Core.Services;
+
 public class YouTubeAPIService : IYouTubeAPIService
 {
     private readonly YouTubeService _youTubeService;

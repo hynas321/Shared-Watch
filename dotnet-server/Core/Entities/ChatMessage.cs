@@ -1,3 +1,5 @@
+namespace DotnetServer.Core.Entities;
+
 public class ChatMessage
 {
     public string Username { get; set; }

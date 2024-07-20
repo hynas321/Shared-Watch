@@ -1,3 +1,5 @@
+namespace DotnetServer.SignalR;
+
 public static class HubMessages {
     //Connection
     public const string OnReceiveConnectionId = "OnReceiveConnectionId";

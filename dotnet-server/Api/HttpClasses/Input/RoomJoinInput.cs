@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+namespace DotnetServer.Api.HttpClasses.Input;
+
 public class RoomJoinInput
 {   
     [MinLength(0)]

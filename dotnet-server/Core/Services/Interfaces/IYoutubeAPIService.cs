@@ -1,3 +1,5 @@
+namespace DotnetServer.Core.Services;
+
 public interface IYouTubeAPIService
 {
     int GetVideoDuration(string videoUrl);

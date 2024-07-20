@@ -1,4 +1,4 @@
-namespace Dotnet.Server.Configuration;
+namespace DotnetServer.Shared.Constants;
 
 public record AppSettingsVariables
 {

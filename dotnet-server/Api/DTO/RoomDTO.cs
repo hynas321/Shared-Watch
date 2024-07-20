@@ -1,3 +1,7 @@
+using DotnetServer.Core.Enums;
+
+namespace DotnetServer.Api.DTO;
+
 public class RoomDTO
 {
     public string RoomHash { get; set; }

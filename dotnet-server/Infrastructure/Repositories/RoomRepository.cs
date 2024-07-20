@@ -1,4 +1,8 @@
-using dotnet_server.Infrastructure;
+using DotnetServer.Api.DTO;
+using DotnetServer.Core.Entities;
+using DotnetServer.Core.Enums;
+
+namespace DotnetServer.Infrastructure.Repositories;
 
 public class RoomRepository : IRoomRepository
 {

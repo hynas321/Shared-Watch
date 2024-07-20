@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+namespace DotnetServer.Shared.Helpers;
+
 class JsonHelper
 {
     public static string Serialize(object o)

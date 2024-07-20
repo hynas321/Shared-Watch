@@ -1,6 +1,7 @@
+using DotnetServer.Core.Entities;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Dotnet.Server.Hubs;
+namespace DotnetServer.SignalR;
 
 public partial class AppHub : Hub
 {

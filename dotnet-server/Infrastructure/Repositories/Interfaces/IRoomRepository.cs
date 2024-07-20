@@ -1,3 +1,8 @@
+using DotnetServer.Api.DTO;
+using DotnetServer.Core.Entities;
+
+namespace DotnetServer.Infrastructure.Repositories;
+
 public interface IRoomRepository
 {
     bool AddRoom(Room room);

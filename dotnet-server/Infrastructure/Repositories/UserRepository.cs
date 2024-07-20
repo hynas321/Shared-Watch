@@ -1,3 +1,8 @@
+using DotnetServer.Api.DTO;
+using DotnetServer.Core.Entities;
+
+namespace DotnetServer.Infrastructure.Repositories;
+
 public class UserRepository : IUserRepository
 {
     private readonly IRoomRepository _roomRepository;
