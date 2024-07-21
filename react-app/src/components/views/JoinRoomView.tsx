@@ -50,12 +50,12 @@ export default function JoinRoomView() {
     }
   }, [privateRoomPassword]);
 
-  const httpManager = new HttpService();
+  const httpService = HttpService.getInstance();
   const httpUrlHelper = new HttpUrlHelper();
 
   const initializeView = async () => {
     const hash = httpUrlHelper.getRoomHash(window.location.href);
-    const [responseStatus, responseData] = await httpManager.getRoom(hash);
+    const [responseStatus, responseData] = await httpService.getRoom(hash);
 
     if (responseStatus !== HttpStatusCodes.OK) {
       toast.error("Room not found", {

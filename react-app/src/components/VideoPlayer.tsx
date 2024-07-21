@@ -17,7 +17,7 @@ export default function VideoPlayer() {
   const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayer.value?.isPlaying ?? false);
   const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] = useState<boolean>(false);
 
-  const localStorageManager = LocalStorageService.getInstance();
+  const localStorageService = LocalStorageService.getInstance();
 
   useEffect(() => {
     if (appHub.getState() !== signalR.HubConnectionState.Connected) {
@@ -75,7 +75,7 @@ export default function VideoPlayer() {
     await appHub.invoke(
       HubMessages.SetIsVideoPlaying,
       appState.roomHash.value,
-      localStorageManager.getAuthorizationToken(),
+      localStorageService.getAuthorizationToken(),
       isPlaying
     );
   };
@@ -93,7 +93,7 @@ export default function VideoPlayer() {
       await appHub.invoke(
         HubMessages.SetPlayedSeconds,
         appState.roomHash.value,
-        localStorageManager.getAuthorizationToken(),
+        localStorageService.getAuthorizationToken(),
         state.playedSeconds
       );
 

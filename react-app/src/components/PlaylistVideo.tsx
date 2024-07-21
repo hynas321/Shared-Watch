@@ -12,7 +12,7 @@ export interface VideoOnPlaylistProps {
 }
 
 export default function VideoOnPlaylist({index, playlistVideo}: VideoOnPlaylistProps) {
-  const localStorageManager = LocalStorageService.getInstance();
+  const localStorageService = LocalStorageService.getInstance();
 
   const videoThumbnailStyle = {
     width: "40px",
@@ -24,7 +24,7 @@ export default function VideoOnPlaylist({index, playlistVideo}: VideoOnPlaylistP
     appHub.invoke(
       HubMessages.DeletePlaylistVideo,
       appState.roomHash.value,
-      localStorageManager.getAuthorizationToken(),
+      localStorageService.getAuthorizationToken(),
       appState.playlistVideos.value[index].hash
     );
   }

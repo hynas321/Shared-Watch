@@ -13,7 +13,7 @@ export default function Settings() {
   const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
 
-  const localStorageManager = LocalStorageService.getInstance();
+  const localStorageService = LocalStorageService.getInstance();
 
   useEffect(() => {
     setUserPermissions(appState.userPermissions.value);
@@ -28,7 +28,7 @@ export default function Settings() {
       appHub.invoke(
         HubMessages.SetRoomPassword,
         appState.roomHash.value,
-        localStorageManager.getAuthorizationToken(),
+        localStorageService.getAuthorizationToken(),
         inputFormPassword
       );
   
@@ -38,7 +38,7 @@ export default function Settings() {
       appHub.invoke(
         HubMessages.SetRoomPassword,
         appState.roomHash.value,
-        localStorageManager.getAuthorizationToken(),
+        localStorageService.getAuthorizationToken(),
         ""
       );
 
@@ -50,7 +50,7 @@ export default function Settings() {
     appHub.invoke(
       HubMessages.SetRoomPassword,
       appState.roomHash.value,
-      localStorageManager.getAuthorizationToken(),
+      localStorageService.getAuthorizationToken(),
       ""
     );
 
@@ -64,7 +64,7 @@ export default function Settings() {
   }
 
   const invokeChange = () => {
-    appHub.invoke(HubMessages.SetUserPermissions, appState.roomHash.value, localStorageManager.getAuthorizationToken(), appState.userPermissions.value);
+    appHub.invoke(HubMessages.SetUserPermissions, appState.roomHash.value, localStorageService.getAuthorizationToken(), appState.userPermissions.value);
   };
 
   const setCanAddChatMessage = (checked: boolean) => {

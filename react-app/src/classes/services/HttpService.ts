@@ -12,9 +12,18 @@ export class HttpService {
   private httpServerUrl: string;
   private authorizationManager = LocalStorageService.getInstance();
 
-  constructor() {
+  private static instance: HttpService;
+
+  private constructor() {
     let env = import.meta.env;
     this.httpServerUrl = env.VITE_SERVER_URL;
+  }
+
+  static getInstance(): HttpService {
+    if (!HttpService.instance) {
+      HttpService.instance = new HttpService();
+    }
+    return HttpService.instance;
   }
 
   async getAllRooms(): Promise<[number, Room[] | undefined]> {

@@ -15,7 +15,7 @@ export default function Chat() {
   const messagesRef = useRef<HTMLDivElement>(null);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
 
-  const localStorageManager = LocalStorageService.getInstance();
+  const localStorageService = LocalStorageService.getInstance();
 
   useEffect(() => {
     if (appState.unreadChatMessagesCount.value !== 0) {
@@ -47,7 +47,7 @@ export default function Chat() {
       date: currentDate
     }
 
-    appHub.invoke(HubMessages.AddChatMessage, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newChatMessage);
+    appHub.invoke(HubMessages.AddChatMessage, appState.roomHash.value, localStorageService.getAuthorizationToken(), newChatMessage);
 
     setCurrentChatMessageText("");
   };

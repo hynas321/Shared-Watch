@@ -9,7 +9,7 @@ export default function Users() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
 
-  const localStorageManager = LocalStorageService.getInstance();
+  const localStorageService = LocalStorageService.getInstance();
 
   const handleAdminStatusButtonClick = async (adminStatus: boolean, username: string) => {
     if (appState.users.value === null) {
@@ -19,7 +19,7 @@ export default function Users() {
     await appHub.invoke(
       HubMessages.SetAdminStatus,
       appState.roomHash.value,
-      localStorageManager.getAuthorizationToken(),
+      localStorageService.getAuthorizationToken(),
       username,
       adminStatus
     );
@@ -29,7 +29,7 @@ export default function Users() {
     await appHub.invoke(
       HubMessages.KickOut,
       appState.roomHash.value,
-      localStorageManager.getAuthorizationToken(),
+      localStorageService.getAuthorizationToken(),
       username
     );
 

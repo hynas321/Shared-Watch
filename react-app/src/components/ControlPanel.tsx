@@ -23,7 +23,7 @@ export default function ControlPanel() {
   const appHub = useContext(AppHubContext);
   const navigate = useNavigate();
 
-  const httpManager = new HttpService();
+  const httpService = HttpService.getInstance();
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     appState.activePanel.value = panelsEnumValue;
@@ -80,7 +80,7 @@ export default function ControlPanel() {
             containerId: ToastNotificationEnum.Main,
           }
         );
-        httpManager.leaveRoom(appState.roomHash.value);
+        httpService.leaveRoom(appState.roomHash.value);
         navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
         return;
       }

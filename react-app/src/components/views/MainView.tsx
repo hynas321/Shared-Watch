@@ -32,7 +32,7 @@ export default function MainView() {
   const [searchText, setSearchText] = useState<string>("");
   const [areRoomsFetched, setAreRoomsFetched] = useState<boolean>(false);
 
-  const httpManager: HttpService = new HttpService();
+  const httpService: HttpService = HttpService.getInstance();;
   const roomHelper = RoomHelper.getInstance();
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function MainView() {
   }, [appHub.getState()]);
 
   const fetchRooms = async () => {
-    const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpManager.getAllRooms();
+    const [responseStatusCode, responseData]: [number, Room[] | undefined] = await httpService.getAllRooms();
 
     if (responseStatusCode !== HttpStatusCodes.OK) {
       toast.error("Could not load the rooms", {

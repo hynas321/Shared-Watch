@@ -27,7 +27,7 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
   const isCreateButtonClicked = useSignal<boolean>(false);
   const navigate = useNavigate();
 
-  const httpManager = new HttpService();
+  const httpService = HttpService.getInstance();
   const roomHelper = RoomHelper.getInstance();
 
   useEffect(() => {
@@ -54,7 +54,7 @@ export default function CreateRoomModal({acceptText, declineText}: CreateRoomMod
 
   const handleCreateRoomButtonClick = async () => {
     const [responseStatusCode, roomInformation]: [number, RoomCreateOutput | undefined] =
-      await httpManager.createRoom(
+      await httpService.createRoom(
         roomName.value,
         roomPassword.value,
         appState.username.value

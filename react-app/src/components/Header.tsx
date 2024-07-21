@@ -25,12 +25,12 @@ export default function Header() {
 
   const buttonColor = useSignal<string>("primary");
 
-  const httpManager = new HttpService();
-  const localStorageManager = LocalStorageService.getInstance();
+  const httpService = HttpService.getInstance();
+  const localStorageService = LocalStorageService.getInstance();
   const httpUrlHelper = new HttpUrlHelper();
 
   useEffect(() => {
-    appState.username.value = localStorageManager.getUsername();
+    appState.username.value = localStorageService.getUsername();
     appState.roomHash.value = httpUrlHelper.getRoomHash(window.location.href);
   }, []);
 
@@ -54,7 +54,7 @@ export default function Header() {
   }, [appHub]);
 
   const handleLeaveRoomButtonClick = () => {
-    httpManager.leaveRoom(appState.roomHash.value);
+    httpService.leaveRoom(appState.roomHash.value);
 
     appState.isInRoom.value = false;
     navigate(ClientEndpoints.mainMenu);
@@ -98,7 +98,7 @@ export default function Header() {
                 isEnabled={true}
                 onChange={(value: string) => {
                   appState.username.value = value;
-                  localStorageManager.setUsername(value);
+                  localStorageService.setUsername(value);
                 }}
               />
             </div>

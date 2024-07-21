@@ -15,12 +15,12 @@ import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 export class RoomHelper {
   private static instance: RoomHelper;
 
-  private httpManager: HttpService;
-  private localStorageManager: LocalStorageService;
+  private httpService: HttpService;
+  private localStorageService: LocalStorageService;
 
   private constructor() {
-    this.httpManager = new HttpService();
-    this.localStorageManager = LocalStorageService.getInstance();
+    this.httpService = HttpService.getInstance();
+    this.localStorageService = LocalStorageService.getInstance();
   }
 
   public static getInstance(): RoomHelper {
@@ -31,7 +31,7 @@ export class RoomHelper {
   }
 
   public joinRoom = async (roomState: RoomState): Promise<boolean> => {
-      const [responseStatusCode, roomInformation] = await this.httpManager.joinRoom(
+      const [responseStatusCode, roomInformation] = await this.httpService.joinRoom(
         roomState.roomHash,
         roomState.password,
         appState.username.value
@@ -84,7 +84,7 @@ export class RoomHelper {
       appState.maxUsers.value = roomInformation?.roomSettings.maxUsers as number;
       appState.roomPassword.value = roomState.password;
   
-      this.localStorageManager.setAuthorizationToken(roomInformation?.authorizationToken as string);
+      this.localStorageService.setAuthorizationToken(roomInformation?.authorizationToken as string);
       appState.isAdmin.value = roomInformation?.isAdmin as boolean;
   
       appState.chatMessages.value = roomInformation?.chatMessages as ChatMessage[];

@@ -18,7 +18,7 @@ export default function Playlist() {
   const [isInputFormEnabled, setIsInputFormEnabled] = useState<boolean>(true);
   const [inputFormPlaceholderText, setInputFormPlaceholderText] = useState<string>("Paste Youtube Video URL");
 
-  const localStorageManager = LocalStorageService.getInstance();
+  const localStorageService = LocalStorageService.getInstance();
   const roomHelper = RoomHelper.getInstance();
   
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function Playlist() {
       duration: 5
     };
 
-    appHub.invoke(HubMessages.AddPlaylistVideo, appState.roomHash.value, localStorageManager.getAuthorizationToken(), newPlaylistVideo);
+    appHub.invoke(HubMessages.AddPlaylistVideo, appState.roomHash.value, localStorageService.getAuthorizationToken(), newPlaylistVideo);
     setCurrentVideoUrlText("");
   }
 
