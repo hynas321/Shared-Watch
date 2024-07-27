@@ -54,7 +54,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            UserDTO kickedOutUserDTO = new UserDTO(kickedOutUser.Username, kickedOutUser.IsAdmin);
+            UserDTO kickedOutUserDTO = _mapper.Map<UserDTO>(kickedOutUser);
 
             await Clients.Group(roomHash).SendAsync(HubMessages.OnKickOut, JsonHelper.Serialize(kickedOutUserDTO));
         }
@@ -110,7 +110,7 @@ public partial class AppHub : Hub
                 room.AdminTokens = room.AdminTokens.Where(x => x != updatedUser.AuthorizationToken).ToList();
             }
 
-            UserDTO updatedUserDTO = new UserDTO(updatedUser.Username, updatedUser.IsAdmin);
+            UserDTO updatedUserDTO = _mapper.Map<UserDTO>(updatedUser);
 
             _logger.LogInformation($"{roomHash} SetAdminStatus: {updatedUser.Username} {updatedUser.IsAdmin} {updatedUser.AuthorizationToken}. Authorization Token: {authorizationToken}");
 

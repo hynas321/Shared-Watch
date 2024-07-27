@@ -46,7 +46,8 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
     });
 
-builder.Services.AddSignalR(); 
+builder.Services.AddSignalR();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 

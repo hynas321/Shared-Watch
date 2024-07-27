@@ -1,4 +1,5 @@
-﻿using DotnetServer.Api.DTO;
+﻿using AutoMapper;
+using DotnetServer.Api.DTO;
 using DotnetServer.Api.HttpClasses.Input;
 using DotnetServer.Api.HttpClasses.Output;
 using DotnetServer.Core.Entities;
@@ -18,17 +19,20 @@ public class UserController : Controller
     private readonly IHubContext<AppHub> _appHubContext;
     private readonly IRoomRepository _roomRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IMapper _mapper;
 
     public UserController(
         ILogger<UserController> logger,
         IHubContext<AppHub> appHubContext,
         IRoomRepository roomRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        IMapper mapper)
     {
         _logger = logger;
         _appHubContext = appHubContext;
         _roomRepository = roomRepository;
         _userRepository = userRepository;
+        _mapper = mapper;
     }
 
     [HttpPost("JoinRoom/{roomHash}")]
@@ -94,7 +98,7 @@ public class UserController : Controller
                 newUser = new User(input.Username, isUserAdmin, signalRConnectionId: signalRConnectionId);
             }
 
-            UserDTO newUserDTO = new UserDTO(newUser.Username, newUser.IsAdmin);
+            UserDTO newUserDTO = _mapper.Map<UserDTO>(newUser);
 
             if (room.Users.Count == 0) room.AdminTokens.Add(newUser.AuthorizationToken);
 
@@ -184,7 +188,7 @@ public class UserController : Controller
 
             _appHubContext.Groups.RemoveFromGroupAsync(signalRConnectionId, roomHash);
 
-            UserDTO userDTO = new UserDTO(user.Username, user.IsAdmin);
+            UserDTO userDTO = _mapper.Map<UserDTO>(user);
 
             _appHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
 

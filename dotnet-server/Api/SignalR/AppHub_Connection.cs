@@ -1,3 +1,4 @@
+using AutoMapper;
 using DotnetServer.Api.DTO;
 using DotnetServer.Core.Entities;
 using DotnetServer.Core.Services;
@@ -17,6 +18,7 @@ public partial class AppHub : Hub
     private readonly IPlaylistService _playlistService;
     private readonly IYouTubeAPIService _youtubeAPIService;
     private readonly IHubContext<AppHub> _roomHubContext;
+    private readonly IMapper _mapper;
 
     public AppHub(
         ILogger<AppHub> logger,
@@ -26,7 +28,8 @@ public partial class AppHub : Hub
         IRoomRepository roomRepository,
         IChatRepository chatRepository,
         IPlaylistRepository playlistRepository,
-        IUserRepository userRepository
+        IUserRepository userRepository,
+        IMapper mapper
     )
     {
         _logger = logger;
@@ -37,6 +40,7 @@ public partial class AppHub : Hub
         _chatRepository = chatRepository;
         _playlistRepository = playlistRepository;
         _userRepository = userRepository;
+        _mapper = mapper;
     }
 
     public override async Task OnConnectedAsync()
@@ -66,7 +70,9 @@ public partial class AppHub : Hub
                 return;
             }
 
-            UserDTO userDTO = new UserDTO(removedUser.Username, removedUser.IsAdmin);
+            
+            UserDTO userDTO = _mapper.Map<UserDTO>(removedUser);
+
             await _roomHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
 
             Room room = _roomRepository.GetRoom(roomHash);

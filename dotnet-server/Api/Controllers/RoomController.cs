@@ -8,6 +8,7 @@ using DotnetServer.Core.Enums;
 using DotnetServer.Api.DTO;
 using DotnetServer.Shared.Helpers;
 using DotnetServer.Shared.Constants;
+using AutoMapper;
 
 namespace DotnetServer.Api.Controllers;
 
@@ -20,20 +21,22 @@ public class RoomController : ControllerBase
     private readonly IRoomRepository _roomRepository;
     private readonly IUserRepository _userRepository;
     private readonly IRoomControllerHandler _roomHandler;
+    private readonly IMapper _mapper;
 
     public RoomController(
         ILogger<RoomController> logger,
         IConfiguration configuration,
         IRoomRepository roomRepository,
         IUserRepository userRepository,
-        IRoomControllerHandler roomHandler)
+        IRoomControllerHandler roomHandler,
+        IMapper mapper)
     {
         _logger = logger;
         _configuration = configuration;
         _roomRepository = roomRepository;
         _userRepository = userRepository;
         _roomHandler = roomHandler;
-
+        _mapper = mapper;
     }
 
     [HttpPost("Create")]
@@ -119,13 +122,7 @@ public class RoomController : ControllerBase
                 return StatusCode(StatusCodes.Status404NotFound);
             }
 
-            RoomDTO roomDTO = new RoomDTO(
-                room.Hash,
-                room.RoomSettings.RoomName,
-                room.RoomSettings.RoomType,
-                room.Users.Count,
-                room.RoomSettings.MaxUsers
-            );
+            RoomDTO roomDTO = _mapper.Map<RoomDTO>(room);
 
             _logger.LogInformation($"GetAll: Status 200.");
             return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomDTO));
