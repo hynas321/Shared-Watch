@@ -4,6 +4,6 @@ namespace DotnetServer.Infrastructure.Repositories;
 
 public interface IPlaylistRepository
 {
-    bool AddPlaylistVideo(string roomHash, PlaylistVideo playlistVideo);
-    PlaylistVideo DeletePlaylistVideo(string roomHash, string videoHash);
+    Task<bool> AddPlaylistVideoAsync(string roomHash, PlaylistVideo playlistVideo);
+    Task<PlaylistVideo> DeletePlaylistVideoAsync(string roomHash, string videoHash);
 }

@@ -5,5 +5,5 @@ namespace DotnetServer.Api.Handlers;
 
 public interface IRoomControllerHandler
 {
-    Room CreateRoom(RoomCreateInput input);
+    Task<Room> CreateRoom(RoomCreateInput input);
 }

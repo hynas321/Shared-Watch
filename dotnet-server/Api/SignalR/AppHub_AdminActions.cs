@@ -1,5 +1,7 @@
+using AutoMapper;
 using DotnetServer.Api.DTO;
 using DotnetServer.Core.Entities;
+using DotnetServer.Infrastructure.Repositories;
 using DotnetServer.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
 
@@ -8,11 +10,11 @@ namespace DotnetServer.SignalR;
 public partial class AppHub : Hub
 {
     [HubMethodName(HubMessages.KickOut)]
-    public async Task KickOut(string roomHash, string authorizationToken, string usernameToKickOut)
+    public async Task KickOutAsync(string roomHash, string authorizationToken, string usernameToKickOut)
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -20,7 +22,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            User user = _userRepository.GetUserByAuthorizationToken(authorizationToken);
+            User user = await _userRepository.GetUserByAuthorizationTokenAsync(authorizationToken);
 
             if (user == null)
             {
@@ -28,13 +30,13 @@ public partial class AppHub : Hub
                 return;
             }
 
-            if (user.IsAdmin == false)
+            if (!user.IsAdmin)
             {
-                _logger.LogInformation($"{roomHash} KickOut: User does not have the permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} KickOut: User does not have permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
-            User userToKickOut = _userRepository.GetUserByUsername(roomHash, usernameToKickOut);
+            User userToKickOut = await _userRepository.GetUserByUsernameAsync(roomHash, usernameToKickOut);
 
             if (userToKickOut == null)
             {
@@ -42,11 +44,9 @@ public partial class AppHub : Hub
                 return;
             }
 
-            _logger.LogInformation(
-                $"{roomHash} KickOut: {userToKickOut.Username} {userToKickOut.IsAdmin} {userToKickOut.AuthorizationToken}. Authorization Token: {authorizationToken}"
-            );
+            _logger.LogInformation($"{roomHash} KickOut: {userToKickOut.Username} {userToKickOut.IsAdmin} {userToKickOut.AuthorizationToken}. Authorization Token: {authorizationToken}");
 
-            User kickedOutUser = _userRepository.DeleteUser(roomHash, userToKickOut.AuthorizationToken);
+            User kickedOutUser = await _userRepository.DeleteUserAsync(roomHash, userToKickOut.AuthorizationToken);
 
             if (kickedOutUser == null)
             {
@@ -65,11 +65,11 @@ public partial class AppHub : Hub
     }
 
     [HubMethodName(HubMessages.SetAdminStatus)]
-    public async Task SetAdminStatus(string roomHash, string authorizationToken, string usernameToSetAdminStatus, bool isAdmin)
+    public async Task SetAdminStatusAsync(string roomHash, string authorizationToken, string usernameToSetAdminStatus, bool isAdmin)
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -77,7 +77,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            User user = _userRepository.GetUserByAuthorizationToken(authorizationToken);
+            User user = await _userRepository.GetUserByAuthorizationTokenAsync(authorizationToken);
 
             if (user == null)
             {
@@ -85,13 +85,13 @@ public partial class AppHub : Hub
                 return;
             }
 
-            if (user.IsAdmin == false)
+            if (!user.IsAdmin)
             {
-                _logger.LogInformation($"{roomHash} SetAdminStatus: User does not have the permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} SetAdminStatus: User does not have permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
-            User updatedUser = _userRepository.GetUserByUsername(roomHash, usernameToSetAdminStatus);
+            User updatedUser = await _userRepository.GetUserByUsernameAsync(roomHash, usernameToSetAdminStatus);
 
             if (updatedUser == null)
             {
@@ -110,6 +110,10 @@ public partial class AppHub : Hub
                 room.AdminTokens = room.AdminTokens.Where(x => x != updatedUser.AuthorizationToken).ToList();
             }
 
+            // Use repository methods to update the room and user
+            await _roomRepository.UpdateRoomAsync(room);
+            await _userRepository.UpdateUserAsync(updatedUser);
+
             UserDTO updatedUserDTO = _mapper.Map<UserDTO>(updatedUser);
 
             _logger.LogInformation($"{roomHash} SetAdminStatus: {updatedUser.Username} {updatedUser.IsAdmin} {updatedUser.AuthorizationToken}. Authorization Token: {authorizationToken}");
@@ -121,4 +125,5 @@ public partial class AppHub : Hub
             _logger.LogError(ex.ToString());
         }
     }
+
 }

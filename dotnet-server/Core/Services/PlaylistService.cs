@@ -1,5 +1,4 @@
 using DotnetServer.Core.Entities;
-using DotnetServer.Infrastructure;
 using DotnetServer.Infrastructure.Repositories;
 using DotnetServer.SignalR;
 using Microsoft.AspNetCore.SignalR;
@@ -8,7 +7,7 @@ namespace DotnetServer.Core.Services;
 
 public class PlaylistService : IPlaylistService
 {
-    private readonly AppData _appData;
+    private readonly AppDbContext _appData;
     private readonly ILogger<PlaylistService> _logger;
     private readonly IRoomRepository _roomRepository;
     private readonly IPlaylistRepository _playlistRepository;
@@ -18,7 +17,7 @@ public class PlaylistService : IPlaylistService
     public bool IsServiceRunning { get; set; } = false;
 
     public PlaylistService(
-        AppData appData,
+        AppDbContext appData,
         ILogger<PlaylistService> logger,
         IRoomRepository roomRepository,
         IPlaylistRepository playlistRepository,
@@ -34,14 +33,14 @@ public class PlaylistService : IPlaylistService
         _youtubeAPIService = youTubeAPIService;
 
         _roomRepository = new RoomRepository(_appData);
-        _playlistRepository = new PlaylistRepository(_roomRepository);
+        _playlistRepository = new PlaylistRepository(_appData);
     }
 
     public async void StartPlaylistService(string roomHash)
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -61,7 +60,7 @@ public class PlaylistService : IPlaylistService
         catch (Exception ex)
         {
             IsServiceRunning = false;
-            _logger.LogInformation(ex.ToString());
+            _logger.LogError(ex.ToString());
         }
     }
 
@@ -73,7 +72,7 @@ public class PlaylistService : IPlaylistService
 
             while (room.PlaylistVideos.Count > 0 && room.Users.Count > 0)
             {
-                PlaylistVideo currentVideo = room.PlaylistVideos[0];
+                PlaylistVideo currentVideo = room.PlaylistVideos.ToList()[0];
 
                 room.VideoPlayer.PlaylistVideo.Url = currentVideo.Url;
                 room.VideoPlayer.CurrentTime = 0;
@@ -84,6 +83,8 @@ public class PlaylistService : IPlaylistService
 
                 await _hubContext.Clients.Group(room.Hash).SendAsync(HubMessages.OnSetIsVideoPlaying, true);
 
+                await _roomRepository.UpdateRoomAsync(room);
+
                 bool hasVideoEndedSuccessfully = await UpdateCurrentTime(room, currentVideo);
 
                 room.VideoPlayer.IsPlaying = false;
@@ -91,7 +92,7 @@ public class PlaylistService : IPlaylistService
 
                 if (hasVideoEndedSuccessfully)
                 {
-                    _playlistRepository.DeletePlaylistVideo(room.Hash, currentVideo.Hash);
+                    await _playlistRepository.DeletePlaylistVideoAsync(room.Hash, currentVideo.Hash);
                     await _hubContext.Clients.Group(room.Hash).SendAsync(HubMessages.OnDeletePlaylistVideo, currentVideo.Hash);
 
                     room.VideoPlayer.PlaylistVideo.Url = null;
@@ -103,13 +104,16 @@ public class PlaylistService : IPlaylistService
                     await _hubContext.Clients.Group(room.Hash).SendAsync(HubMessages.OnDeletePlaylistVideo, currentVideo.Hash);
                     await _hubContext.Clients.Group(room.Hash).SendAsync(HubMessages.OnSetVideoUrl, null);
                 }
+
+                await _roomRepository.UpdateRoomAsync(room);
             }
 
             IsServiceRunning = false;
         }
         catch (Exception ex)
         {
-            _logger.LogInformation(ex.ToString());
+            _logger.LogError(ex.ToString());
+            IsServiceRunning = false;
         }
     }
 
@@ -117,7 +121,7 @@ public class PlaylistService : IPlaylistService
     {
         try
         {
-            double durationTime = _youtubeAPIService.GetVideoDuration(currentVideo.Url);
+            double durationTime = await _youtubeAPIService.GetVideoDurationAsync(currentVideo.Url);
 
             if (durationTime == -1)
             {
@@ -129,9 +133,8 @@ public class PlaylistService : IPlaylistService
             while (room.VideoPlayer.IsPlaying && room.VideoPlayer.CurrentTime <= durationTime)
             {
                 if (room.PlaylistVideos.Count == 0 ||
-                    room.PlaylistVideos[0].Hash != currentVideoHash ||
-                    room.Users.Count == 0
-                )
+                    room.PlaylistVideos.ToList()[0].Hash != currentVideoHash ||
+                    room.Users.Count == 0)
                 {
                     return false;
                 }
@@ -142,14 +145,15 @@ public class PlaylistService : IPlaylistService
 
                 room.VideoPlayer.CurrentTime += 0.5;
 
+                await _roomRepository.UpdateRoomAsync(room);
+
                 if (!room.VideoPlayer.IsPlaying)
                 {
                     while (!room.VideoPlayer.IsPlaying)
                     {
                         if (room.PlaylistVideos.Count == 0 ||
-                            room.PlaylistVideos[0].Hash != currentVideoHash ||
-                            room.Users.Count == 0
-                        )
+                            room.PlaylistVideos.ToList()[0].Hash != currentVideoHash ||
+                            room.Users.Count == 0)
                         {
                             return false;
                         }
@@ -163,7 +167,7 @@ public class PlaylistService : IPlaylistService
         }
         catch (Exception ex)
         {
-            _logger.LogError(Convert.ToString(ex));
+            _logger.LogError(ex.ToString());
             return false;
         }
     }

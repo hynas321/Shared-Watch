@@ -13,14 +13,11 @@ public partial class AppHub : Hub
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetRoomPassword: Room does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetRoomPassword: Room does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
@@ -28,32 +25,24 @@ public partial class AppHub : Hub
 
             if (user == null)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetRoomPassword: User does not exist. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetRoomPassword: User does not exist. Authorization Token: {authorizationToken}");
                 return;
             }
 
-            if (user.IsAdmin == false)
+            if (!user.IsAdmin)
             {
-                _logger.LogInformation(
-                    $"{roomHash} SetRoomPassword: User does not have the permission. Authorization Token: {authorizationToken}"
-                );
-
+                _logger.LogInformation($"{roomHash} SetRoomPassword: User does not have permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
             room.RoomSettings.RoomPassword = newRoomPassword;
-            room.RoomSettings.RoomType = newRoomPassword.Length == 0 ? RoomTypes.Public : RoomTypes.Private;
+            room.RoomSettings.RoomType = string.IsNullOrEmpty(newRoomPassword) ? RoomTypes.Public : RoomTypes.Private;
 
-            _logger.LogInformation(
-                $"{roomHash} SetRoomPassword: New room password set. Authorization Token: {authorizationToken}"
-            );
+            await _roomRepository.UpdateRoomAsync(room);
 
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetRoomPassword, newRoomPassword, room.RoomSettings.RoomType);
 
-            IEnumerable<RoomDTO> rooms = _roomRepository.GetRoomsDTO();
+            IEnumerable<RoomDTO> rooms = await _roomRepository.GetRoomsDTOAsync();
 
             await Clients.AllExcept(Context.ConnectionId).SendAsync(HubMessages.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
         }
@@ -61,7 +50,6 @@ public partial class AppHub : Hub
         {
             _logger.LogError(ex.ToString());
         }
-        
     }
 
     [HubMethodName(HubMessages.SetUserPermissions)]
@@ -69,7 +57,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -85,15 +73,15 @@ public partial class AppHub : Hub
                 return;
             }
 
-            if (user.IsAdmin == false)
+            if (!user.IsAdmin)
             {
-                _logger.LogInformation($"{roomHash} SetUserPermissions: User does not have the permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} SetUserPermissions: User does not have permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
             room.UserPermissions = userPermissions;
 
-            _logger.LogInformation($"{roomHash} User permissions set. Authorization Token: {authorizationToken}");
+            await _roomRepository.UpdateRoomAsync(room);
 
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetUserPermissions, JsonHelper.Serialize(userPermissions));
         }

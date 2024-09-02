@@ -2,7 +2,8 @@ namespace DotnetServer.Core.Services;
 
 public interface IYouTubeAPIService
 {
-    int GetVideoDuration(string videoUrl);
-    string GetVideoTitle(string videoUrl);
-    string GetVideoThumbnailUrl(string videoUrl);
+    Task<int> GetVideoDurationAsync(string videoUrl);
+    Task<string> GetVideoTitleAsync(string videoUrl);
+    Task<string> GetVideoThumbnailUrlAsync(string videoUrl);
+
 }

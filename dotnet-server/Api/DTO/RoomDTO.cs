@@ -10,6 +10,8 @@ public class RoomDTO
     public int OccupiedSlots { get; set; }
     public int TotalSlots { get; set; }
 
+    public RoomDTO() { }
+
     public RoomDTO(
         string roomHash,
         string roomName,

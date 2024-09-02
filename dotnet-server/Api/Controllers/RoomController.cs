@@ -6,9 +6,9 @@ using DotnetServer.Core.Entities;
 using DotnetServer.Api.HttpClasses.Output;
 using DotnetServer.Core.Enums;
 using DotnetServer.Api.DTO;
-using DotnetServer.Shared.Helpers;
 using DotnetServer.Shared.Constants;
 using AutoMapper;
+using DotnetServer.Shared.Helpers;
 
 namespace DotnetServer.Api.Controllers;
 
@@ -40,137 +40,117 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost("Create")]
-    public IActionResult Create(
+    public async Task<IActionResult> Create(
         [FromBody] RoomCreateInput input,
         [FromHeader(Name = "X-SignalR-ConnectionId")] string signalRConnectionId = null,
         [FromHeader(Name = "Authorization")] string authorizationToken = null)
     {
-        try
+        if (!ModelState.IsValid || string.IsNullOrEmpty(signalRConnectionId))
         {
-            if (!ModelState.IsValid || string.IsNullOrEmpty(signalRConnectionId))
-            {
-                _logger.LogInformation($"Create: Status 400. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
-                return StatusCode(StatusCodes.Status400BadRequest);
-            }
-
-            bool isUserConnectedInOtherRoom = _userRepository.GetUserByAuthorizationToken(authorizationToken) != null;
-
-            if (isUserConnectedInOtherRoom)
-            {
-                _logger.LogInformation($"Create: Status 401. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
-                return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-
-            Room room = _roomHandler.CreateRoom(input);
-
-            if (room == null)
-            {
-                string roomPasswordInfo = input.RoomPassword.Length > 0 ? input.RoomPassword : "<No password>";
-
-                _logger.LogInformation($"Create: Status 409. RoomName: {input.RoomName}, RoomPassword: {roomPasswordInfo}, Username: {input.Username}");
-                return StatusCode(StatusCodes.Status409Conflict);
-            }
-
-            RoomCreateOutput output = new RoomCreateOutput()
-            {
-                RoomHash = room.Hash
-            };
-
-            _logger.LogInformation($"Create: Status 201. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
-            return StatusCode(StatusCodes.Status201Created, JsonHelper.Serialize(output));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
-    }
-
-    [HttpGet("Exists/{roomHash}")]
-    public IActionResult Exists([FromRoute] string roomHash)
-    {
-        if (roomHash == "")
-        {
-            return StatusCode(StatusCodes.Status400BadRequest);
+            _logger.LogInformation($"Create: BadRequest. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
+            return BadRequest();
         }
 
-        Room room = _roomRepository.GetRoom(roomHash);
+        var existingUser = await _userRepository.GetUserByAuthorizationTokenAsync(authorizationToken);
+        if (existingUser != null)
+        {
+            _logger.LogInformation($"Create: Unauthorized. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
+            return Unauthorized();
+        }
+
+        Room room = await _roomHandler.CreateRoom(input);
 
         if (room == null)
         {
-            return StatusCode(StatusCodes.Status404NotFound);
+            string roomPasswordInfo = string.IsNullOrEmpty(input.RoomPassword) ? "<No password>" : input.RoomPassword;
+            _logger.LogInformation($"Create: Conflict. RoomName: {input.RoomName}, RoomPassword: {roomPasswordInfo}, Username: {input.Username}");
+            return Conflict();
         }
 
-        RoomExistsOutput output = new RoomExistsOutput()
+        var output = new RoomCreateOutput
         {
-            RoomType = room.RoomSettings.RoomPassword == "" ? RoomTypes.Public : RoomTypes.Private
+            RoomHash = room.Hash
         };
 
-        return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(output));
+        _logger.LogInformation($"Create: Created. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
+
+        var serializedOutput = JsonHelper.Serialize(output);
+
+        return CreatedAtAction(nameof(Get), new { roomHash = room.Hash }, serializedOutput);
+    }
+
+    [HttpGet("Exists/{roomHash}")]
+    public async Task<IActionResult> Exists([FromRoute] string roomHash)
+    {
+        if (string.IsNullOrEmpty(roomHash))
+        {
+            return BadRequest();
+        }
+
+        Room room = await _roomRepository.GetRoomAsync(roomHash);
+
+        if (room == null)
+        {
+            return NotFound();
+        }
+
+        var output = new RoomExistsOutput
+        {
+            RoomType = string.IsNullOrEmpty(room.RoomSettings.RoomPassword) ? RoomTypes.Public : RoomTypes.Private
+        };
+
+        var serializedOutput = JsonHelper.Serialize(output);
+
+        return Ok(serializedOutput);
     }
 
     [HttpGet("Get/{roomHash}")]
-    public IActionResult Get([FromRoute] string roomHash)
+    public async Task<IActionResult> Get([FromRoute] string roomHash)
     {
-        try
-        {
-            Room room = _roomRepository.GetRoom(roomHash);
-            
-            if (room == null)
-            {
-                _logger.LogInformation($"{roomHash} Get: Status 404.");
-                return StatusCode(StatusCodes.Status404NotFound);
-            }
+        Room room = await _roomRepository.GetRoomAsync(roomHash);
 
-            RoomDTO roomDTO = _mapper.Map<RoomDTO>(room);
-
-            _logger.LogInformation($"GetAll: Status 200.");
-            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomDTO));
-        }
-        catch (Exception ex)
+        if (room == null)
         {
-            _logger.LogError(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            _logger.LogInformation($"{roomHash} Get: NotFound.");
+            return NotFound();
         }
+
+        RoomDTO roomDTO = _mapper.Map<RoomDTO>(room);
+
+        _logger.LogInformation($"GetAll: OK.");
+
+        var serializedRoomsDTO = JsonHelper.Serialize(roomDTO);
+
+        return Ok(serializedRoomsDTO);
     }
 
     [HttpGet("GetAll")]
-    public IActionResult GetAll()
+    public async Task<IActionResult> GetAll()
     {
-        try
-        {
-            IEnumerable<RoomDTO> roomsDTO = _roomRepository.GetRoomsDTO();
+        IEnumerable<RoomDTO> roomsDTO = await _roomRepository.GetRoomsDTOAsync();
 
-            _logger.LogInformation($"GetAll: Status 200.");
-            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(roomsDTO));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+        _logger.LogInformation($"GetAll: OK.");
+
+        var serializedRoomsDTO = JsonHelper.Serialize(roomsDTO);
+
+        return Ok(serializedRoomsDTO);
     }
 
     [HttpGet("GetAllDetails")]
-    public IActionResult GetAllDetails([FromHeader] string globalAdminToken)
+    public async Task<IActionResult> GetAllDetails([FromHeader] string globalAdminToken)
     {
-        try
+        if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
         {
-            if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
-            {
-                _logger.LogInformation("GetAllDetails: Status 401");
-                return StatusCode(StatusCodes.Status401Unauthorized);
-            }
-
-            List<Room> rooms = _roomRepository.GetRooms();
-
-            _logger.LogInformation("GetAllDetails: Status 200");
-            return StatusCode(StatusCodes.Status200OK, JsonHelper.Serialize(rooms));
+            _logger.LogInformation("GetAllDetails: Unauthorized");
+            return Unauthorized();
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString());
-            return StatusCode(StatusCodes.Status500InternalServerError);
-        }
+
+        List<Room> rooms = await _roomRepository.GetRoomsAsync();
+
+        _logger.LogInformation("GetAllDetails: OK");
+
+        var serializedRooms = JsonHelper.Serialize(rooms);
+
+        return Ok(serializedRooms);
     }
 }

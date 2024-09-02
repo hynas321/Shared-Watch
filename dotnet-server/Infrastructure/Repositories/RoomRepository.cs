@@ -1,35 +1,38 @@
 using DotnetServer.Api.DTO;
 using DotnetServer.Core.Entities;
 using DotnetServer.Core.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotnetServer.Infrastructure.Repositories;
 
 public class RoomRepository : IRoomRepository
 {
-    private readonly AppData _appData;
+    private readonly AppDbContext _appData;
 
-    public RoomRepository(AppData appData)
+    public RoomRepository(AppDbContext appData)
     {
         _appData = appData;
     }
 
-    public bool AddRoom(Room room)
+    public async Task<bool> AddRoomAsync(Room room)
     {
-        bool roomExists = _appData.Rooms.Any(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
+        bool roomExists = await _appData.Rooms
+            .AnyAsync(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
 
         if (roomExists)
         {
             return false;
         }
 
-        _appData.Rooms.Add(room);
+        await _appData.Rooms.AddAsync(room);
+        await _appData.SaveChangesAsync();
 
         return true;
     }
 
-    public Room DeleteRoom(string roomHash)
+    public async Task<Room> DeleteRoomAsync(string roomHash)
     {
-        Room room = GetRoom(roomHash);
+        Room room = await GetRoomAsync(roomHash);
 
         if (room == null)
         {
@@ -37,33 +40,50 @@ public class RoomRepository : IRoomRepository
         }
 
         _appData.Rooms.Remove(room);
+        await _appData.SaveChangesAsync();
 
         return room;
     }
 
-    public Room GetRoom(string roomHash)
+    public async Task<bool> UpdateRoomAsync(Room room)
     {
-        return _appData.Rooms.FirstOrDefault(r => r.Hash == roomHash);
+        _appData.Rooms.Update(room);
+        await _appData.SaveChangesAsync();
+        return true;
     }
 
-    public List<Room> GetRooms()
+    public async Task<Room> GetRoomAsync(string roomHash)
     {
-        return _appData.Rooms;
+        return await _appData.Rooms
+            .Include(r => r.ChatMessages)
+            .Include(r => r.PlaylistVideos)
+            .Include(r => r.Users)
+            .Include(r => r.RoomSettings)
+            .Include(r => r.UserPermissions)
+            .Include(r => r.VideoPlayer)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash);
     }
 
-    public IEnumerable<RoomDTO> GetRoomsDTO()
+    public async Task<List<Room>> GetRoomsAsync()
     {
-        foreach (var room in _appData.Rooms)
-        {
-            RoomDTO roomDTO = new RoomDTO(
+        return await _appData.Rooms
+            .Include(r => r.Users)
+            .Include(r => r.RoomSettings)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<RoomDTO>> GetRoomsDTOAsync()
+    {
+        return await _appData.Rooms
+            .Include(r => r.Users)
+            .Include(r => r.RoomSettings)
+            .Select(room => new RoomDTO(
                 room.Hash,
                 room.RoomSettings.RoomName,
                 room.RoomSettings.RoomPassword == "" ? RoomTypes.Public : RoomTypes.Private,
                 room.Users.Count(),
                 room.RoomSettings.MaxUsers
-            );
-
-            yield return roomDTO;
-        }
+            ))
+            .ToListAsync();
     }
 }

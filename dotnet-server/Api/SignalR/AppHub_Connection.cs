@@ -61,7 +61,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            (User removedUser, string roomHash) = _userRepository.DeleteUser(Context.ConnectionId);
+            (User removedUser, string roomHash) = await _userRepository.DeleteUserAsync(Context.ConnectionId);
 
             if (removedUser == null || roomHash == null)
             {
@@ -70,18 +70,17 @@ public partial class AppHub : Hub
                 return;
             }
 
-            
             UserDTO userDTO = _mapper.Map<UserDTO>(removedUser);
 
             await _roomHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
 
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room.Users.Count == 0)
             {
-                _roomRepository.DeleteRoom(roomHash);
+                await _roomRepository.DeleteRoomAsync(roomHash);
 
-                IEnumerable<RoomDTO> rooms = _roomRepository.GetRoomsDTO();
+                IEnumerable<RoomDTO> rooms = await _roomRepository.GetRoomsDTOAsync();
             
                 await _roomHubContext.Clients.All.SendAsync(HubMessages.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
             }

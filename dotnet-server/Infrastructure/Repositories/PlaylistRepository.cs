@@ -1,19 +1,22 @@
 using DotnetServer.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotnetServer.Infrastructure.Repositories;
 
 public class PlaylistRepository : IPlaylistRepository
 {
-    private readonly IRoomRepository _roomRepository;
+    private readonly AppDbContext _context;
 
-    public PlaylistRepository(IRoomRepository roomRepository)
+    public PlaylistRepository(AppDbContext context)
     {
-        _roomRepository = roomRepository;
+        _context = context;
     }
 
-    public bool AddPlaylistVideo(string roomHash, PlaylistVideo playlistVideo)
+    public async Task<bool> AddPlaylistVideoAsync(string roomHash, PlaylistVideo playlistVideo)
     {
-        Room room = _roomRepository.GetRoom(roomHash);
+        Room room = await _context.Rooms
+            .Include(r => r.PlaylistVideos)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
         if (room == null)
         {
@@ -21,12 +24,15 @@ public class PlaylistRepository : IPlaylistRepository
         }
 
         room.PlaylistVideos.Add(playlistVideo);
+        await _context.SaveChangesAsync();
         return true;
     }
 
-    public PlaylistVideo DeletePlaylistVideo(string roomHash, string videoHash)
+    public async Task<PlaylistVideo> DeletePlaylistVideoAsync(string roomHash, string videoHash)
     {
-        Room room = _roomRepository.GetRoom(roomHash);
+        Room room = await _context.Rooms
+            .Include(r => r.PlaylistVideos)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
         if (room == null)
         {
@@ -41,6 +47,8 @@ public class PlaylistRepository : IPlaylistRepository
         }
 
         room.PlaylistVideos.Remove(playlistVideo);
+        await _context.SaveChangesAsync();
+
         return playlistVideo;
     }
 }

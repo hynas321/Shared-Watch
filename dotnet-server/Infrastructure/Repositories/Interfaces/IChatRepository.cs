@@ -4,5 +4,5 @@ namespace DotnetServer.Infrastructure.Repositories;
 
 public interface IChatRepository
 {
-    bool AddChatMessage(string roomHash, ChatMessage chatMessage);
+    Task<bool> AddChatMessageAsync(string roomHash, ChatMessage chatMessage);
 }

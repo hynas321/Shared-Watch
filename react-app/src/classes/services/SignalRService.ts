@@ -52,7 +52,7 @@ export class SignalRService {
   }
 
   async onclose(callback: (...args: any[]) => any) {
-    await this.connection.onclose(callback);
+    this.connection.onclose(callback);
   }
 
   onreconnected(callback: (...args: any[]) => any) {

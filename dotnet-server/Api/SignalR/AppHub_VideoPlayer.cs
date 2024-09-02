@@ -10,7 +10,7 @@ public partial class AppHub : Hub
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -26,15 +26,15 @@ public partial class AppHub : Hub
                 return;
             }
 
-            if (user.IsAdmin == false && room.UserPermissions.CanStartOrPauseVideo == false)
+            if (!user.IsAdmin && !room.UserPermissions.CanStartOrPauseVideo)
             {
-                _logger.LogInformation($"{roomHash} SetIsVideoPlaying: User does not have the permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} SetIsVideoPlaying: User does not have permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
-            _logger.LogInformation($"{roomHash} SetIsVideoPlaying: {isPlaying}. Authorization Token: {authorizationToken}");
-
             room.VideoPlayer.IsPlaying = isPlaying;
+
+            await _roomRepository.UpdateRoomAsync(room);
 
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetIsVideoPlaying, isPlaying);
         }
@@ -45,11 +45,11 @@ public partial class AppHub : Hub
     }
 
     [HubMethodName(HubMessages.SetPlayedSeconds)]
-    public void SetPlayedSeconds(string roomHash, string authorizationToken, double playedSeconds)
+    public async Task SetPlayedSeconds(string roomHash, string authorizationToken, double playedSeconds)
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -65,14 +65,16 @@ public partial class AppHub : Hub
                 return;
             }
 
-            if (user.IsAdmin == false && room.UserPermissions.CanSkipVideo == false)
+            if (!user.IsAdmin && !room.UserPermissions.CanSkipVideo)
             {
-                _logger.LogInformation($"{roomHash} SetPlayedSeconds: User does not have the permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} SetPlayedSeconds: User does not have permission. Authorization Token: {authorizationToken}");
                 return;
             }
-            
+
             room.VideoPlayer.SetPlayedSecondsCalled = true;
             room.VideoPlayer.CurrentTime = playedSeconds;
+
+            await _roomRepository.UpdateRoomAsync(room);
 
             _logger.LogInformation($"{roomHash} SetPlayedSeconds: {playedSeconds}s. Authorization Token: {authorizationToken}");
         }
@@ -81,4 +83,5 @@ public partial class AppHub : Hub
             _logger.LogError(ex.ToString());
         }
     }
+
 }

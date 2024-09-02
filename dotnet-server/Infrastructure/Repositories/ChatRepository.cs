@@ -1,19 +1,22 @@
 using DotnetServer.Core.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace DotnetServer.Infrastructure.Repositories;
 
 public class ChatRepository : IChatRepository
 {
-    private readonly IRoomRepository _roomRepository;
+    private readonly AppDbContext _context;
 
-    public ChatRepository(IRoomRepository roomRepository)
+    public ChatRepository(AppDbContext context)
     {
-        _roomRepository = roomRepository;
+        _context = context;
     }
 
-    public bool AddChatMessage(string roomHash, ChatMessage chatMessage)
+    public async Task<bool> AddChatMessageAsync(string roomHash, ChatMessage chatMessage)
     {
-        Room room = _roomRepository.GetRoom(roomHash);
+        Room room = await _context.Rooms
+            .Include(r => r.ChatMessages)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
         if (room == null)
         {
@@ -21,6 +24,7 @@ public class ChatRepository : IChatRepository
         }
 
         room.ChatMessages.Add(chatMessage);
+        await _context.SaveChangesAsync();
 
         return true;
     }

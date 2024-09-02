@@ -20,13 +20,14 @@ builder.Services.AddSingleton<IYouTubeAPIService, YouTubeAPIService>(sp =>
     }
 );
 
-builder.Services.AddSingleton<AppData>();
+builder.Services.AddSingleton<AppDbContext>();
 builder.Services.AddScoped<IRoomControllerHandler, RoomControllerHandler>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
 builder.Services.AddSingleton<IChatRepository, ChatRepository>();
 builder.Services.AddSingleton<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddSingleton<IUserRepository, UserRepository>();
+builder.Services.AddHostedService<DatabaseCleanup>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

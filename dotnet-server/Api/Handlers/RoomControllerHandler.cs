@@ -6,11 +6,11 @@ namespace DotnetServer.Api.Handlers;
 
 public class RoomControllerHandler(IRoomRepository roomRepository) : IRoomControllerHandler
 {
-    public Room CreateRoom(RoomCreateInput input)
+    public async Task<Room> CreateRoom(RoomCreateInput input)
     {
         Room room = new Room(input.RoomName, input.RoomPassword);
 
-        roomRepository.AddRoom(room);
+        await roomRepository.AddRoomAsync(room);
 
         return room;
     }

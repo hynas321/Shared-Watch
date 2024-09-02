@@ -79,7 +79,7 @@ export default function Header() {
 
   return (
     <div
-      className={ !appState.isInRoom.value ? "container d-flex justify-content-center align-items-center" : "mx-5" }
+      className={ !appState.isInRoom.value ? "d-flex justify-content-center align-items-center" : "mx-5" }
       style={{ paddingLeft: '5rem', paddingRight: '5rem' }}
     >
       <nav className="navbar navbar-dark mb-2 mt-2">

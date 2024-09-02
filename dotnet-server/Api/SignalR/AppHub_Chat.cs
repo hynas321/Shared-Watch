@@ -7,11 +7,14 @@ namespace DotnetServer.SignalR;
 public partial class AppHub : Hub
 {
     [HubMethodName(HubMessages.AddChatMessage)]
-    public async Task AddChatMessage(string roomHash, string authorizationToken, ChatMessage chatMessage)
+    public async Task AddChatMessageAsync(string roomHash, string authorizationToken, ChatMessage chatMessage)
     {
         try
         {
-            Room room = _roomRepository.GetRoom(roomHash);
+            const int maxChatMessages = 30;
+            const int maxChatMessageTextLength = 200;
+
+            Room room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -27,29 +30,30 @@ public partial class AppHub : Hub
                 return;
             }
 
-            if (user.IsAdmin == false && room.UserPermissions.CanAddChatMessage == false)
+            if (!user.IsAdmin && !room.UserPermissions.CanAddChatMessage)
             {
-                _logger.LogInformation($"{roomHash} AddChatMessage: User does not have the permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} AddChatMessage: User does not have permission. Authorization Token: {authorizationToken}");
                 return;
             }
 
-            int maxChatMessageTextLength = 200;
+            if (room.ChatMessages.Count >= maxChatMessages)
+            {
+                ChatMessage oldestMessage = room.ChatMessages.FirstOrDefault();
+                if (oldestMessage != null)
+                {
+                    room.ChatMessages.Remove(oldestMessage);
+                }
+            }
 
             if (chatMessage.Text.Length > maxChatMessageTextLength)
             {
-                _logger.LogInformation($"{roomHash} AddChatMessage: Maximum length of a message reached. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} AddChatMessage: Maximum message length reached. Authorization Token: {authorizationToken}");
                 return;
             }
 
-            DateTime utcNow = DateTime.UtcNow.AddDays(0);
-            TimeZoneInfo localTimeZone = TimeZoneInfo.Local;
-            DateTime localTime = TimeZoneInfo.ConvertTimeFromUtc(utcNow, localTimeZone);
+            chatMessage.Date = DateTime.Now.ToString("HH:mm:ss");
 
-            chatMessage.Date = localTime.ToString("HH:mm:ss");
-
-            _logger.LogInformation($"{roomHash} AddChatMessage: {chatMessage.Date} {chatMessage.Username}: {chatMessage.Text}. Authorization Token: {authorizationToken}");
-
-            bool isChatMessageAdded = _chatRepository.AddChatMessage(roomHash, chatMessage);
+            bool isChatMessageAdded = await _chatRepository.AddChatMessageAsync(roomHash, chatMessage);
 
             if (!isChatMessageAdded)
             {
