@@ -16,40 +16,73 @@ public class RoomRepository : IRoomRepository
 
     public async Task<bool> AddRoomAsync(Room room)
     {
-        bool roomExists = await _appData.Rooms
-            .AnyAsync(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
+        using var transaction = await _appData.Database.BeginTransactionAsync();
 
-        if (roomExists)
+        try
         {
-            return false;
+            bool roomExists = await _appData.Rooms
+                .AnyAsync(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
+
+            if (roomExists)
+            {
+                return false;
+            }
+
+            await _appData.Rooms.AddAsync(room);
+            await _appData.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return true;
         }
-
-        await _appData.Rooms.AddAsync(room);
-        await _appData.SaveChangesAsync();
-
-        return true;
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<Room> DeleteRoomAsync(string roomHash)
     {
-        Room room = await GetRoomAsync(roomHash);
+        using var transaction = await _appData.Database.BeginTransactionAsync();
 
-        if (room == null)
+        try
         {
-            return null;
+            Room room = await GetRoomAsync(roomHash);
+
+            if (room == null)
+            {
+                return null;
+            }
+
+            _appData.Rooms.Remove(room);
+            await _appData.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return room;
         }
-
-        _appData.Rooms.Remove(room);
-        await _appData.SaveChangesAsync();
-
-        return room;
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> UpdateRoomAsync(Room room)
     {
-        _appData.Rooms.Update(room);
-        await _appData.SaveChangesAsync();
-        return true;
+        using var transaction = await _appData.Database.BeginTransactionAsync();
+
+        try
+        {
+            _appData.Rooms.Update(room);
+            await _appData.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<Room> GetRoomAsync(string roomHash)
@@ -80,7 +113,7 @@ public class RoomRepository : IRoomRepository
             .Select(room => new RoomDTO(
                 room.Hash,
                 room.RoomSettings.RoomName,
-                room.RoomSettings.RoomPassword == "" ? RoomTypes.Public : RoomTypes.Private,
+                string.IsNullOrEmpty(room.RoomSettings.RoomPassword) ? RoomTypes.Public : RoomTypes.Private,
                 room.Users.Count(),
                 room.RoomSettings.MaxUsers
             ))

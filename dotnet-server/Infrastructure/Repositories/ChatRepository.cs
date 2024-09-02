@@ -14,18 +14,29 @@ public class ChatRepository : IChatRepository
 
     public async Task<bool> AddChatMessageAsync(string roomHash, ChatMessage chatMessage)
     {
-        Room room = await _context.Rooms
-            .Include(r => r.ChatMessages)
-            .FirstOrDefaultAsync(r => r.Hash == roomHash);
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-        if (room == null)
+        try
         {
-            return false;
+            Room room = await _context.Rooms
+                .Include(r => r.ChatMessages)
+                .FirstOrDefaultAsync(r => r.Hash == roomHash);
+
+            if (room == null)
+            {
+                return false;
+            }
+
+            room.ChatMessages.Add(chatMessage);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return true;
         }
-
-        room.ChatMessages.Add(chatMessage);
-        await _context.SaveChangesAsync();
-
-        return true;
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

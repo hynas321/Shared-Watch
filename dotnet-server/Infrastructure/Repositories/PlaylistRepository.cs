@@ -14,41 +14,64 @@ public class PlaylistRepository : IPlaylistRepository
 
     public async Task<bool> AddPlaylistVideoAsync(string roomHash, PlaylistVideo playlistVideo)
     {
-        Room room = await _context.Rooms
-            .Include(r => r.PlaylistVideos)
-            .FirstOrDefaultAsync(r => r.Hash == roomHash);
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-        if (room == null)
+        try
         {
-            return false;
-        }
+            Room room = await _context.Rooms
+                .Include(r => r.PlaylistVideos)
+                .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
-        room.PlaylistVideos.Add(playlistVideo);
-        await _context.SaveChangesAsync();
-        return true;
+            if (room == null)
+            {
+                return false;
+            }
+
+            room.PlaylistVideos.Add(playlistVideo);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return true;
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<PlaylistVideo> DeletePlaylistVideoAsync(string roomHash, string videoHash)
     {
-        Room room = await _context.Rooms
-            .Include(r => r.PlaylistVideos)
-            .FirstOrDefaultAsync(r => r.Hash == roomHash);
+        using var transaction = await _context.Database.BeginTransactionAsync();
 
-        if (room == null)
+        try
         {
-            return null;
+            Room room = await _context.Rooms
+                .Include(r => r.PlaylistVideos)
+                .FirstOrDefaultAsync(r => r.Hash == roomHash);
+
+            if (room == null)
+            {
+                return null;
+            }
+
+            PlaylistVideo playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
+
+            if (playlistVideo == null)
+            {
+                return null;
+            }
+
+            room.PlaylistVideos.Remove(playlistVideo);
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return playlistVideo;
         }
-
-        PlaylistVideo playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
-
-        if (playlistVideo == null)
+        catch (DbUpdateConcurrencyException)
         {
-            return null;
+            await transaction.RollbackAsync();
+            throw;
         }
-
-        room.PlaylistVideos.Remove(playlistVideo);
-        await _context.SaveChangesAsync();
-
-        return playlistVideo;
     }
 }
