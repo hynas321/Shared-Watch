@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb-ha:pg14-latest
+    container_name: timescaledb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRES_DB: mydatabase
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - pg-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    ports:
+      - "80:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    restart: always
+    depends_on:
+      - timescaledb
+    networks:
+      - pg-network
+
+volumes:
+  timescale_data:
+    driver: local
+
+networks:
+  pg-network:
+    driver: bridge
