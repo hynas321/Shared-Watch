@@ -1,9 +1,10 @@
 using System.Text.RegularExpressions;
 using System.Xml;
+using DotnetServer.Application.Services.Interfaces;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3;
 
-namespace DotnetServer.Core.Services;
+namespace DotnetServer.Application.Services;
 
 public class YouTubeAPIService : IYouTubeAPIService
 {

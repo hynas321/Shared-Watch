@@ -1,7 +1,7 @@
 using AutoMapper;
+using DotnetServer.Application.Services.Interfaces;
 using DotnetServer.Api.DTO;
 using DotnetServer.Core.Entities;
-using DotnetServer.Core.Services;
 using DotnetServer.Infrastructure.Repositories;
 using DotnetServer.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;

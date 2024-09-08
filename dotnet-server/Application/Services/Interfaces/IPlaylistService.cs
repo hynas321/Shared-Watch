@@ -1,5 +1,4 @@
-
-namespace DotnetServer.Core.Services;
+namespace DotnetServer.Application.Services.Interfaces;
 
 public interface IPlaylistService
 {

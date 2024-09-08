@@ -9,17 +9,9 @@ public class Room
     public string Hash { get; set; }
 
     public List<string> AdminTokens { get; set; }
-
-    // One-to-Many relationship with ChatMessage
-    public virtual ICollection<ChatMessage> ChatMessages { get; set; } = new List<ChatMessage>();
-
-    // One-to-Many relationship with PlaylistVideo
-    public virtual ICollection<PlaylistVideo> PlaylistVideos { get; set; } = new List<PlaylistVideo>();
-
-    // One-to-Many relationship with Users
-    public virtual ICollection<User> Users { get; set; } = new List<User>();
-
-    // One-to-One relationships
+    public ICollection<ChatMessage> ChatMessages { get; set; }
+    public ICollection<PlaylistVideo> PlaylistVideos { get; set; }
+    public ICollection<User> Users { get; set; }
     public RoomSettings RoomSettings { get; set; }
     public UserPermissions UserPermissions { get; set; }
     public VideoPlayer VideoPlayer { get; set; }
@@ -30,6 +22,9 @@ public class Room
     {
         Hash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
         AdminTokens = new List<string>();
+        ChatMessages = new List<ChatMessage>();
+        PlaylistVideos = new List<PlaylistVideo>();
+        Users = new List<User>();
         RoomSettings = new RoomSettings(roomName, roomPassword, roomPassword.Length == 0 ? RoomTypes.Public : RoomTypes.Private);
         UserPermissions = new UserPermissions();
         VideoPlayer = new VideoPlayer();

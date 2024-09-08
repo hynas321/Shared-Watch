@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace dotnet_server.Migrations
+namespace DotnetServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20240901112128_Migration_1")]

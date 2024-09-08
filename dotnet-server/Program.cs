@@ -1,48 +1,53 @@
+using DotnetServer.Application.HostedServices;
+using DotnetServer.Application.Services;
+using DotnetServer.Application.Services.Interfaces;
 using DotnetServer.Api.Handlers;
-using DotnetServer.Core.Services;
-using DotnetServer.Infrastructure;
 using DotnetServer.Infrastructure.Repositories;
 using DotnetServer.Shared.Helpers;
 using DotnetServer.SignalR;
 using Google.Apis.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 builder.Services.AddSingleton<IYouTubeAPIService, YouTubeAPIService>(sp =>
+{
+    var youtubeAPIServiceInitializer = new BaseClientService.Initializer
     {
-        var youtubeAPIServiceInitializer = new BaseClientService.Initializer
-        {
-            ApiKey = configuration["YouTubeApi:ApiKey"],
-            ApplicationName = "ReactApplication"
-        };
-        return new YouTubeAPIService(youtubeAPIServiceInitializer);
-    }
-);
+        ApiKey = configuration["YouTubeApi:ApiKey"],
+        ApplicationName = "ReactApplication"
+    };
+    return new YouTubeAPIService(youtubeAPIServiceInitializer);
+});
 
-builder.Services.AddSingleton<AppDbContext>();
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IRoomRepository, RoomRepository>();
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+
 builder.Services.AddScoped<IRoomControllerHandler, RoomControllerHandler>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
-builder.Services.AddSingleton<IRoomRepository, RoomRepository>();
-builder.Services.AddSingleton<IChatRepository, ChatRepository>();
-builder.Services.AddSingleton<IPlaylistRepository, PlaylistRepository>();
-builder.Services.AddSingleton<IUserRepository, UserRepository>();
+
 builder.Services.AddHostedService<DatabaseCleanup>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options => 
-    {
-        options.AddPolicy("AllowReactApplication",
-            builder => builder.WithOrigins("*")
-                .AllowAnyHeader()
-                .AllowAnyMethod()   
-        );
-    }
-); 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApplication",
+        builder => builder.WithOrigins("*")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+    );
+});
 
 builder.Services.AddControllers()
-    .AddJsonOptions(options => 
+    .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
     });
@@ -63,4 +68,5 @@ app.UseCors("AllowReactApplication");
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
+
 app.Run();

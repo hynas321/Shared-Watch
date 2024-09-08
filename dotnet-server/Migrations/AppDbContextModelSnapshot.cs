@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace dotnet_server.Migrations
+namespace DotnetServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -42,7 +42,7 @@ namespace dotnet_server.Migrations
 
                     b.HasIndex("RoomHash");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessages", (string)null);
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.PlaylistVideo", b =>
@@ -69,7 +69,7 @@ namespace dotnet_server.Migrations
 
                     b.HasIndex("RoomHash");
 
-                    b.ToTable("PlaylistVideos");
+                    b.ToTable("PlaylistVideos", (string)null);
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.Room", b =>
@@ -85,7 +85,7 @@ namespace dotnet_server.Migrations
                     b.HasIndex("Hash")
                         .IsUnique();
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.RoomSettings", b =>
@@ -108,7 +108,7 @@ namespace dotnet_server.Migrations
 
                     b.HasKey("RoomHash");
 
-                    b.ToTable("RoomSettings");
+                    b.ToTable("RoomSettings", (string)null);
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.User", b =>
@@ -133,7 +133,7 @@ namespace dotnet_server.Migrations
 
                     b.HasIndex("RoomHash");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.UserPermissions", b =>
@@ -158,7 +158,7 @@ namespace dotnet_server.Migrations
 
                     b.HasKey("RoomHash");
 
-                    b.ToTable("UserPermissions");
+                    b.ToTable("UserPermissions", (string)null);
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.VideoPlayer", b =>
@@ -182,49 +182,59 @@ namespace dotnet_server.Migrations
 
                     b.HasIndex("PlaylistVideoHash");
 
-                    b.ToTable("VideoPlayers");
+                    b.ToTable("VideoPlayers", (string)null);
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.ChatMessage", b =>
                 {
-                    b.HasOne("DotnetServer.Core.Entities.Room", null)
+                    b.HasOne("DotnetServer.Core.Entities.Room", "Room")
                         .WithMany("ChatMessages")
                         .HasForeignKey("RoomHash")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.PlaylistVideo", b =>
                 {
-                    b.HasOne("DotnetServer.Core.Entities.Room", null)
+                    b.HasOne("DotnetServer.Core.Entities.Room", "Room")
                         .WithMany("PlaylistVideos")
                         .HasForeignKey("RoomHash")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.RoomSettings", b =>
                 {
-                    b.HasOne("DotnetServer.Core.Entities.Room", null)
+                    b.HasOne("DotnetServer.Core.Entities.Room", "Room")
                         .WithOne("RoomSettings")
                         .HasForeignKey("DotnetServer.Core.Entities.RoomSettings", "RoomHash")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.User", b =>
                 {
-                    b.HasOne("DotnetServer.Core.Entities.Room", null)
+                    b.HasOne("DotnetServer.Core.Entities.Room", "Room")
                         .WithMany("Users")
                         .HasForeignKey("RoomHash")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.UserPermissions", b =>
                 {
-                    b.HasOne("DotnetServer.Core.Entities.Room", null)
+                    b.HasOne("DotnetServer.Core.Entities.Room", "Room")
                         .WithOne("UserPermissions")
                         .HasForeignKey("DotnetServer.Core.Entities.UserPermissions", "RoomHash")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.VideoPlayer", b =>
@@ -233,13 +243,15 @@ namespace dotnet_server.Migrations
                         .WithMany()
                         .HasForeignKey("PlaylistVideoHash");
 
-                    b.HasOne("DotnetServer.Core.Entities.Room", null)
+                    b.HasOne("DotnetServer.Core.Entities.Room", "Room")
                         .WithOne("VideoPlayer")
                         .HasForeignKey("DotnetServer.Core.Entities.VideoPlayer", "RoomHash")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("PlaylistVideo");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("DotnetServer.Core.Entities.Room", b =>

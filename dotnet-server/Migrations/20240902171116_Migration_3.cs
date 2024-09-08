@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace dotnet_server.Migrations
+namespace DotnetServer.Migrations
 {
     /// <inheritdoc />
     public partial class Migration_3 : Migration
