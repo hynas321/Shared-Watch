@@ -51,8 +51,6 @@ public partial class AppHub : Hub
                 return;
             }
 
-            chatMessage.Date = DateTime.Now.ToString("HH:mm:ss");
-
             bool isChatMessageAdded = await _chatRepository.AddChatMessageAsync(roomHash, chatMessage);
 
             if (!isChatMessageAdded)

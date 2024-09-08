@@ -9,7 +9,7 @@ public class ChatMessage
     public string Username { get; set; }
 
     [Key, Column(Order = 1)]
-    public string Date { get; set; }
+    public DateTime Date { get; set; }
 
     [Required]
     public string Text { get; set; }

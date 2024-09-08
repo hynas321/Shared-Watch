@@ -13,7 +13,8 @@ export default function Chat() {
   const appHub = useContext(AppHubContext);
 
   const messagesRef = useRef<HTMLDivElement>(null);
-  const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
+  const [currentChatMessageText, setCurrentChatMessageText] =
+    useState<string>("");
 
   const localStorageService = LocalStorageService.getInstance();
 
@@ -31,23 +32,25 @@ export default function Chat() {
 
   const handleTextInputChange = (text: string) => {
     setCurrentChatMessageText(text);
-  }
+  };
 
   const handleSendMessage = () => {
     if (!currentChatMessageText || currentChatMessageText?.length === 0) {
       return;
     }
 
-    const date = new Date();
-    const currentDate: string = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
-
     const newChatMessage: ChatMessage = {
       username: appState.username.value,
       text: currentChatMessageText,
-      date: currentDate
-    }
+      date: new Date(),
+    };
 
-    appHub.invoke(HubMessages.AddChatMessage, appState.roomHash.value, localStorageService.getAuthorizationToken(), newChatMessage);
+    appHub.invoke(
+      HubMessages.AddChatMessage,
+      appState.roomHash.value,
+      localStorageService.getAuthorizationToken(),
+      newChatMessage
+    );
 
     setCurrentChatMessageText("");
   };
@@ -56,11 +59,12 @@ export default function Chat() {
     if (key === "Enter") {
       handleSendMessage();
     }
-  }
+  };
 
   return (
     <>
-      {(appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) && (
+      {(appState.userPermissions.value?.canAddChatMessage ||
+        appState.isAdmin.value) && (
         <div className="d-flex mb-3">
           <InputField
             classNames="form-control rounded-0"
@@ -79,16 +83,21 @@ export default function Chat() {
           />
         </div>
       )}
-      <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
+      <div
+        className="list-group rounded-3 control-panel-list"
+        ref={messagesRef}
+      >
         {appState.chatMessages.value.length !== 0 ? (
-          appState.chatMessages.value.map((chatMessage: ChatMessage, index: number) => (
-          <li 
-            key={index}
-            className="border border-secondary list-group-item bg-muted border-2"
-          >
-            <MessageOnChat chatMessage={chatMessage} />
-          </li>
-          ))
+          appState.chatMessages.value.map(
+            (chatMessage: ChatMessage, index: number) => (
+              <li
+                key={index}
+                className="border border-secondary list-group-item bg-muted border-2"
+              >
+                <MessageOnChat chatMessage={chatMessage} />
+              </li>
+            )
+          )
         ) : (
           <h6 className="text-white text-center">No messages to display</h6>
         )}
