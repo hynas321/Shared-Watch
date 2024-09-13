@@ -41,6 +41,8 @@ The key needs to be set in _the dotnet-server/appsettings.json_ file if the appl
 + **SignalR** - bi-directional, real-time communication
 
 ## Running the Application
-React application: `npm install` `npm run start`
+React application: `npm install` `npm run start` 
 
 ASP.NET Core application: `dotnet run`
+
+TimescaleDB: `docker-compose up` in the directory of the `docker-compose.yml` file
