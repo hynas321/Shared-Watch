@@ -9,8 +9,7 @@ public class UserProfile : Profile
     public UserProfile()
     {
         CreateMap<User, UserDTO>()
-            .ForMember(dest => dest.Username, src => src.MapFrom(x => x.Username))
-            .ForMember(dest => dest.IsAdmin, src => src.MapFrom(x => x.IsAdmin));
+            .ForMember(dest => dest.Username, src => src.MapFrom(x => x.Username));
     }
 }
 

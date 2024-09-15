@@ -6,12 +6,9 @@ namespace WebApi.Infrastructure.Repositories;
 public interface IUserRepository
 {
     Task<bool> AddUserAsync(string roomHash, User user);
-    Task<User> DeleteUserAsync(string roomHash, string authorizationToken);
-    Task<(User user, string roomHash)> DeleteUserAsync(string connectionId);
+    Task<User> DeleteUserByUsernameAsync(string roomHash, string username);
+    Task<User> DeleteUserByConnectionIdAsync(string roomHash, string connectionId);
     Task<bool> UpdateUserAsync(User user);
-    Task<User> GetUserByAuthorizationTokenAsync(string roomHash, string authorizationToken);
-    Task<User> GetUserByAuthorizationTokenAsync(string authorizationToken);
-    Task<User> GetUserByUsernameAsync(string roomHash, string username);
-    Task<User> GetUserByConnectionIdAsync(string connectionId);
+    Task<User> GetUserAsync(string roomHash, string username);
     Task<IEnumerable<UserDTO>> GetUsersDTOAsync(string roomHash);
 }

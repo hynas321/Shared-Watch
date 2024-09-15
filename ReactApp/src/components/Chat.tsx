@@ -1,22 +1,18 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import Button from "./Button";
 import { ChatMessage } from "../types/ChatMessage";
-import { InputField } from "./InputField";
 import { BsSendFill } from "react-icons/bs";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import { HubMessages } from "../classes/constants/HubMessages";
-import { LocalStorageService } from "../classes/services/LocalStorageService";
 import MessageOnChat from "./ChatMessage";
+import { InputField } from "./shared/InputField";
+import Button from "./shared/Button";
 
 export default function Chat() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
 
   const messagesRef = useRef<HTMLDivElement>(null);
-  const [currentChatMessageText, setCurrentChatMessageText] =
-    useState<string>("");
-
-  const localStorageService = LocalStorageService.getInstance();
+  const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
 
   useEffect(() => {
     if (appState.unreadChatMessagesCount.value !== 0) {
@@ -45,12 +41,7 @@ export default function Chat() {
       date: new Date(),
     };
 
-    appHub.invoke(
-      HubMessages.AddChatMessage,
-      appState.roomHash.value,
-      localStorageService.getAuthorizationToken(),
-      newChatMessage
-    );
+    appHub.invoke(HubMessages.AddChatMessage, appState.roomHash.value, newChatMessage);
 
     setCurrentChatMessageText("");
   };
@@ -63,8 +54,7 @@ export default function Chat() {
 
   return (
     <>
-      {(appState.userPermissions.value?.canAddChatMessage ||
-        appState.isAdmin.value) && (
+      {(appState.userPermissions.value?.canAddChatMessage || appState.isAdmin.value) && (
         <div className="d-flex mb-3">
           <InputField
             classNames="form-control rounded-0"
@@ -83,21 +73,13 @@ export default function Chat() {
           />
         </div>
       )}
-      <div
-        className="list-group rounded-3 control-panel-list"
-        ref={messagesRef}
-      >
+      <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
         {appState.chatMessages.value.length !== 0 ? (
-          appState.chatMessages.value.map(
-            (chatMessage: ChatMessage, index: number) => (
-              <li
-                key={index}
-                className="border border-secondary list-group-item bg-muted border-2"
-              >
-                <MessageOnChat chatMessage={chatMessage} />
-              </li>
-            )
-          )
+          appState.chatMessages.value.map((chatMessage: ChatMessage, index: number) => (
+            <li key={index} className="border border-secondary list-group-item bg-muted border-2">
+              <MessageOnChat chatMessage={chatMessage} />
+            </li>
+          ))
         ) : (
           <h6 className="text-white text-center">No messages to display</h6>
         )}

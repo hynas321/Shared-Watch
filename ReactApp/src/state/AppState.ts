@@ -8,9 +8,6 @@ import { PlaylistVideo } from "../types/PlaylistVideo";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export function createAppState() {
-  //signalR
-  const connectionId = signal<string | null | undefined>(undefined);
-
   //User state
   const username = signal<string>("");
   const isAdmin = signal<boolean>(false);
@@ -41,12 +38,22 @@ export function createAppState() {
   const joinedViaView = signal<boolean>(false);
 
   return {
-    connectionId,
-    username, isAdmin, isInRoom,
-    roomHash, roomName, roomPassword, roomType, maxUsers,
-    chatMessages, playlistVideos, users, userPermissions, videoPlayer,
-    unreadChatMessagesCount, activePanel, maxPlaylistVideos,
-    joinedViaView
-  }
+    username,
+    isAdmin,
+    isInRoom,
+    roomHash,
+    roomName,
+    roomPassword,
+    roomType,
+    maxUsers,
+    chatMessages,
+    playlistVideos,
+    users,
+    userPermissions,
+    videoPlayer,
+    unreadChatMessagesCount,
+    activePanel,
+    maxPlaylistVideos,
+    joinedViaView,
+  };
 }
-

@@ -4,9 +4,6 @@ public static class HubMessages {
     //Connection
     public const string OnReceiveConnectionId = "OnReceiveConnectionId";
 
-    //Rooms
-    public const string OnListOfRoomsUpdated = "OnListOfRoomsUpdated";
-
     //Room
     public const string KickOut = "KickOut";
     public const string SetAdminStatus = "SetAdminStatus";
@@ -39,4 +36,7 @@ public static class HubMessages {
     //UserPermissions
     public const string SetUserPermissions = "SetUserPermissions";
     public const string OnSetUserPermissions = "OnSetUserPermissions";
+
+    //Identity
+    public const string OnReceiveJwt = "OnReceiveJwt";
 }

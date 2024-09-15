@@ -8,27 +8,20 @@
 }
 
 @keyframes gradient {
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
-	}
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .font-border {
-  text-shadow: 
-    -1px -1px 0px #000,
-    0px -1px 0px #000,
-    1px -1px 0px #000,
-    -1px  0px 0px #000,
-    1px  0px 0px #000,
-    -1px  1px 0px #000,
-    0px  1px 0px #000,
-    1px  1px 0px #000;
+  text-shadow: -1px -1px 0px #000, 0px -1px 0px #000, 1px -1px 0px #000, -1px 0px 0px #000,
+    1px 0px 0px #000, -1px 1px 0px #000, 0px 1px 0px #000, 1px 1px 0px #000;
 }
 
 .text-orange {
@@ -105,9 +98,13 @@
   justify-content: center;
 }
 
-.box:first-child > span { margin-right: auto; }
+.box:first-child > span {
+  margin-right: auto;
+}
 
-.box:last-child  > span { margin-left: auto;  }
+.box:last-child > span {
+  margin-left: auto;
+}
 
 .box {
   align-items: center;

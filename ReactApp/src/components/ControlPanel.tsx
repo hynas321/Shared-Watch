@@ -1,7 +1,6 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { PanelsEnum } from "../enums/PanelsEnum";
-import Button from "./Button";
-import { BsFillChatTextFill, BsFillLockFill, BsGearFill } from 'react-icons/bs';
+import { BsFillChatTextFill, BsFillLockFill, BsGearFill } from "react-icons/bs";
 import Chat from "./Chat";
 import Playlist from "./Playlist";
 import Users from "./Users";
@@ -18,19 +17,29 @@ import { useNavigate } from "react-router-dom";
 import { HttpService } from "../classes/services/HttpService";
 import { UserPermissions } from "../types/UserPermissions";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
+import Button from "./shared/Button";
 
 export default function ControlPanel() {
   const appHub = useContext(AppHubContext);
   const navigate = useNavigate();
+  const [hubState, setHubState] = useState(appHub.getState());
 
   const httpService = HttpService.getInstance();
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     appState.activePanel.value = panelsEnumValue;
-  }
+  };
 
   useEffect(() => {
-    if (appHub.getState() !== signalR.HubConnectionState.Connected) {
+    const interval = setInterval(() => {
+      setHubState(appHub.getState());
+    }, 10);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (hubState !== signalR.HubConnectionState.Connected) {
       return;
     }
 
@@ -73,23 +82,19 @@ export default function ControlPanel() {
     appHub.on(HubMessages.OnKickOut, (removedUserSerialized: string) => {
       const removedUser: User = JSON.parse(removedUserSerialized);
       const isCurrentUser = removedUser.username === appState.username.value;
-      
+
       if (isCurrentUser) {
-        toast.error(
-          "You have been kicked out", {
-            containerId: ToastNotificationEnum.Main,
-          }
-        );
+        toast.error("You have been kicked out", {
+          containerId: ToastNotificationEnum.Main,
+        });
         httpService.leaveRoom(appState.roomHash.value);
         navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
         return;
       }
 
-      toast.info(
-        `User ${removedUser.username} has been kicked out`, {
-          containerId: ToastNotificationEnum.Room
-        }
-      );
+      toast.info(`User ${removedUser.username} has been kicked out`, {
+        containerId: ToastNotificationEnum.Room,
+      });
 
       appState.users.value = appState.users.value.filter(
         (user) => user.username !== removedUser.username
@@ -102,65 +107,50 @@ export default function ControlPanel() {
 
       if (isCurrentUser && updatedUser.isAdmin === true) {
         appState.isAdmin.value = updatedUser.isAdmin;
-        
-        toast.clearWaitingQueue({
-            containerId: ToastNotificationEnum.Room
-          }
-        );
 
-        toast.success(
-          `You have become an admin`, {
-            containerId: ToastNotificationEnum.Room
-          }
-        );
-      } 
-      else if (isCurrentUser && updatedUser.isAdmin === false) {
+        toast.clearWaitingQueue({
+          containerId: ToastNotificationEnum.Room,
+        });
+
+        toast.success(`You have become an admin`, {
+          containerId: ToastNotificationEnum.Room,
+        });
+      } else if (isCurrentUser && updatedUser.isAdmin === false) {
         appState.isAdmin.value = updatedUser.isAdmin;
 
         toast.clearWaitingQueue({
-            containerId: ToastNotificationEnum.Room
-          }
-        );
+          containerId: ToastNotificationEnum.Room,
+        });
 
-        toast.error(
-          `You are no longer an admin`, {
-            containerId: ToastNotificationEnum.Room
-          }
-        );
-      }
-      else if (!isCurrentUser && updatedUser.isAdmin === true) {
+        toast.error(`You are no longer an admin`, {
+          containerId: ToastNotificationEnum.Room,
+        });
+      } else if (!isCurrentUser && updatedUser.isAdmin === true) {
         toast.clearWaitingQueue({
-            containerId: ToastNotificationEnum.Room
-          }
-        );
+          containerId: ToastNotificationEnum.Room,
+        });
 
-        toast.info(
-          `User ${updatedUser.username} has become an admin`, {
-            containerId: ToastNotificationEnum.Room
-          }
-        );
-      }
-      else if (!isCurrentUser && updatedUser.isAdmin === false) {
+        toast.info(`User ${updatedUser.username} has become an admin`, {
+          containerId: ToastNotificationEnum.Room,
+        });
+      } else if (!isCurrentUser && updatedUser.isAdmin === false) {
         toast.clearWaitingQueue({
-            containerId: ToastNotificationEnum.Room
-          }
-        );
+          containerId: ToastNotificationEnum.Room,
+        });
 
-        toast.info(
-          `User ${updatedUser.username} is no longer an admin`, {
-            containerId: ToastNotificationEnum.Room
-          }
-        );
+        toast.info(`User ${updatedUser.username} is no longer an admin`, {
+          containerId: ToastNotificationEnum.Room,
+        });
       }
-    
+
       const userIndex = appState.users.value.findIndex(
         (user) => user.username === updatedUser.username
       );
-    
+
       if (userIndex !== -1) {
         const updatedUsers = [...appState.users.value];
         updatedUsers[userIndex] = { ...updatedUser };
-    
+
         appState.users.value = updatedUsers;
       }
     });
@@ -188,8 +178,9 @@ export default function ControlPanel() {
       appHub.off(HubMessages.OnSetAdminStatus);
       appHub.off(HubMessages.OnSetUserPermissions);
       appHub.off(HubMessages.OnSetRoomPassword);
-    }
-  }, [appHub.getState()]);
+      appHub.off(HubMessages.OnReceiveJwt);
+    };
+  }, [hubState]);
 
   return (
     <div>
@@ -197,60 +188,88 @@ export default function ControlPanel() {
         <div className="d-flex align-items-center">
           <div className="text-center flex-grow-1">
             <h5 className="text-white">
-              {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />} {appState.roomName.value}
-            </h5> 
+              {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />}{" "}
+              {appState.roomName.value}
+            </h5>
           </div>
         </div>
       </div>
       <div className="row">
         <div className="btn-group" role="group">
-          <Button 
+          <Button
             text={
               appState.unreadChatMessagesCount.value !== 0 ? (
                 <>
-                  <span className="badge rounded-pill bg-danger mt-2">{appState.unreadChatMessagesCount.value}</span> Chat
+                  <span className="badge rounded-pill bg-danger mt-2">
+                    {appState.unreadChatMessagesCount.value}
+                  </span>{" "}
+                  Chat
                 </>
               ) : (
-                <><BsFillChatTextFill /> Chat</>
+                <>
+                  <BsFillChatTextFill /> Chat
+                </>
               )
             }
-            classNames={appState.activePanel.value === PanelsEnum.Chat ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
-            onClick={() => handlePanelButtonClick(PanelsEnum.Chat)} 
+            classNames={
+              appState.activePanel.value === PanelsEnum.Chat
+                ? "btn btn-primary btn-rectangular"
+                : "btn btn-secondary btn-rectangular"
+            }
+            onClick={() => handlePanelButtonClick(PanelsEnum.Chat)}
           />
-          <Button 
+          <Button
             text={
               <>
-                <span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>
+                <span className="badge rounded-pill bg-success mt-2" style={{ fontSize: "11px" }}>
                   {appState.playlistVideos.value?.length}/{appState.maxPlaylistVideos.value}
-                </span> Playlist
+                </span>{" "}
+                Playlist
               </>
             }
-            classNames={appState.activePanel.value === PanelsEnum.Playlist ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
-            onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)} 
+            classNames={
+              appState.activePanel.value === PanelsEnum.Playlist
+                ? "btn btn-primary btn-rectangular"
+                : "btn btn-secondary btn-rectangular"
+            }
+            onClick={() => handlePanelButtonClick(PanelsEnum.Playlist)}
           />
-          <Button 
+          <Button
             text={
               <>
-                <span className="badge rounded-pill bg-success mt-2" style={{fontSize: "11px"}}>
+                <span className="badge rounded-pill bg-success mt-2" style={{ fontSize: "11px" }}>
                   {appState.users.value?.length}/{appState.maxUsers.value}
-                </span> Users
+                </span>{" "}
+                Users
               </>
             }
-            classNames={appState.activePanel.value === PanelsEnum.Users ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
-            onClick={() => handlePanelButtonClick(PanelsEnum.Users)} 
+            classNames={
+              appState.activePanel.value === PanelsEnum.Users
+                ? "btn btn-primary btn-rectangular"
+                : "btn btn-secondary btn-rectangular"
+            }
+            onClick={() => handlePanelButtonClick(PanelsEnum.Users)}
           />
-          <Button 
-            text={<><BsGearFill /> Settings</>}
-            classNames={appState.activePanel.value === PanelsEnum.Settings ? "btn btn-primary btn-rectangular" : "btn btn-secondary btn-rectangular"}
-            onClick={() => handlePanelButtonClick(PanelsEnum.Settings)} 
+          <Button
+            text={
+              <>
+                <BsGearFill /> Settings
+              </>
+            }
+            classNames={
+              appState.activePanel.value === PanelsEnum.Settings
+                ? "btn btn-primary btn-rectangular"
+                : "btn btn-secondary btn-rectangular"
+            }
+            onClick={() => handlePanelButtonClick(PanelsEnum.Settings)}
           />
         </div>
       </div>
       <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-4 pb-4 px-4">
-        { appState.activePanel.value === PanelsEnum.Chat && <Chat /> }
-        { appState.activePanel.value === PanelsEnum.Playlist && <Playlist /> }
-        { appState.activePanel.value === PanelsEnum.Users && <Users /> }
-        { appState.activePanel.value === PanelsEnum.Settings && <Settings /> }
+        {appState.activePanel.value === PanelsEnum.Chat && <Chat />}
+        {appState.activePanel.value === PanelsEnum.Playlist && <Playlist />}
+        {appState.activePanel.value === PanelsEnum.Users && <Users />}
+        {appState.activePanel.value === PanelsEnum.Settings && <Settings />}
       </div>
     </div>
   );

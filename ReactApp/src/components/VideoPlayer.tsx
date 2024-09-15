@@ -3,7 +3,6 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { AppStateContext, AppHubContext } from "../context/AppContext";
 import * as signalR from "@microsoft/signalr";
 import { HubMessages } from "../classes/constants/HubMessages";
-import { LocalStorageService } from "../classes/services/LocalStorageService";
 import { OnProgressProps } from "react-player/base";
 import { BsCameraVideoOffFill } from "react-icons/bs";
 
@@ -12,12 +11,15 @@ export default function VideoPlayer() {
   const appHub = useContext(AppHubContext);
 
   const videoPlayerRef = useRef<ReactPlayer>(null);
-  const [videoUrl, setVideoUrl] = useState<string | undefined>(appState.videoPlayer.value?.playlistVideo.url ?? undefined);
+  const [videoUrl, setVideoUrl] = useState<string | undefined>(
+    appState.videoPlayer.value?.playlistVideo.url ?? undefined
+  );
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
-  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(appState.videoPlayer.value?.isPlaying ?? false);
-  const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] = useState<boolean>(false);
-
-  const localStorageService = LocalStorageService.getInstance();
+  const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(
+    appState.videoPlayer.value?.isPlaying ?? false
+  );
+  const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] =
+    useState<boolean>(false);
 
   useEffect(() => {
     if (appHub.getState() !== signalR.HubConnectionState.Connected) {
@@ -72,12 +74,7 @@ export default function VideoPlayer() {
   }, [appHub.getState()]);
 
   const setUserVideoState = async (isPlaying: boolean) => {
-    await appHub.invoke(
-      HubMessages.SetIsVideoPlaying,
-      appState.roomHash.value,
-      localStorageService.getAuthorizationToken(),
-      isPlaying
-    );
+    await appHub.invoke(HubMessages.SetIsVideoPlaying, appState.roomHash.value, isPlaying);
   };
 
   const handleStartVideo = () => {
@@ -93,7 +90,6 @@ export default function VideoPlayer() {
       await appHub.invoke(
         HubMessages.SetPlayedSeconds,
         appState.roomHash.value,
-        localStorageService.getAuthorizationToken(),
         state.playedSeconds
       );
 
@@ -137,11 +133,13 @@ export default function VideoPlayer() {
             className="d-flex align-items-center justify-content-center text-white"
             style={{
               width: isMobileView ? "428px" : "854px",
-              height: isMobileView ? "auto" : "480px"
+              height: isMobileView ? "auto" : "480px",
             }}
           >
             <div className="text-center">
-              <h1><BsCameraVideoOffFill /></h1>
+              <h1>
+                <BsCameraVideoOffFill />
+              </h1>
               <h5>No video to display</h5>
             </div>
           </div>

@@ -1,25 +1,27 @@
 using WebApi.Api.DTO;
 using WebApi.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Api.SignalR;
+using WebApi.Application.Constants;
 
 namespace WebApi.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _dbContext;
 
-    public UserRepository(AppDbContext context)
+    public UserRepository(AppDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 
     public async Task<bool> AddUserAsync(string roomHash, User user)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
-            var room = await _context.Rooms
+            var room = await _dbContext.Rooms
                 .Include(r => r.Users)
                 .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
@@ -29,7 +31,7 @@ public class UserRepository : IUserRepository
             }
 
             room.Users.Add(user);
-            await _context.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
             return true;
@@ -41,13 +43,15 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public async Task<User> DeleteUserAsync(string roomHash, string authorizationToken)
+    public async Task<User> DeleteUserByConnectionIdAsync(string roomHash, string connectionId)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
-            var room = await _context.Rooms
+            var username = HubConnectionMapper.UserConnections.FirstOrDefault(kvp => kvp.Value == connectionId).Key;
+
+            var room = await _dbContext.Rooms
                 .Include(r => r.Users)
                 .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
@@ -56,15 +60,16 @@ public class UserRepository : IUserRepository
                 return null;
             }
 
-            var user = room.Users.FirstOrDefault(u => u.AuthorizationToken == authorizationToken);
+            var user = room.Users.FirstOrDefault(u => u.Username == username);
+
             if (user == null)
             {
                 return null;
             }
 
             room.Users.Remove(user);
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
 
             return user;
@@ -76,30 +81,34 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public async Task<(User user, string roomHash)> DeleteUserAsync(string connectionId)
+    public async Task<User> DeleteUserByUsernameAsync(string roomHash, string username)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
-            var room = await _context.Rooms
+            var room = await _dbContext.Rooms
                 .Include(r => r.Users)
-                .FirstOrDefaultAsync(r => r.Users.Any(u => u.SignalRConnectionId == connectionId));
+                .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
-            if (room != null)
+            if (room == null)
             {
-                var user = room.Users.FirstOrDefault(u => u.SignalRConnectionId == connectionId);
-                if (user != null)
-                {
-                    room.Users.Remove(user);
-                    _context.Users.Remove(user);
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-                    return (user, room.Hash);
-                }
+                return null;
             }
 
-            return (null, null);
+            var user = room.Users.FirstOrDefault(u => u.Username == username);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            room.Users.Remove(user);
+            _dbContext.Users.Remove(user);
+            await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return user;
         }
         catch (DbUpdateConcurrencyException)
         {
@@ -110,12 +119,12 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> UpdateUserAsync(User user)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
-            _context.Users.Update(user);
-            await _context.SaveChangesAsync();
+            _dbContext.Users.Update(user);
+            await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
             return true;
         }
@@ -126,42 +135,21 @@ public class UserRepository : IUserRepository
         }
     }
 
-    public async Task<User> GetUserByAuthorizationTokenAsync(string roomHash, string authorizationToken)
+    public async Task<User> GetUserAsync(string roomHash, string username)
     {
-        return await _context.Rooms
-            .Include(r => r.Users)
-            .Where(r => r.Hash == roomHash)
-            .SelectMany(r => r.Users)
-            .FirstOrDefaultAsync(u => u.AuthorizationToken == authorizationToken);
-    }
-
-    public async Task<User> GetUserByAuthorizationTokenAsync(string authorizationToken)
-    {
-        return await _context.Users
-            .FirstOrDefaultAsync(u => u.AuthorizationToken == authorizationToken);
-    }
-
-    public async Task<User> GetUserByUsernameAsync(string roomHash, string username)
-    {
-        return await _context.Rooms
+        return await _dbContext.Rooms
             .Include(r => r.Users)
             .Where(r => r.Hash == roomHash)
             .SelectMany(r => r.Users)
             .FirstOrDefaultAsync(u => u.Username == username);
     }
 
-    public async Task<User> GetUserByConnectionIdAsync(string connectionId)
-    {
-        return await _context.Users
-            .FirstOrDefaultAsync(u => u.SignalRConnectionId == connectionId);
-    }
-
     public async Task<IEnumerable<UserDTO>> GetUsersDTOAsync(string roomHash)
     {
-        var room = await _context.Rooms
+        var room = await _dbContext.Rooms
             .Include(r => r.Users)
             .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
-        return room?.Users.Select(user => new UserDTO(user.Username, user.IsAdmin)) ?? Enumerable.Empty<UserDTO>();
+        return room?.Users.Select(user => new UserDTO(user.Username, user.Role == Role.Admin)) ?? Enumerable.Empty<UserDTO>();
     }
 }

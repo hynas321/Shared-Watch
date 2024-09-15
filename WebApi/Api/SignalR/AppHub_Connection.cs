@@ -1,10 +1,11 @@
 using AutoMapper;
-using WebApi.Application.Services.Interfaces;
-using WebApi.Api.DTO;
-using WebApi.Core.Entities;
-using WebApi.Infrastructure.Repositories;
-using WebApi.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
+using System.Collections.Concurrent;
+using System.Security.Claims;
+using WebApi.Api.DTO;
+using WebApi.Api.SignalR;
+using WebApi.Application.Services.Interfaces;
+using WebApi.Infrastructure.Repositories;
 
 namespace WebApi.SignalR;
 
@@ -17,29 +18,29 @@ public partial class AppHub : Hub
     private readonly IUserRepository _userRepository;
     private readonly IPlaylistService _playlistService;
     private readonly IYouTubeAPIService _youtubeAPIService;
-    private readonly IHubContext<AppHub> _roomHubContext;
+    private readonly IJwtTokenService _jwtTokenService;
     private readonly IMapper _mapper;
 
     public AppHub(
         ILogger<AppHub> logger,
         IPlaylistService playlistHandler,
         IYouTubeAPIService youTubeAPIService,
-        IHubContext<AppHub> roomHubContext,
         IRoomRepository roomRepository,
         IChatRepository chatRepository,
         IPlaylistRepository playlistRepository,
         IUserRepository userRepository,
+        IJwtTokenService tokenService,
         IMapper mapper
     )
     {
         _logger = logger;
         _playlistService = playlistHandler;
         _youtubeAPIService = youTubeAPIService;
-        _roomHubContext = roomHubContext;
         _roomRepository = roomRepository;
         _chatRepository = chatRepository;
         _playlistRepository = playlistRepository;
         _userRepository = userRepository;
+        _jwtTokenService = tokenService;
         _mapper = mapper;
     }
 
@@ -47,13 +48,27 @@ public partial class AppHub : Hub
     {
         try
         {
-            await Clients.Client(Context.ConnectionId).SendAsync(HubMessages.OnReceiveConnectionId, Context.ConnectionId);
-            _logger.LogInformation($"Hub: User Connected: {Context.ConnectionId}");
+            var connectionId = Context.ConnectionId;
+            var userId = GetUserId();
+            var roomHash = GetRoomHash();
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("A user connected without a valid user ID.");
+                await base.OnConnectedAsync();
+                return;
+            }
+
+            _logger.LogInformation("User connected: {UserId}", userId);
+
+            AddConnection(userId, connectionId);
+
+            await Groups.AddToGroupAsync(connectionId, roomHash);
             await base.OnConnectedAsync();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString());
+            _logger.LogError(ex, "An error occurred in OnConnectedAsync");
         }
     }
 
@@ -61,36 +76,68 @@ public partial class AppHub : Hub
     {
         try
         {
-            (User removedUser, string roomHash) = await _userRepository.DeleteUserAsync(Context.ConnectionId);
+            var userId = GetUserId();
+            var connectionId = Context.ConnectionId;
+            var roomHash = GetRoomHash();
 
-            if (removedUser == null || roomHash == null)
+            if (string.IsNullOrEmpty(userId))
             {
-                _logger.LogInformation($"Hub: User Disconnected: {Context.ConnectionId}");
                 await base.OnDisconnectedAsync(exception);
                 return;
             }
 
-            UserDTO userDTO = _mapper.Map<UserDTO>(removedUser);
+            var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
 
-            await _roomHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
+            RemoveConnection(userId, connectionId);
+            await Groups.RemoveFromGroupAsync(connectionId, roomHash);
 
-            Room room = await _roomRepository.GetRoomAsync(roomHash);
+            if (removedUser == null)
+            {
+                await base.OnDisconnectedAsync(exception);
+                return;
+            }
+
+            var userDTO = _mapper.Map<UserDTO>(removedUser);
+
+            await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
+
+            var room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room.Users.Count == 0)
             {
                 await _roomRepository.DeleteRoomAsync(roomHash);
-
-                IEnumerable<RoomDTO> rooms = await _roomRepository.GetRoomsDTOAsync();
-            
-                await _roomHubContext.Clients.All.SendAsync(HubMessages.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
             }
 
-            _logger.LogInformation($"Hub: User Disconnected: {Context.ConnectionId}");
+            _logger.LogInformation("Hub: User Disconnected: {ConnectionId}", connectionId);
+
             await base.OnDisconnectedAsync(exception);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.ToString());
+            _logger.LogError(ex, "An error occurred in OnDisconnectedAsync");
+        }
+    }
+
+    private string GetUserId()
+    {
+        return Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    }
+
+    private string GetRoomHash()
+    {
+        return Context.User?.FindFirst(ClaimTypes.Hash)?.Value;
+    }
+
+    private void AddConnection(string userId, string connectionId)
+    {
+        HubConnectionMapper.UserConnections.AddOrUpdate(userId, connectionId, (key, oldValue) => connectionId);
+    }
+
+    private void RemoveConnection(string userId, string connectionId)
+    {
+        if (HubConnectionMapper.UserConnections.TryGetValue(userId, out var storedConnectionId) && storedConnectionId == connectionId)
+        {
+            HubConnectionMapper.UserConnections.TryRemove(userId, out _);
         }
     }
 }

@@ -8,6 +8,11 @@ using WebApi.Shared.Helpers;
 using WebApi.SignalR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using WebApi.Application.Services.Interfaces;
+using System.Security.Claims;
+using WebApi.Application.Constants;
+using Microsoft.AspNetCore.Authorization;
+using WebApi.Api.Services.Interfaces;
 
 namespace WebApi.Api.Controllers;
 
@@ -19,6 +24,7 @@ public class UserController : ControllerBase
     private readonly IHubContext<AppHub> _appHubContext;
     private readonly IRoomRepository _roomRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IJwtTokenService _tokenService;
     private readonly IMapper _mapper;
 
     public UserController(
@@ -26,29 +32,26 @@ public class UserController : ControllerBase
         IHubContext<AppHub> appHubContext,
         IRoomRepository roomRepository,
         IUserRepository userRepository,
+        IJwtTokenService tokenService,
         IMapper mapper)
     {
         _logger = logger;
         _appHubContext = appHubContext;
         _roomRepository = roomRepository;
         _userRepository = userRepository;
+        _tokenService = tokenService;
         _mapper = mapper;
     }
 
     [HttpPost("Join/{roomHash}")]
-    public async Task<IActionResult> JoinRoom(
-        [FromBody] RoomJoinInput input,
-        [FromRoute] string roomHash,
-        [FromHeader(Name = "X-SignalR-ConnectionId")] string signalRConnectionId = null,
-        [FromHeader(Name = "Authorization")] string authorizationToken = null)
+    public async Task<IActionResult> JoinRoom([FromBody] RoomJoinInput input, [FromRoute] string roomHash)
     {
-        if (!ModelState.IsValid || string.IsNullOrEmpty(roomHash) || string.IsNullOrEmpty(signalRConnectionId))
+        if (!ModelState.IsValid || string.IsNullOrEmpty(roomHash))
         {
-            _logger.LogInformation($"{roomHash} Join: BadRequest. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return BadRequest();
         }
 
-        Room room = await _roomRepository.GetRoomAsync(roomHash);
+        var room = await _roomRepository.GetRoomAsync(roomHash);
 
         if (room == null)
         {
@@ -68,25 +71,23 @@ public class UserController : ControllerBase
             return Forbid();
         }
 
-        if (room.Users.Any(u => u.Username == input.Username) || room.Users.Any(u => u.AuthorizationToken == authorizationToken))
+        if (room.Users.Any(u => u.Username == input.Username))
         {
             _logger.LogInformation($"{roomHash} Join: Conflict. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return Conflict();
         }
 
-        bool isUserAdmin = room.Users.Count == 0 || room.AdminTokens.Any(o => o == authorizationToken);
-        User newUser = new User(input.Username, isUserAdmin, authorizationToken, signalRConnectionId);
+        var userRole = room.Users.Count == 0 ? Role.Admin : Role.User;
+        var newUser = new User(input.Username, userRole);
 
-        UserDTO newUserDTO = _mapper.Map<UserDTO>(newUser);
+        var jwt = _tokenService.GenerateToken(
+            input.Username,
+            userRole,
+            roomHash
+        );
 
-        if (room.Users.Count == 0)
-        {
-            room.AdminTokens.Add(newUser.AuthorizationToken);
-        }
-
-        await _appHubContext.Groups.AddToGroupAsync(signalRConnectionId, roomHash);
-
-        bool isNewUserAdded = await _userRepository.AddUserAsync(roomHash, newUser);
+        var newUserDTO = _mapper.Map<UserDTO>(newUser);
+        var isNewUserAdded = await _userRepository.AddUserAsync(roomHash, newUser);
 
         if (!isNewUserAdded)
         {
@@ -94,10 +95,10 @@ public class UserController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
-        RoomJoinOutput output = new RoomJoinOutput
+        var output = new RoomJoinOutput
         {
-            AuthorizationToken = newUser.AuthorizationToken,
-            IsAdmin = newUser.IsAdmin,
+            AuthorizationToken = jwt,
+            IsAdmin = userRole == Role.Admin,
             ChatMessages = room.ChatMessages.ToList(),
             PlaylistVideos = room.PlaylistVideos.ToList(),
             Users = (await _userRepository.GetUsersDTOAsync(roomHash)).ToList(),
@@ -110,50 +111,49 @@ public class UserController : ControllerBase
 
         await _appHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnJoinRoom, newUserDTO);
 
-        IEnumerable<RoomDTO> rooms = await _roomRepository.GetRoomsDTOAsync();
-        await _appHubContext.Clients.All.SendAsync(HubMessages.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
+        var rooms = await _roomRepository.GetRoomsDTOAsync();
 
         _logger.LogInformation($"{roomHash} Join: OK. RoomPassword: {input.RoomPassword}, Username: {input.Username}");
         return Ok(serializedOutput);
     }
 
+    [Authorize]
     [HttpDelete("Leave/{roomHash}")]
-    public async Task<IActionResult> Leave(
-        [FromRoute] string roomHash,
-        [FromHeader(Name = "X-SignalR-ConnectionId")] string signalRConnectionId = null,
-        [FromHeader(Name = "Authorization")] string authorizationToken = null)
+    public async Task<IActionResult> LeaveRoom([FromRoute] string roomHash)
     {
-        if (string.IsNullOrEmpty(roomHash) || string.IsNullOrEmpty(authorizationToken) || string.IsNullOrEmpty(signalRConnectionId))
+        var userIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(roomHash))
         {
-            _logger.LogInformation($"{roomHash} Leave: BadRequest. AuthorizationToken: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} Leave: BadRequest. User Identifier: {userIdentifier}");
             return BadRequest();
         }
 
-        Room room = await _roomRepository.GetRoomAsync(roomHash);
+        var room = await _roomRepository.GetRoomAsync(roomHash);
 
         if (room == null)
         {
-            _logger.LogInformation($"{roomHash} Leave: NotFound. AuthorizationToken: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} Leave: NotFound. User Identifier: {userIdentifier}");
             return NotFound();
         }
 
-        User user = await _userRepository.GetUserByAuthorizationTokenAsync(roomHash, authorizationToken);
+        var user = await _userRepository.GetUserAsync(roomHash, userIdentifier);
 
         if (user == null)
         {
-            _logger.LogInformation($"{roomHash} Leave: Unauthorized. AuthorizationToken: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} Leave: Unauthorized. User Identifier: {userIdentifier}");
             return Unauthorized();
         }
 
-        User deletedUser = await _userRepository.DeleteUserAsync(roomHash, authorizationToken);
+        var deletedUser = await _userRepository.DeleteUserByUsernameAsync(roomHash, userIdentifier);
 
         if (deletedUser == null)
         {
-            _logger.LogInformation($"{roomHash} Leave: InternalServerError. AuthorizationToken: {authorizationToken}");
+            _logger.LogInformation($"{roomHash} Leave: InternalServerError. User Identifier: {userIdentifier}");
             return StatusCode(StatusCodes.Status500InternalServerError);
         }
 
-        Room updatedRoom = await _roomRepository.GetRoomAsync(roomHash);
+        var updatedRoom = await _roomRepository.GetRoomAsync(roomHash);
 
         if (updatedRoom.Users.Count == 0)
         {
@@ -161,15 +161,12 @@ public class UserController : ControllerBase
             await _roomRepository.DeleteRoomAsync(roomHash);
         }
 
-        await _appHubContext.Groups.RemoveFromGroupAsync(signalRConnectionId, roomHash);
-
-        UserDTO userDTO = _mapper.Map<UserDTO>(user);
+        var userDTO = _mapper.Map<UserDTO>(user);
         await _appHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
 
-        IEnumerable<RoomDTO> rooms = await _roomRepository.GetRoomsDTOAsync();
-        await _appHubContext.Clients.All.SendAsync(HubMessages.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
+        var rooms = await _roomRepository.GetRoomsDTOAsync();
 
-        _logger.LogInformation($"{roomHash} Leave: OK. AuthorizationToken: {authorizationToken}");
+        _logger.LogInformation($"{roomHash} Leave: OK. User Identifier: {userIdentifier}");
         return Ok();
     }
 }

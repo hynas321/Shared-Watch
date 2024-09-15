@@ -8,7 +8,6 @@ public class Room
     [Key]
     public string Hash { get; set; }
 
-    public List<string> AdminTokens { get; set; }
     public ICollection<ChatMessage> ChatMessages { get; set; }
     public ICollection<PlaylistVideo> PlaylistVideos { get; set; }
     public ICollection<User> Users { get; set; }
@@ -21,7 +20,6 @@ public class Room
     public Room(string roomName, string roomPassword)
     {
         Hash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
-        AdminTokens = new List<string>();
         ChatMessages = new List<ChatMessage>();
         PlaylistVideos = new List<PlaylistVideo>();
         Users = new List<User>();

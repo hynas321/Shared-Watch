@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using WebApi.Infrastructure.Repositories;
 using WebApi.Api.Handlers;
 using WebApi.Api.HttpClasses.Input;
-using WebApi.Core.Entities;
 using WebApi.Api.HttpClasses.Output;
 using WebApi.Core.Enums;
 using WebApi.Api.DTO;
@@ -40,32 +39,17 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost("Create")]
-    public async Task<IActionResult> Create(
-        [FromBody] RoomCreateInput input,
-        [FromHeader(Name = "X-SignalR-ConnectionId")] string signalRConnectionId = null,
-        [FromHeader(Name = "Authorization")] string authorizationToken = null)
+    public async Task<IActionResult> Create([FromBody] RoomCreateInput input)
     {
-        if (!ModelState.IsValid || string.IsNullOrEmpty(signalRConnectionId))
+        if (!ModelState.IsValid)
         {
             _logger.LogInformation($"Create: BadRequest. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return BadRequest();
         }
 
-        var existingUser = await _userRepository.GetUserByAuthorizationTokenAsync(authorizationToken);
-        if (existingUser != null)
-        {
-            _logger.LogInformation($"Create: Unauthorized. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
-            return Unauthorized();
-        }
+        //User in any other room - add the check
 
-        Room room = await _roomHandler.CreateRoom(input);
-
-        if (room == null)
-        {
-            string roomPasswordInfo = string.IsNullOrEmpty(input.RoomPassword) ? "<No password>" : input.RoomPassword;
-            _logger.LogInformation($"Create: Conflict. RoomName: {input.RoomName}, RoomPassword: {roomPasswordInfo}, Username: {input.Username}");
-            return Conflict();
-        }
+        var room = await _roomHandler.CreateRoom(input);
 
         var output = new RoomCreateOutput
         {
@@ -87,7 +71,7 @@ public class RoomController : ControllerBase
             return BadRequest();
         }
 
-        Room room = await _roomRepository.GetRoomAsync(roomHash);
+        var room = await _roomRepository.GetRoomAsync(roomHash);
 
         if (room == null)
         {
@@ -107,7 +91,7 @@ public class RoomController : ControllerBase
     [HttpGet("Get/{roomHash}")]
     public async Task<IActionResult> Get([FromRoute] string roomHash)
     {
-        Room room = await _roomRepository.GetRoomAsync(roomHash);
+        var room = await _roomRepository.GetRoomAsync(roomHash);
 
         if (room == null)
         {
@@ -115,7 +99,7 @@ public class RoomController : ControllerBase
             return NotFound();
         }
 
-        RoomDTO roomDTO = _mapper.Map<RoomDTO>(room);
+        var roomDTO = _mapper.Map<RoomDTO>(room);
 
         _logger.LogInformation($"GetAll: OK.");
 
@@ -127,7 +111,7 @@ public class RoomController : ControllerBase
     [HttpGet("GetAll")]
     public async Task<IActionResult> GetAll()
     {
-        IEnumerable<RoomDTO> roomsDTO = await _roomRepository.GetRoomsDTOAsync();
+        var roomsDTO = await _roomRepository.GetRoomsDTOAsync();
 
         _logger.LogInformation($"GetAll: OK.");
 
@@ -145,7 +129,7 @@ public class RoomController : ControllerBase
             return Unauthorized();
         }
 
-        List<Room> rooms = await _roomRepository.GetRoomsAsync();
+        var rooms = await _roomRepository.GetRoomsAsync();
 
         _logger.LogInformation("GetAllDetails: OK");
 

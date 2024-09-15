@@ -1,19 +1,16 @@
 import { useEffect, useState } from "react";
-import Switch from "./Switch";
-import { InputField } from "./InputField";
-import Button from "./Button";
 import { BsSaveFill } from "react-icons/bs";
 import { AppStateContext, appHub } from "../context/AppContext";
 import { useContext } from "react";
 import { HubMessages } from "../classes/constants/HubMessages";
-import { LocalStorageService } from "../classes/services/LocalStorageService";
+import { InputField } from "./shared/InputField";
+import Button from "./shared/Button";
+import Switch from "./shared/Switch";
 
 export default function Settings() {
   const appState = useContext(AppStateContext);
   const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
-
-  const localStorageService = LocalStorageService.getInstance();
 
   useEffect(() => {
     setUserPermissions(appState.userPermissions.value);
@@ -25,46 +22,34 @@ export default function Settings() {
     }
 
     if (inputFormPassword.length > 0) {
-      appHub.invoke(
-        HubMessages.SetRoomPassword,
-        appState.roomHash.value,
-        localStorageService.getAuthorizationToken(),
-        inputFormPassword
-      );
-  
+      appHub.invoke(HubMessages.SetRoomPassword, appState.roomHash.value, inputFormPassword);
+
       setInputFormPassword("");
-    }
-    else {
-      appHub.invoke(
-        HubMessages.SetRoomPassword,
-        appState.roomHash.value,
-        localStorageService.getAuthorizationToken(),
-        ""
-      );
+    } else {
+      appHub.invoke(HubMessages.SetRoomPassword, appState.roomHash.value, "");
 
       setInputFormPassword("");
     }
-  }
+  };
 
   const handleRemovePasswordButtonClick = () => {
-    appHub.invoke(
-      HubMessages.SetRoomPassword,
-      appState.roomHash.value,
-      localStorageService.getAuthorizationToken(),
-      ""
-    );
+    appHub.invoke(HubMessages.SetRoomPassword, appState.roomHash.value, "");
 
     setInputFormPassword("");
-  }
+  };
 
   const handleSetRoomPrivateEnterClick = (key: string) => {
     if (key === "Enter") {
       handleSetRoomPrivateButtonClick();
     }
-  }
+  };
 
   const invokeChange = () => {
-    appHub.invoke(HubMessages.SetUserPermissions, appState.roomHash.value, localStorageService.getAuthorizationToken(), appState.userPermissions.value);
+    appHub.invoke(
+      HubMessages.SetUserPermissions,
+      appState.roomHash.value,
+      appState.userPermissions.value
+    );
   };
 
   const setCanAddChatMessage = (checked: boolean) => {
@@ -109,14 +94,20 @@ export default function Settings() {
               onKeyDown={handleSetRoomPrivateEnterClick}
             />
             <Button
-              text={<><BsSaveFill /></>}
+              text={
+                <>
+                  <BsSaveFill />
+                </>
+              }
               classNames="btn btn-primary rounded-0"
               onClick={handleSetRoomPrivateButtonClick}
             />
           </div>
           {appState.roomPassword.value.length > 0 && (
             <div className="mt-2">
-              <span className="text-white room-password">Current password: {appState.roomPassword.value} </span>
+              <span className="text-white room-password">
+                Current password: {appState.roomPassword.value}{" "}
+              </span>
               <Button
                 text={"Remove password"}
                 classNames="text-orange button-text"

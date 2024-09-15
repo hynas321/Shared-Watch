@@ -1,13 +1,4 @@
 export class HubMessages {
-  //Connection
-  static OnReceiveConnectionId: string = "OnReceiveConnectionId";
-  static SendHeartbeat: string = "SendHeartbeat";
-  static OnSendHeartbeat: string = "OnSendHeartbeat";
-
-  //Rooms
-  static onRoomUpdated: string = "OnRoomUpdated";
-  static onListOfRoomsUpdated: string = "OnListOfRoomsUpdated";
-
   //User
   static KickOut: string = "KickOut";
   static SetAdminStatus: string = "SetAdminStatus";
@@ -40,4 +31,7 @@ export class HubMessages {
   //UserPermissions
   static SetUserPermissions: string = "SetUserPermissions";
   static OnSetUserPermissions: string = "OnSetUserPermissions";
+
+  //Identity
+  static OnReceiveJwt: string = "OnReceiveJwt";
 }

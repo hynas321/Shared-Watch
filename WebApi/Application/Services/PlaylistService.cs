@@ -41,7 +41,7 @@ public class PlaylistService : IPlaylistService
     {
         try
         {
-            Room room = await _roomRepository.GetRoomAsync(roomHash);
+            var room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
@@ -73,7 +73,7 @@ public class PlaylistService : IPlaylistService
 
             while (room.PlaylistVideos.Count > 0 && room.Users.Count > 0)
             {
-                PlaylistVideo currentVideo = room.PlaylistVideos.ToList()[0];
+                var currentVideo = room.PlaylistVideos.ToList()[0];
 
                 room.VideoPlayer.PlaylistVideo.Url = currentVideo.Url;
                 room.VideoPlayer.CurrentTime = 0;
@@ -86,7 +86,7 @@ public class PlaylistService : IPlaylistService
 
                 await _roomRepository.UpdateRoomAsync(room);
 
-                bool hasVideoEndedSuccessfully = await UpdateCurrentTime(room, currentVideo);
+                var hasVideoEndedSuccessfully = await UpdateCurrentTime(room, currentVideo);
 
                 room.VideoPlayer.IsPlaying = false;
                 await _hubContext.Clients.Group(room.Hash).SendAsync(HubMessages.OnSetIsVideoPlaying, false);
@@ -122,14 +122,14 @@ public class PlaylistService : IPlaylistService
     {
         try
         {
-            double durationTime = await _youtubeAPIService.GetVideoDurationAsync(currentVideo.Url);
+            var durationTime = await _youtubeAPIService.GetVideoDurationAsync(currentVideo.Url);
 
             if (durationTime == -1)
             {
                 return false;
             }
 
-            string currentVideoHash = currentVideo.Hash;
+            var currentVideoHash = currentVideo.Hash;
 
             while (room.VideoPlayer.IsPlaying && room.VideoPlayer.CurrentTime <= durationTime)
             {

@@ -20,7 +20,7 @@ public class RoomRepository : IRoomRepository
 
         try
         {
-            bool roomExists = await _appData.Rooms
+            var roomExists = await _appData.Rooms
                 .AnyAsync(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
 
             if (roomExists)
@@ -47,7 +47,7 @@ public class RoomRepository : IRoomRepository
 
         try
         {
-            Room room = await GetRoomAsync(roomHash);
+            var room = await GetRoomAsync(roomHash);
 
             if (room == null)
             {
