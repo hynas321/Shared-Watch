@@ -5,7 +5,7 @@ namespace WebApi.Core.Entities;
 public class PlaylistVideo
 {
     [Key]
-    public string Hash { get; set; }
+    public string Hash { get; set; } = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 
     public string Url { get; set; }
     public double Duration { get; set; }
@@ -15,10 +15,7 @@ public class PlaylistVideo
     // Foreign Key
     public string RoomHash { get; set; } 
 
-    public PlaylistVideo()
-    {
-        Hash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
-    }
+    public PlaylistVideo() {}
 
     public PlaylistVideo(string hash, string url, double duration, string title, string thumbnailUrl)
     {
