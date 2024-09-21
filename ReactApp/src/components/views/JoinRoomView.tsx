@@ -91,7 +91,7 @@ export default function JoinRoomView() {
     const roomState: RoomState = {
       roomHash: room.value.roomHash,
       roomName: room.value.roomName,
-      password: "",
+      roomPassword: "",
     };
 
     const canJoin = await roomHelper.joinRoom(roomState);
@@ -105,7 +105,7 @@ export default function JoinRoomView() {
     const roomState: RoomState = {
       roomHash: room.value.roomHash,
       roomName: room.value.roomName,
-      password: privateRoomPassword,
+      roomPassword: privateRoomPassword,
     };
 
     const canJoin = await roomHelper.joinRoom(roomState);

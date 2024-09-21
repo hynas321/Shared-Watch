@@ -42,7 +42,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("RoomHash");
 
-                    b.ToTable("ChatMessages");
+                    b.ToTable("ChatMessages", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Core.Entities.PlaylistVideo", b =>
@@ -69,7 +69,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("RoomHash");
 
-                    b.ToTable("PlaylistVideos");
+                    b.ToTable("PlaylistVideos", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Core.Entities.Room", b =>
@@ -82,7 +82,7 @@ namespace WebApi.Migrations
                     b.HasIndex("Hash")
                         .IsUnique();
 
-                    b.ToTable("Rooms");
+                    b.ToTable("Rooms", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Core.Entities.RoomSettings", b =>
@@ -105,7 +105,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("RoomHash");
 
-                    b.ToTable("RoomSettings");
+                    b.ToTable("RoomSettings", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Core.Entities.User", b =>
@@ -131,7 +131,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("RoomHash");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Core.Entities.UserPermissions", b =>
@@ -156,7 +156,7 @@ namespace WebApi.Migrations
 
                     b.HasKey("RoomHash");
 
-                    b.ToTable("UserPermissions");
+                    b.ToTable("UserPermissions", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Core.Entities.VideoPlayer", b =>
@@ -180,7 +180,7 @@ namespace WebApi.Migrations
 
                     b.HasIndex("PlaylistVideoHash");
 
-                    b.ToTable("VideoPlayers");
+                    b.ToTable("VideoPlayers", (string)null);
                 });
 
             modelBuilder.Entity("WebApi.Core.Entities.ChatMessage", b =>

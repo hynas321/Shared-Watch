@@ -30,13 +30,16 @@ export default function RoomView() {
     const setupRoomView = async () => {
       await appHub.start();
 
-      appHub.on(HubMessages.OnReceiveJwt, (jwt: string) => {
-        sessionStorageService.setAuthorizationToken(jwt);
-
+      appHub.on(HubMessages.OnReceiveJwt, async (jwt: string) => {
         const decodedJwt = jwtDecode<CustomJwtPayload>(jwt);
         const role = decodedJwt["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
         appState.isAdmin.value = role == "Admin";
+
+        sessionStorageService.setAuthorizationToken(jwt);
+
+        await appHub.stop();
+        await appHub.start();
       });
     };
 

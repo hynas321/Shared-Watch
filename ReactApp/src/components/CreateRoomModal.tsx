@@ -81,7 +81,7 @@ export default function CreateRoomModal({ acceptText, declineText }: CreateRoomM
   const createRoomState = (roomInfo: RoomCreateOutput | undefined): RoomState => ({
     roomHash: roomInfo?.roomHash || "",
     roomName: roomName.value,
-    password: roomPassword.value,
+    roomPassword: roomPassword.value,
   });
 
   return (

@@ -73,7 +73,7 @@ public partial class AppHub : Hub
 
             if (room.PlaylistVideos.Count == 1 && !_playlistService.IsServiceRunning)
             {
-                _playlistService.StartPlaylistService(roomHash);
+                await _playlistService.StartPlaylistService(roomHash);
             }
 
             await Clients.Group(roomHash).SendAsync(HubMessages.OnAddPlaylistVideo, JsonHelper.Serialize(playlistVideo));

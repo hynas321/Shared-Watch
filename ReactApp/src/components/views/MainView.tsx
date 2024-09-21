@@ -94,7 +94,11 @@ export default function MainView() {
   }, [searchText, displayOnlyAvailableRooms, rooms, filterRooms]);
 
   const handleRoomClick = async (room: Room, password: string = "") => {
-    const roomState: RoomState = { roomHash: room.roomHash, roomName: room.roomName, password };
+    const roomState: RoomState = {
+      roomHash: room.roomHash,
+      roomName: room.roomName,
+      roomPassword: password,
+    };
     if (await roomHelper.joinRoom(roomState)) {
       navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
     }

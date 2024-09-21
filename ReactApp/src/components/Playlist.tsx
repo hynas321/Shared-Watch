@@ -15,10 +15,11 @@ export default function Playlist() {
 
   const [currentVideoUrlText, setCurrentVideoUrlText] = useState<string>("");
   const [isInputFormEnabled, setIsInputFormEnabled] = useState<boolean>(true);
-  const [inputFormPlaceholderText, setInputFormPlaceholderText] = useState<string>("Paste Youtube Video URL");
+  const [inputFormPlaceholderText, setInputFormPlaceholderText] =
+    useState<string>("Paste Youtube Video URL");
 
   const roomHelper = RoomHelper.getInstance();
-  
+
   useEffect(() => {
     if (playlistVideosRef.current) {
       playlistVideosRef.current.scrollTop = playlistVideosRef.current.scrollHeight;
@@ -27,7 +28,7 @@ export default function Playlist() {
 
   const handleTextInputChange = (text: string) => {
     setCurrentVideoUrlText(text);
-  }
+  };
 
   const handleAddVideoUrlButtonClick = async () => {
     if (!currentVideoUrlText || currentVideoUrlText?.length === 0) {
@@ -39,7 +40,7 @@ export default function Playlist() {
     if (!isUrlValid) {
       setIsInputFormEnabled(false);
       setInputFormPlaceholderText("Incorrect Youtube Video URL");
-  
+
       setTimeout(() => {
         setIsInputFormEnabled(true);
         setInputFormPlaceholderText("Paste Youtube Video URL");
@@ -51,18 +52,18 @@ export default function Playlist() {
 
     const newPlaylistVideo: PlaylistVideo = {
       url: currentVideoUrlText,
-      duration: 5
+      duration: 5,
     };
 
     appHub.invoke(HubMessages.AddPlaylistVideo, appState.roomHash.value, newPlaylistVideo);
     setCurrentVideoUrlText("");
-  }
+  };
 
   const handleEnterPress = (key: string) => {
     if (key === "Enter") {
       handleAddVideoUrlButtonClick();
     }
-  }
+  };
 
   return (
     <>
@@ -88,17 +89,18 @@ export default function Playlist() {
       <div className="list-group rounded-3 control-panel-list" ref={playlistVideosRef}>
         {appState.playlistVideos.value.length !== 0 ? (
           appState.playlistVideos.value.map((playlistVideo: PlaylistVideo, index: number) => (
-            <a 
+            <a
               key={index}
               className="border border-secondary list-group-item bg-muted border-2 a-video"
-              href={playlistVideo.url.startsWith('http') ? playlistVideo.url : `http://${playlistVideo.url}`}
+              href={
+                playlistVideo.url.startsWith("http")
+                  ? playlistVideo.url
+                  : `http://${playlistVideo.url}`
+              }
               target="_blank"
               style={index === 0 ? { backgroundColor: "#DAF7A6" } : {}}
             >
-              <VideoOnPlaylist
-                index={index}
-                playlistVideo={playlistVideo}
-              />
+              <VideoOnPlaylist index={index} playlistVideo={playlistVideo} />
             </a>
           ))
         ) : (

@@ -8,7 +8,6 @@ namespace WebApi.Application.Services;
 
 public class PlaylistService : IPlaylistService
 {
-    private readonly AppDbContext _appData;
     private readonly ILogger<PlaylistService> _logger;
     private readonly IRoomRepository _roomRepository;
     private readonly IPlaylistRepository _playlistRepository;
@@ -18,7 +17,6 @@ public class PlaylistService : IPlaylistService
     public bool IsServiceRunning { get; set; } = false;
 
     public PlaylistService(
-        AppDbContext appData,
         ILogger<PlaylistService> logger,
         IRoomRepository roomRepository,
         IPlaylistRepository playlistRepository,
@@ -26,18 +24,14 @@ public class PlaylistService : IPlaylistService
         IYouTubeAPIService youTubeAPIService
     )
     {
-        _appData = appData;
         _logger = logger;
         _roomRepository = roomRepository;
         _playlistRepository = playlistRepository;
         _hubContext = hubContext;
         _youtubeAPIService = youTubeAPIService;
-
-        _roomRepository = new RoomRepository(_appData);
-        _playlistRepository = new PlaylistRepository(_appData);
     }
 
-    public async void StartPlaylistService(string roomHash)
+    public async Task StartPlaylistService(string roomHash)
     {
         try
         {

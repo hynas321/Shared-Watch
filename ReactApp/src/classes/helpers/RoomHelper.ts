@@ -34,7 +34,7 @@ export class RoomHelper {
   public joinRoom = async (roomState: RoomState): Promise<boolean> => {
     const [responseStatusCode, roomInformation] = await this.httpService.joinRoom(
       roomState.roomHash,
-      roomState.password,
+      roomState.roomPassword,
       appState.username.value
     );
 
@@ -87,7 +87,7 @@ export class RoomHelper {
     appState.roomName.value = roomState.roomName;
     appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
     appState.maxUsers.value = roomInformation?.roomSettings.maxUsers as number;
-    appState.roomPassword.value = roomState.password;
+    appState.roomPassword.value = roomState.roomPassword;
 
     this.sessionStorageService.setAuthorizationToken(roomInformation?.authorizationToken as string);
     appState.isAdmin.value = roomInformation?.isAdmin as boolean;

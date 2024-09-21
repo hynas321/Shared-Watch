@@ -1,6 +1,5 @@
 using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
-using System.Collections.Concurrent;
 using System.Security.Claims;
 using WebApi.Api.DTO;
 using WebApi.Api.SignalR;
@@ -86,29 +85,39 @@ public partial class AppHub : Hub
                 return;
             }
 
-            var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
+            await Task.Delay(5000);
 
-            RemoveConnection(userId, connectionId);
-            await Groups.RemoveFromGroupAsync(connectionId, roomHash);
-
-            if (removedUser == null)
+            if (HubConnectionMapper.UserConnections.TryGetValue(userId, out var activeConnectionId)
+                && activeConnectionId == connectionId)
             {
-                await base.OnDisconnectedAsync(exception);
-                return;
+                var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
+
+                RemoveConnection(userId, connectionId);
+                await Groups.RemoveFromGroupAsync(connectionId, roomHash);
+
+                if (removedUser == null)
+                {
+                    await base.OnDisconnectedAsync(exception);
+                    return;
+                }
+
+                var userDTO = _mapper.Map<UserDTO>(removedUser);
+
+                await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
+
+                var room = await _roomRepository.GetRoomAsync(roomHash);
+
+                if (room.Users.Count == 0)
+                {
+                    await _roomRepository.DeleteRoomAsync(roomHash);
+                }
+
+                _logger.LogInformation("Hub: User Disconnected: {ConnectionId}", connectionId);
             }
-
-            var userDTO = _mapper.Map<UserDTO>(removedUser);
-
-            await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
-
-            var room = await _roomRepository.GetRoomAsync(roomHash);
-
-            if (room.Users.Count == 0)
+            else
             {
-                await _roomRepository.DeleteRoomAsync(roomHash);
+                _logger.LogInformation("Hub: User {UserId} has another active connection in the same room", userId);
             }
-
-            _logger.LogInformation("Hub: User Disconnected: {ConnectionId}", connectionId);
 
             await base.OnDisconnectedAsync(exception);
         }
@@ -117,6 +126,7 @@ public partial class AppHub : Hub
             _logger.LogError(ex, "An error occurred in OnDisconnectedAsync");
         }
     }
+
 
     private string GetUserId()
     {
