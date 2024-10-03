@@ -12,7 +12,6 @@ using WebApi.Application.Services.Interfaces;
 using System.Security.Claims;
 using WebApi.Application.Constants;
 using Microsoft.AspNetCore.Authorization;
-using WebApi.Api.Services.Interfaces;
 
 namespace WebApi.Api.Controllers;
 
@@ -25,6 +24,7 @@ public class UserController : ControllerBase
     private readonly IRoomRepository _roomRepository;
     private readonly IUserRepository _userRepository;
     private readonly IJwtTokenService _tokenService;
+    private readonly IVideoPlayerStateService _videoPlayerStateService;
     private readonly IMapper _mapper;
 
     public UserController(
@@ -33,6 +33,7 @@ public class UserController : ControllerBase
         IRoomRepository roomRepository,
         IUserRepository userRepository,
         IJwtTokenService tokenService,
+        IVideoPlayerStateService videoPlayerStateService,
         IMapper mapper)
     {
         _logger = logger;
@@ -40,6 +41,7 @@ public class UserController : ControllerBase
         _roomRepository = roomRepository;
         _userRepository = userRepository;
         _tokenService = tokenService;
+        _videoPlayerStateService = videoPlayerStateService;
         _mapper = mapper;
     }
 
@@ -104,7 +106,7 @@ public class UserController : ControllerBase
             Users = (await _userRepository.GetUsersDTOAsync(roomHash)).ToList(),
             RoomSettings = room.RoomSettings,
             UserPermissions = room.UserPermissions,
-            VideoPlayer = room.VideoPlayer
+            VideoPlayer = _videoPlayerStateService.GetVideoPlayer(roomHash) ?? new Core.Entities.In_memory.VideoPlayer()
         };
 
         var serializedOutput = JsonHelper.Serialize(output);

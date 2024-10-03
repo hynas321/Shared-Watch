@@ -13,7 +13,8 @@ public class Room
     public ICollection<User> Users { get; set; }
     public RoomSettings RoomSettings { get; set; }
     public UserPermissions UserPermissions { get; set; }
-    public VideoPlayer VideoPlayer { get; set; }
+
+    //VideoPlayer is an in-memory variable
 
     public Room() { }
 
@@ -25,6 +26,5 @@ public class Room
         Users = new List<User>();
         RoomSettings = new RoomSettings(roomName, roomPassword, roomPassword.Length == 0 ? RoomTypes.Public : RoomTypes.Private);
         UserPermissions = new UserPermissions();
-        VideoPlayer = new VideoPlayer();
     }
 }

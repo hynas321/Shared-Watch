@@ -93,7 +93,6 @@ public class RoomRepository : IRoomRepository
             .Include(r => r.Users)
             .Include(r => r.RoomSettings)
             .Include(r => r.UserPermissions)
-            .Include(r => r.VideoPlayer)
             .FirstOrDefaultAsync(r => r.Hash == roomHash);
     }
 

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using WebApi.Application.Constants;
+using WebApi.Application.Services;
 
 namespace WebApi.SignalR;
 
@@ -30,9 +31,8 @@ public partial class AppHub : Hub
                 return;
             }
 
-            room.VideoPlayer.IsPlaying = isPlaying;
+            _videoPlayerStateService.SetIsPlaying(roomHash, isPlaying);
 
-            await _roomRepository.UpdateRoomAsync(room);
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetIsVideoPlaying, isPlaying);
         }
         catch (Exception ex)
@@ -63,10 +63,7 @@ public partial class AppHub : Hub
                 return;
             }
 
-            room.VideoPlayer.SetPlayedSecondsCalled = true;
-            room.VideoPlayer.CurrentTime = playedSeconds;
-
-            await _roomRepository.UpdateRoomAsync(room);
+            _videoPlayerStateService.SetCurrentTime(roomHash, playedSeconds);
 
             _logger.LogInformation($"{roomHash} SetPlayedSeconds: {playedSeconds}s. User identifier: {Context.UserIdentifier}");
         }
@@ -75,5 +72,4 @@ public partial class AppHub : Hub
             _logger.LogError(ex.ToString());
         }
     }
-
 }

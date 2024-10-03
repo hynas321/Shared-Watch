@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,9 +11,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240922182836_Migration_7")]
+    partial class Migration_7
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -159,6 +162,24 @@ namespace WebApi.Migrations
                     b.ToTable("UserPermissions");
                 });
 
+            modelBuilder.Entity("WebApi.Core.Entities.VideoPlayer", b =>
+                {
+                    b.Property<string>("RoomHash")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PlaylistVideoHash")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("SetPlayedSecondsCalled")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("RoomHash");
+
+                    b.HasIndex("PlaylistVideoHash");
+
+                    b.ToTable("VideoPlayers");
+                });
+
             modelBuilder.Entity("WebApi.Core.Entities.ChatMessage", b =>
                 {
                     b.HasOne("WebApi.Core.Entities.Room", null)
@@ -201,6 +222,21 @@ namespace WebApi.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("WebApi.Core.Entities.VideoPlayer", b =>
+                {
+                    b.HasOne("WebApi.Core.Entities.PlaylistVideo", "PlaylistVideo")
+                        .WithMany()
+                        .HasForeignKey("PlaylistVideoHash");
+
+                    b.HasOne("WebApi.Core.Entities.Room", null)
+                        .WithOne("VideoPlayer")
+                        .HasForeignKey("WebApi.Core.Entities.VideoPlayer", "RoomHash")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PlaylistVideo");
+                });
+
             modelBuilder.Entity("WebApi.Core.Entities.Room", b =>
                 {
                     b.Navigation("ChatMessages");
@@ -212,6 +248,8 @@ namespace WebApi.Migrations
                     b.Navigation("UserPermissions");
 
                     b.Navigation("Users");
+
+                    b.Navigation("VideoPlayer");
                 });
 #pragma warning restore 612, 618
         }

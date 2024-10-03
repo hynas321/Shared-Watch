@@ -13,6 +13,8 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using WebApi.Api.Services.Interfaces;
 using WebApi.Api.Services;
+using WebApi.Api.SignalR.Interfaces;
+using WebApi.Api.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -105,9 +107,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddScoped<IRoomControllerHandler, RoomControllerHandler>();
 
+builder.Services.AddSingleton<IVideoPlayerStateService, VideoPlayerStateService>();
 builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IHttpContextService, HttpContextService>();
+
+builder.Services.AddSingleton<IHubConnectionMapper, HubConnectionMapper>();
 
 builder.Services.AddHostedService<DatabaseCleanup>();
 

@@ -1,18 +1,20 @@
 using WebApi.Api.DTO;
 using WebApi.Core.Entities;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Api.SignalR;
 using WebApi.Application.Constants;
+using WebApi.Api.SignalR.Interfaces;
 
 namespace WebApi.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {
     private readonly AppDbContext _dbContext;
+    private readonly IHubConnectionMapper _hubConnectionMapper;
 
-    public UserRepository(AppDbContext dbContext)
+    public UserRepository(AppDbContext dbContext, IHubConnectionMapper hubConnectionMapper)
     {
         _dbContext = dbContext;
+        _hubConnectionMapper = hubConnectionMapper;
     }
 
     public async Task<bool> AddUserAsync(string roomHash, User user)
@@ -49,7 +51,7 @@ public class UserRepository : IUserRepository
 
         try
         {
-            var username = HubConnectionMapper.UserConnections.FirstOrDefault(kvp => kvp.Value == connectionId).Key;
+            var username = _hubConnectionMapper.GetUserIdByConnectionId(connectionId);
 
             var room = await _dbContext.Rooms
                 .Include(r => r.Users)

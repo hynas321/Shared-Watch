@@ -33,7 +33,7 @@ public partial class AppHub : Hub
 
             _logger.LogInformation($"{roomHash} KickOut: {userToKickOut.Username}. User identifier: {Context.UserIdentifier}");
 
-            var connectionId = HubConnectionMapper.UserConnections.FirstOrDefault(kvp => kvp.Key == usernameToKickOut).Value;
+            var connectionId = _hubConnectionMapper.GetConnectionIdByUserId(usernameToKickOut);
 
             var kickedOutUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
 
@@ -71,7 +71,7 @@ public partial class AppHub : Hub
 
             if (updatedUser == null)
             {
-                _logger.LogInformation($"{roomHash} SetAdminStatus: User does not exist {usernameToSetAdminStatus}. User identifier: {Context.UserIdentifier}");
+                _logger.LogInformation($"{roomHash} SetAdminStatus: User does not exist: {usernameToSetAdminStatus}. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
@@ -86,7 +86,7 @@ public partial class AppHub : Hub
                 isAdmin ? Role.Admin : Role.User,
                 roomHash);
 
-            var connectionId = HubConnectionMapper.UserConnections.FirstOrDefault(kvp => kvp.Key == updatedUser.Username).Value;
+            var connectionId = _hubConnectionMapper.GetConnectionIdByUserId(usernameToSetAdminStatus);
 
             await Clients.Client(connectionId).SendAsync(HubMessages.OnReceiveJwt, newJwtToken);
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetAdminStatus, JsonHelper.Serialize(updatedUserDTO));

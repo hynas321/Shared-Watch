@@ -8,7 +8,6 @@ public class AppDbContext : DbContext
     public DbSet<Room> Rooms { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<UserPermissions> UserPermissions { get; set; }
-    public DbSet<VideoPlayer> VideoPlayers { get; set; }
     public DbSet<RoomSettings> RoomSettings { get; set; }
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
@@ -45,12 +44,6 @@ public class AppDbContext : DbContext
             .HasOne(r => r.UserPermissions)
             .WithOne()
             .HasForeignKey<UserPermissions>(up => up.RoomHash)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        modelBuilder.Entity<Room>()
-            .HasOne(r => r.VideoPlayer)
-            .WithOne()
-            .HasForeignKey<VideoPlayer>(vp => vp.RoomHash)
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<ChatMessage>()

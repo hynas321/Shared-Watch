@@ -11,8 +11,8 @@ export default function VideoPlayer() {
   const appHub = useContext(AppHubContext);
 
   const videoPlayerRef = useRef<ReactPlayer>(null);
-  const [videoUrl, setVideoUrl] = useState<string | undefined>(
-    appState.videoPlayer.value?.playlistVideo.url ?? undefined
+  const [videoUrl, setVideoUrl] = useState<string | null>(
+    appState.videoPlayer.value?.playlistVideo.url ?? null
   );
   const [isMobileView, setIsMobileView] = useState<boolean>(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState<boolean>(
@@ -26,42 +26,6 @@ export default function VideoPlayer() {
       return;
     }
 
-    const handleSetIsVideoPlaying = (isPlaying: boolean) => {
-      if (appState.videoPlayer.value === null) {
-        return;
-      }
-
-      appState.videoPlayer.value.isPlaying = isPlaying;
-      setIsVideoPlaying(isPlaying);
-    };
-
-    const handleSetPlayedSeconds = (newTime: number) => {
-      if (appState.videoPlayer.value === null) {
-        return;
-      }
-
-      setIsVideoCurrentTimeDifferenceLarge(false);
-      appState.videoPlayer.value.currentTime = newTime;
-
-      const currentVideoTime = videoPlayerRef.current?.getCurrentTime();
-      if (currentVideoTime != null && Math.abs(currentVideoTime - newTime) > 1) {
-        videoPlayerRef.current?.seekTo(newTime, "seconds");
-      }
-
-      if (currentVideoTime != null && Math.abs(currentVideoTime - newTime) > 2) {
-        setIsVideoCurrentTimeDifferenceLarge(true);
-      }
-    };
-
-    const handleSetVideoUrl = async (url: string) => {
-      if (appState.videoPlayer.value == null) {
-        return;
-      }
-
-      appState.videoPlayer.value.playlistVideo.url = url;
-      setVideoUrl(url);
-    };
-
     appHub.on(HubMessages.OnSetIsVideoPlaying, handleSetIsVideoPlaying);
     appHub.on(HubMessages.OnSetPlayedSeconds, handleSetPlayedSeconds);
     appHub.on(HubMessages.OnSetVideoUrl, handleSetVideoUrl);
@@ -72,6 +36,52 @@ export default function VideoPlayer() {
       appHub.off(HubMessages.OnSetVideoUrl);
     };
   }, [appHub.getState()]);
+
+  useEffect(() => {
+    if (videoPlayerRef.current && appState.videoPlayer.value?.currentTime) {
+      videoPlayerRef.current.seekTo(appState.videoPlayer.value.currentTime, "seconds");
+    }
+  }, [videoUrl, appState.videoPlayer.value?.currentTime]);
+
+  const handleSetIsVideoPlaying = (isPlaying: boolean) => {
+    if (appState.videoPlayer.value === null) {
+      return;
+    }
+
+    appState.videoPlayer.value.isPlaying = isPlaying;
+    setIsVideoPlaying(isPlaying);
+  };
+
+  const handleSetPlayedSeconds = (newTime: number) => {
+    if (appState.videoPlayer.value === null) {
+      return;
+    }
+
+    setIsVideoCurrentTimeDifferenceLarge(false);
+    appState.videoPlayer.value.currentTime = newTime;
+
+    const currentVideoTime = videoPlayerRef.current?.getCurrentTime();
+    if (currentVideoTime != null && Math.abs(currentVideoTime - newTime) > 1) {
+      videoPlayerRef.current?.seekTo(newTime, "seconds");
+    }
+
+    if (currentVideoTime != null && Math.abs(currentVideoTime - newTime) > 2) {
+      setIsVideoCurrentTimeDifferenceLarge(true);
+    }
+  };
+
+  const handleSetVideoUrl = (url: string) => {
+    if (appState.videoPlayer.value == null) {
+      return;
+    }
+
+    appState.videoPlayer.value.playlistVideo.url = url;
+    setVideoUrl(url);
+
+    if (videoPlayerRef.current) {
+      videoPlayerRef.current.forceUpdate();
+    }
+  };
 
   const setUserVideoState = async (isPlaying: boolean) => {
     await appHub.invoke(HubMessages.SetIsVideoPlaying, appState.roomHash.value, isPlaying);
@@ -115,8 +125,9 @@ export default function VideoPlayer() {
     <>
       <div className="rounded-top-5 bg-dark bg-opacity-50 pt-4 pb-2 text-center"></div>
       <div className="d-flex justify-content-center bg-dark bg-opacity-50">
-        {videoUrl !== undefined && videoUrl !== null ? (
+        {videoUrl ? (
           <ReactPlayer
+            key={videoUrl}
             ref={videoPlayerRef}
             url={videoUrl}
             playing={isVideoPlaying}

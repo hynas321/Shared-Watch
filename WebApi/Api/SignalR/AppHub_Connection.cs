@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using WebApi.Api.DTO;
 using WebApi.Api.SignalR;
+using WebApi.Api.SignalR.Interfaces;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Infrastructure.Repositories;
 
@@ -18,6 +19,8 @@ public partial class AppHub : Hub
     private readonly IPlaylistService _playlistService;
     private readonly IYouTubeAPIService _youtubeAPIService;
     private readonly IJwtTokenService _jwtTokenService;
+    private readonly IVideoPlayerStateService _videoPlayerStateService;
+    private readonly IHubConnectionMapper _hubConnectionMapper;
     private readonly IMapper _mapper;
 
     public AppHub(
@@ -29,6 +32,8 @@ public partial class AppHub : Hub
         IPlaylistRepository playlistRepository,
         IUserRepository userRepository,
         IJwtTokenService tokenService,
+        IVideoPlayerStateService videoPlayerStateService,
+        IHubConnectionMapper hubConnectionMapper,
         IMapper mapper
     )
     {
@@ -40,6 +45,8 @@ public partial class AppHub : Hub
         _playlistRepository = playlistRepository;
         _userRepository = userRepository;
         _jwtTokenService = tokenService;
+        _videoPlayerStateService = videoPlayerStateService;
+        _hubConnectionMapper = hubConnectionMapper;
         _mapper = mapper;
     }
 
@@ -60,7 +67,7 @@ public partial class AppHub : Hub
 
             _logger.LogInformation("User connected: {UserId}", userId);
 
-            AddConnection(userId, connectionId);
+            _hubConnectionMapper.AddUserConnection(userId, connectionId);
 
             await Groups.AddToGroupAsync(connectionId, roomHash);
             await base.OnConnectedAsync();
@@ -87,12 +94,12 @@ public partial class AppHub : Hub
 
             await Task.Delay(5000);
 
-            if (HubConnectionMapper.UserConnections.TryGetValue(userId, out var activeConnectionId)
-                && activeConnectionId == connectionId)
+            if (_hubConnectionMapper.GetConnectionIdByUserId(userId) == connectionId)
             {
                 var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
 
-                RemoveConnection(userId, connectionId);
+                _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
+
                 await Groups.RemoveFromGroupAsync(connectionId, roomHash);
 
                 if (removedUser == null)
@@ -127,7 +134,6 @@ public partial class AppHub : Hub
         }
     }
 
-
     private string GetUserId()
     {
         return Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -136,18 +142,5 @@ public partial class AppHub : Hub
     private string GetRoomHash()
     {
         return Context.User?.FindFirst(ClaimTypes.Hash)?.Value;
-    }
-
-    private void AddConnection(string userId, string connectionId)
-    {
-        HubConnectionMapper.UserConnections.AddOrUpdate(userId, connectionId, (key, oldValue) => connectionId);
-    }
-
-    private void RemoveConnection(string userId, string connectionId)
-    {
-        if (HubConnectionMapper.UserConnections.TryGetValue(userId, out var storedConnectionId) && storedConnectionId == connectionId)
-        {
-            HubConnectionMapper.UserConnections.TryRemove(userId, out _);
-        }
     }
 }
