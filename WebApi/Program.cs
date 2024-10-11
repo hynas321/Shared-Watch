@@ -15,6 +15,8 @@ using WebApi.Api.Services.Interfaces;
 using WebApi.Api.Services;
 using WebApi.Api.SignalR.Interfaces;
 using WebApi.Api.SignalR;
+using Microsoft.AspNetCore.SignalR;
+using WebApi.Api.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -134,7 +136,11 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
     });
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(options =>
+{
+    options.AddFilter<RoomHashAuthorizationFilter>();
+});
+
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
