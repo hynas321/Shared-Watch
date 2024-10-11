@@ -20,6 +20,8 @@ The working Google Youtube API key is needed in the _dotnet-server/appsettings.D
 
 The key needs to be set in _the dotnet-server/appsettings.json_ file if the application is to be deployed.
 
+Docker is required to run the TimescaleDB.
+
 ## Technological Specification
 
 ### Frontend
@@ -35,14 +37,19 @@ The key needs to be set in _the dotnet-server/appsettings.json_ file if the appl
 
 ### Backend
 + **ASP.NET Core** (REST API)
++ **TimescaleDB**
 
 #### NuGet Packages:
 + **Google.Apis.Youtube.v3** - access to Youtube API methods
 + **SignalR** - bi-directional, real-time communication
 
 ## Running the Application
-React application: `npm install` `npm run start` 
+React application:
+- `npm install`
+- `npm run start` 
 
-ASP.NET Core application: `dotnet run`
+ASP.NET Core application:
+- `dotnet run`
 
-TimescaleDB: `docker-compose up` in the directory of the `docker-compose.yml` file
+TimescaleDB:
+- `docker-compose up` in the directory of the `docker-compose.yml` file
