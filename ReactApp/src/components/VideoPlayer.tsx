@@ -9,6 +9,7 @@ import { BsCameraVideoOffFill } from "react-icons/bs";
 export default function VideoPlayer() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
+  const [hubState, setHubState] = useState(appHub.getState());
 
   const videoPlayerRef = useRef<ReactPlayer>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(
@@ -35,7 +36,15 @@ export default function VideoPlayer() {
       appHub.off(HubMessages.OnSetPlayedSeconds);
       appHub.off(HubMessages.OnSetVideoUrl);
     };
-  }, [appHub.getState()]);
+  }, [hubState]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setHubState(appHub.getState());
+    }, 10);
+
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (videoPlayerRef.current && appState.videoPlayer.value?.currentTime) {
