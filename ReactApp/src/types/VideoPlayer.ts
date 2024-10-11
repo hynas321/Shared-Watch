@@ -1,7 +1,7 @@
-import { PlaylistVideo } from "./PlaylistVideo"
+import { PlaylistVideo } from "./PlaylistVideo";
 
 export interface VideoPlayer {
-  playlistVideo: PlaylistVideo,
-  isPlaying: boolean,
-  currentTime: number
+  playlistVideo: PlaylistVideo;
+  isPlaying: boolean;
+  currentTime: number;
 }

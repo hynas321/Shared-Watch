@@ -26,8 +26,8 @@ public class YouTubeAPIService : IYouTubeAPIService
 
             if (videoResponse.Items.Count == 1)
             {
-                string duration = videoResponse.Items[0].ContentDetails.Duration;
-                TimeSpan timeSpan = XmlConvert.ToTimeSpan(duration);
+                var duration = videoResponse.Items[0].ContentDetails.Duration;
+                var timeSpan = XmlConvert.ToTimeSpan(duration);
 
                 return (int)timeSpan.TotalSeconds;
             }

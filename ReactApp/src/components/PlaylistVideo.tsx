@@ -1,53 +1,52 @@
-import { BsFillXCircleFill } from 'react-icons/bs';
-import { HubMessages } from '../classes/constants/HubMessages';
-import { LocalStorageService } from '../classes/services/LocalStorageService';
-import { appHub, appState } from '../context/AppContext';
-import { PlaylistVideo } from '../types/PlaylistVideo'
-import VideoIcon from './../assets/video-icon.png'
-import Button from './Button';
+import { BsFillXCircleFill } from "react-icons/bs";
+import { HubMessages } from "../classes/constants/HubMessages";
+import { appHub, appState } from "../context/AppContext";
+import { PlaylistVideo } from "../types/PlaylistVideo";
+import VideoIcon from "./../assets/video-icon.png";
+import Button from "./shared/Button";
 
 export interface VideoOnPlaylistProps {
-  index: number,
-  playlistVideo: PlaylistVideo
+  index: number;
+  playlistVideo: PlaylistVideo;
 }
 
-export default function VideoOnPlaylist({index, playlistVideo}: VideoOnPlaylistProps) {
-  const localStorageService = LocalStorageService.getInstance();
+const videoThumbnailStyle = {
+  width: "40px",
+  height: "40px",
+};
 
-  const videoThumbnailStyle = {
-    width: "40px",
-    height: "40px"
+export default function VideoOnPlaylist({ index, playlistVideo }: VideoOnPlaylistProps) {
+  const handleDeleteClick = (event: React.MouseEvent, index: number) => {
+    event.preventDefault();
+    const videoHash = appState.playlistVideos.value[index].hash;
+    appHub.invoke(HubMessages.DeletePlaylistVideo, appState.roomHash.value, videoHash);
   };
 
-  const handleDeletePlaylistVideoButtonClick = (event: any, index: number) => {
-    event.preventDefault();
-    appHub.invoke(
-      HubMessages.DeletePlaylistVideo,
-      appState.roomHash.value,
-      localStorageService.getAuthorizationToken(),
-      appState.playlistVideos.value[index].hash
-    );
-  }
+  const canRemoveVideo = appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value;
 
   return (
     <div className="row">
       <div className="col-auto">
-        <img src={playlistVideo.thumbnailUrl === null ? VideoIcon : playlistVideo.thumbnailUrl} alt="Video" style={videoThumbnailStyle} />
+        <img
+          src={playlistVideo.thumbnailUrl || VideoIcon}
+          alt="Video Thumbnail"
+          style={videoThumbnailStyle}
+        />
       </div>
-      <div className="d-flex col justify-content-between align-items-center text-secondary align-items-center">
-        <small style={{ wordWrap: 'break-word', maxWidth: '200px' }}>
-          <b>{playlistVideo.title === null ? playlistVideo.url : playlistVideo.title}</b>
+      <div className="d-flex col justify-content-between align-items-center text-secondary">
+        <small style={{ wordWrap: "break-word", maxWidth: "200px" }}>
+          <b>{playlistVideo.title || playlistVideo.url}</b>
         </small>
-        {(appState.userPermissions.value?.canRemoveVideo || appState.isAdmin.value) && (
+        {canRemoveVideo && (
           <div>
             <Button
               text={<BsFillXCircleFill />}
               classNames="btn btn-danger btn-sm"
-              onClick={() => handleDeletePlaylistVideoButtonClick(event, index)}
+              onClick={(event) => handleDeleteClick(event, index)}
             />
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }

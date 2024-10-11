@@ -1,37 +1,25 @@
-using WebApi.Api.DTO;
 using WebApi.Core.Entities;
 using WebApi.Core.Enums;
 using WebApi.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
+using WebApi.Application.Constants;
 
 namespace WebApi.SignalR;
 
 public partial class AppHub : Hub
 {
+    [Authorize(Roles = Role.Admin)]
     [HubMethodName(HubMessages.SetRoomPassword)]
-    public async Task SetRoomPassword(string roomHash, string authorizationToken, string newRoomPassword)
+    public async Task SetRoomPassword(string roomHash, string newRoomPassword)
     {
         try
         {
-            Room room = await _roomRepository.GetRoomAsync(roomHash);
+            var room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
-                _logger.LogInformation($"{roomHash} SetRoomPassword: Room does not exist. Authorization Token: {authorizationToken}");
-                return;
-            }
-
-            User user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
-
-            if (user == null)
-            {
-                _logger.LogInformation($"{roomHash} SetRoomPassword: User does not exist. Authorization Token: {authorizationToken}");
-                return;
-            }
-
-            if (!user.IsAdmin)
-            {
-                _logger.LogInformation($"{roomHash} SetRoomPassword: User does not have permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} SetRoomPassword: Room does not exist. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
@@ -39,12 +27,9 @@ public partial class AppHub : Hub
             room.RoomSettings.RoomType = string.IsNullOrEmpty(newRoomPassword) ? RoomTypes.Public : RoomTypes.Private;
 
             await _roomRepository.UpdateRoomAsync(room);
-
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetRoomPassword, newRoomPassword, room.RoomSettings.RoomType);
 
-            IEnumerable<RoomDTO> rooms = await _roomRepository.GetRoomsDTOAsync();
-
-            await Clients.AllExcept(Context.ConnectionId).SendAsync(HubMessages.OnListOfRoomsUpdated, JsonHelper.Serialize(rooms));
+            var rooms = await _roomRepository.GetRoomsDTOAsync();
         }
         catch (Exception ex)
         {
@@ -52,37 +37,23 @@ public partial class AppHub : Hub
         }
     }
 
+    [Authorize(Roles = Role.Admin)]
     [HubMethodName(HubMessages.SetUserPermissions)]
-    public async Task SetUserPermissions(string roomHash, string authorizationToken, UserPermissions userPermissions)
+    public async Task SetUserPermissions(string roomHash, UserPermissions userPermissions)
     {
         try
         {
-            Room room = await _roomRepository.GetRoomAsync(roomHash);
+            var room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
-                _logger.LogInformation($"{roomHash} SetUserPermissions: Room does not exist. Authorization Token: {authorizationToken}");
-                return;
-            }
-
-            User user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
-
-            if (user == null)
-            {
-                _logger.LogInformation($"{roomHash} SetUserPermissions: User does not exist. Authorization Token: {authorizationToken}");
-                return;
-            }
-
-            if (!user.IsAdmin)
-            {
-                _logger.LogInformation($"{roomHash} SetUserPermissions: User does not have permission. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} SetUserPermissions: Room does not exist. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
             room.UserPermissions = userPermissions;
 
             await _roomRepository.UpdateRoomAsync(room);
-
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetUserPermissions, JsonHelper.Serialize(userPermissions));
         }
         catch (Exception ex)

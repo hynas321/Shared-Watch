@@ -6,25 +6,29 @@ export interface MessageProps {
 }
 
 export default function MessageOnChat({ chatMessage }: MessageProps) {
-  const formattedTime = new Date(chatMessage.date).toLocaleTimeString("pl-PL", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const formattedTime = formatMessageTime(chatMessage.date);
+  const isCurrentUser = isMessageFromCurrentUser(chatMessage.username);
+  const usernameClass = isCurrentUser ? "text-orange" : "text-primary";
 
   return (
     <div className="d-block chat-message">
       <small className="text-muted">{`(${formattedTime})`} </small>
-      <span
-        className={`${
-          appState.username.value === chatMessage.username
-            ? "text-orange"
-            : "text-primary"
-        }`}
-      >
+      <span className={usernameClass}>
         <b>{chatMessage.username}: </b>
       </span>
       <span className="text-dark">{chatMessage.text}</span>
     </div>
   );
+}
+
+function formatMessageTime(date: string | Date): string {
+  return new Date(date).toLocaleTimeString("pl-PL", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+}
+
+function isMessageFromCurrentUser(username: string): boolean {
+  return appState.username.value === username;
 }

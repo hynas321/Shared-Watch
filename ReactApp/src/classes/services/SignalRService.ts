@@ -1,9 +1,11 @@
 import * as signalR from "@microsoft/signalr";
 import { HttpApiEndpoints } from "../constants/HttpApiEndpoints";
+import { SessionStorageService } from "./SessionStorageService";
 
 export class SignalRService {
   private connection: signalR.HubConnection;
   private httpWebSocketUrl: string;
+  private sessionStorage = SessionStorageService.getInstance();
 
   constructor() {
     let env = import.meta.env;
@@ -13,34 +15,27 @@ export class SignalRService {
       .withUrl(`${this.httpWebSocketUrl}${HttpApiEndpoints.appHubConnection}`, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
-        withCredentials: false
+        withCredentials: false,
+        accessTokenFactory: () => this.sessionStorage.getAuthorizationToken(),
       })
       .withAutomaticReconnect()
       .build();
   }
 
   async start() {
-    if (this.connection.state === signalR.HubConnectionState.Disconnected) {
-      return await this.connection.start();
-    }
+    return await this.connection.start();
   }
 
   async stop() {
-    if (this.connection.state === signalR.HubConnectionState.Connected) {
-      return await this.connection.stop();
-    }
+    return await this.connection.stop();
   }
 
   async send(name: string, ...args: any[]) {
-    if (this.connection.state === signalR.HubConnectionState.Connected) {
-      return await this.connection.send(name, ...args);
-    }
+    return await this.connection.send(name, ...args);
   }
 
   async invoke(name: string, ...args: any[]) {
-    if (this.connection.state === signalR.HubConnectionState.Connected) {
-      return await this.connection.invoke(name, ...args);
-    }
+    return await this.connection.invoke(name, ...args);
   }
 
   on(name: string, callback: (...args: any[]) => any) {
@@ -49,18 +44,6 @@ export class SignalRService {
 
   off(name: string) {
     this.connection.off(name);
-  }
-
-  async onclose(callback: (...args: any[]) => any) {
-    this.connection.onclose(callback);
-  }
-
-  onreconnected(callback: (...args: any[]) => any) {
-    this.connection.onreconnected(callback);
-  }
-
-  getConnection() {
-    return this.connection;
   }
 
   getState() {

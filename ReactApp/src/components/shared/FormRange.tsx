@@ -10,12 +10,20 @@ export interface RangeProps {
   onChange: (value: number) => void;
 }
 
-export default function FormRange({label, labelClassNames, minValue, maxValue, defaultValue, step, onChange}: RangeProps) {
+export default function FormRange({
+  label,
+  labelClassNames,
+  minValue,
+  maxValue,
+  defaultValue,
+  step,
+  onChange,
+}: RangeProps) {
   const [inputValue, setInputValue] = useState<number>(defaultValue);
 
   const handleInputValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(parseInt(event.target.value));
-  }
+  };
 
   useEffect(() => {
     onChange(inputValue);
@@ -23,7 +31,9 @@ export default function FormRange({label, labelClassNames, minValue, maxValue, d
 
   return (
     <>
-      <label htmlFor="range-component" className={labelClassNames}>{label} {inputValue}</label>
+      <label htmlFor="range-component" className={labelClassNames}>
+        {label} {inputValue}
+      </label>
       <input
         id="range-component"
         type="range"
@@ -35,5 +45,5 @@ export default function FormRange({label, labelClassNames, minValue, maxValue, d
         onChange={handleInputValueChange}
       />
     </>
-  )
+  );
 }

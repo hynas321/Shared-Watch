@@ -7,13 +7,13 @@ import { RoomSettings } from "../../RoomSettings";
 
 export interface RoomJoinOutput {
   //User fields
-  authorizationToken: string,
-  isAdmin: boolean,
+  authorizationToken: string;
+  isAdmin: boolean;
   //Room fields
-  chatMessages: ChatMessage[],
-  playlistVideos: PlaylistVideo[],
-  users: User[],
-  roomSettings: RoomSettings,
-  userPermissions: UserPermissions,
-  videoPlayer: VideoPlayer
+  chatMessages: ChatMessage[];
+  playlistVideos: PlaylistVideo[];
+  users: User[];
+  roomSettings: RoomSettings;
+  userPermissions: UserPermissions;
+  videoPlayer: VideoPlayer;
 }

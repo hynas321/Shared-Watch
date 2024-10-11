@@ -18,7 +18,7 @@ public class ChatRepository : IChatRepository
 
         try
         {
-            Room room = await _context.Rooms
+            var room = await _context.Rooms
                 .Include(r => r.ChatMessages)
                 .FirstOrDefaultAsync(r => r.Hash == roomHash);
 

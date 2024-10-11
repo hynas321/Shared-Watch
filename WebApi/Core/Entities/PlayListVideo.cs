@@ -15,7 +15,7 @@ public class PlaylistVideo
     // Foreign Key
     public string RoomHash { get; set; } 
 
-    public PlaylistVideo() { }
+    public PlaylistVideo() {}
 
     public PlaylistVideo(string hash, string url, double duration, string title, string thumbnailUrl)
     {

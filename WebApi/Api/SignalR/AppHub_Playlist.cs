@@ -2,63 +2,60 @@ using System.Text.RegularExpressions;
 using WebApi.Core.Entities;
 using WebApi.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
+using WebApi.Application.Constants;
+using System.Security.Claims;
 
 namespace WebApi.SignalR;
 
 public partial class AppHub : Hub
 {
+    [Authorize]
     [HubMethodName(HubMessages.AddPlaylistVideo)]
-    public async Task AddPlaylistVideoAsync(string roomHash, string authorizationToken, PlaylistVideo playlistVideo)
+    public async Task AddPlaylistVideoAsync(string roomHash, PlaylistVideo playlistVideo)
     {
         try
         {
-            Room room = await _roomRepository.GetRoomAsync(roomHash);
+            var room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
-                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Room does not exist. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
-            bool IsUrlCorrect = CheckIfIsYouTubeVideoLink(playlistVideo.Url);
+            var IsUrlCorrect = CheckIfIsYouTubeVideoLink(playlistVideo.Url);
 
             if (!IsUrlCorrect)
             {
-                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Url {playlistVideo.Url} is incorrect. Authorization Token: {authorizationToken}");
-                await Clients.Client(Context.ConnectionId).SendAsync(HubMessages.OnAddPlaylistVideo, null);
+                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Url {playlistVideo.Url} is incorrect. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
-            User user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
+            var role = Context.User?.FindFirstValue(ClaimTypes.Role);
 
-            if (user == null)
+            if (role != Role.Admin && !room.UserPermissions.CanAddVideo)
             {
-                _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not exist. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have permission. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
-            if (!user.IsAdmin && !room.UserPermissions.CanAddVideo)
-            {
-                _logger.LogInformation($"{roomHash} AddPlaylistVideo: User does not have permission. Authorization Token: {authorizationToken}");
-                return;
-            }
-
-            string title = await _youtubeAPIService.GetVideoTitleAsync(playlistVideo.Url);
+            var title = await _youtubeAPIService.GetVideoTitleAsync(playlistVideo.Url);
 
             if (title == null)
             {
-                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find title {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find title {playlistVideo.Url}. User identifier: {Context.UserIdentifier}");
                 await Clients.Client(Context.ConnectionId).SendAsync(HubMessages.OnAddPlaylistVideo, null);
                 return;
             }
 
             playlistVideo.Title = title;
 
-            string thumbnailUrl = await _youtubeAPIService.GetVideoThumbnailUrlAsync(playlistVideo.Url);
+            var thumbnailUrl = await _youtubeAPIService.GetVideoThumbnailUrlAsync(playlistVideo.Url);
 
             if (thumbnailUrl == null)
             {
-                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find thumbnail URL {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find thumbnail URL {playlistVideo.Url}. User identifier: {Context.UserIdentifier}");
                 await Clients.Client(Context.ConnectionId).SendAsync(HubMessages.OnAddPlaylistVideo, null);
                 return;
             }
@@ -66,11 +63,11 @@ public partial class AppHub : Hub
             playlistVideo.ThumbnailUrl = thumbnailUrl;
             playlistVideo.Hash = Guid.NewGuid().ToString();
 
-            bool isPlaylistVideoAdded = await _playlistRepository.AddPlaylistVideoAsync(roomHash, playlistVideo);
+            var isPlaylistVideoAdded = await _playlistRepository.AddPlaylistVideoAsync(roomHash, playlistVideo);
 
             if (!isPlaylistVideoAdded)
             {
-                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a video {playlistVideo.Url}. Authorization Token: {authorizationToken}");
+                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Error when adding a video {playlistVideo.Url}. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
@@ -87,38 +84,33 @@ public partial class AppHub : Hub
         }
     }
 
+    [Authorize]
     [HubMethodName(HubMessages.DeletePlaylistVideo)]
-    public async Task DeletePlaylistVideoAsync(string roomHash, string authorizationToken, string videoHash)
+    public async Task DeletePlaylistVideoAsync(string roomHash, string videoHash)
     {
         try
         {
-            Room room = await _roomRepository.GetRoomAsync(roomHash);
+            var room = await _roomRepository.GetRoomAsync(roomHash);
 
             if (room == null)
             {
-                _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Room does not exist. Authorization Token: {authorizationToken}, PlaylistVideoHash: {videoHash}");
+                _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Room does not exist. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
-            User user = room.Users.FirstOrDefault(x => x.AuthorizationToken == authorizationToken);
+            var role = Context.User?.FindFirstValue(ClaimTypes.Role);
 
-            if (user == null)
+            if (role != Role.Admin && !room.UserPermissions.CanRemoveVideo)
             {
-                _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not exist. Authorization Token: {authorizationToken}, PlaylistVideoHash: {videoHash}");
+                _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not have permission. User identifier: {Context.UserIdentifier}");
                 return;
             }
 
-            if (!user.IsAdmin && !room.UserPermissions.CanRemoveVideo)
-            {
-                _logger.LogInformation($"{roomHash} DeletePlaylistVideo: User does not have permission. Authorization Token: {authorizationToken}, PlaylistVideoHash: {videoHash}");
-                return;
-            }
-
-            PlaylistVideo deletedPlaylistVideo = await _playlistRepository.DeletePlaylistVideoAsync(roomHash, videoHash);
+            var deletedPlaylistVideo = await _playlistRepository.DeletePlaylistVideoAsync(roomHash, videoHash);
 
             if (deletedPlaylistVideo == null)
             {
-                _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. Authorization Token: {authorizationToken}, PlaylistVideoHash: {videoHash}");
+                _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. User identifier: {Context.UserIdentifier}, PlaylistVideoHash: {videoHash}");
                 return;
             }
 
@@ -132,10 +124,10 @@ public partial class AppHub : Hub
 
     private bool CheckIfIsYouTubeVideoLink(string url)
     {
-        string pattern = @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})";
+        var pattern = @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})";
 
-        Regex regex = new Regex(pattern);
-        Match match = regex.Match(url);
+        var regex = new Regex(pattern);
+        var match = regex.Match(url);
 
         return match.Success;
     }

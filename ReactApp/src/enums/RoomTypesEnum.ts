@@ -1,4 +1,4 @@
 export enum RoomTypesEnum {
   public = 0,
-  private = 1
+  private = 1,
 }

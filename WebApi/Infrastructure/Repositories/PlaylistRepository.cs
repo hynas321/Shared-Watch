@@ -18,7 +18,7 @@ public class PlaylistRepository : IPlaylistRepository
 
         try
         {
-            Room room = await _context.Rooms
+            var room = await _context.Rooms
                 .Include(r => r.PlaylistVideos)
                 .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
@@ -46,7 +46,7 @@ public class PlaylistRepository : IPlaylistRepository
 
         try
         {
-            Room room = await _context.Rooms
+            var room = await _context.Rooms
                 .Include(r => r.PlaylistVideos)
                 .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
@@ -55,7 +55,7 @@ public class PlaylistRepository : IPlaylistRepository
                 return null;
             }
 
-            PlaylistVideo playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
+            var playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
 
             if (playlistVideo == null)
             {
@@ -73,5 +73,21 @@ public class PlaylistRepository : IPlaylistRepository
             await transaction.RollbackAsync();
             throw;
         }
+    }
+
+    public async Task<PlaylistVideo> GetPlaylistVideoAsync(string roomHash, string videoHash)
+    {
+        var room = await _context.Rooms
+            .Include(r => r.PlaylistVideos)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash);
+
+        if (room == null)
+        {
+            return null;
+        }
+
+        var playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
+
+        return playlistVideo;
     }
 }
