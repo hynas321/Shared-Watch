@@ -7,52 +7,49 @@ using WebApi.Api.SignalR.Interfaces;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Infrastructure.Repositories;
 
-namespace WebApi.SignalR;
-
-public partial class AppHub : Hub
+namespace WebApi.SignalR
 {
-    private readonly ILogger<AppHub> _logger;
-    private readonly IRoomRepository _roomRepository;
-    private readonly IChatRepository _chatRepository;
-    private readonly IPlaylistRepository _playlistRepository;
-    private readonly IUserRepository _userRepository;
-    private readonly IPlaylistService _playlistService;
-    private readonly IYouTubeAPIService _youtubeAPIService;
-    private readonly IJwtTokenService _jwtTokenService;
-    private readonly IVideoPlayerStateService _videoPlayerStateService;
-    private readonly IHubConnectionMapper _hubConnectionMapper;
-    private readonly IMapper _mapper;
-
-    public AppHub(
-        ILogger<AppHub> logger,
-        IPlaylistService playlistHandler,
-        IYouTubeAPIService youTubeAPIService,
-        IRoomRepository roomRepository,
-        IChatRepository chatRepository,
-        IPlaylistRepository playlistRepository,
-        IUserRepository userRepository,
-        IJwtTokenService tokenService,
-        IVideoPlayerStateService videoPlayerStateService,
-        IHubConnectionMapper hubConnectionMapper,
-        IMapper mapper
-    )
+    public partial class AppHub : Hub
     {
-        _logger = logger;
-        _playlistService = playlistHandler;
-        _youtubeAPIService = youTubeAPIService;
-        _roomRepository = roomRepository;
-        _chatRepository = chatRepository;
-        _playlistRepository = playlistRepository;
-        _userRepository = userRepository;
-        _jwtTokenService = tokenService;
-        _videoPlayerStateService = videoPlayerStateService;
-        _hubConnectionMapper = hubConnectionMapper;
-        _mapper = mapper;
-    }
+        private readonly ILogger<AppHub> _logger;
+        private readonly IRoomRepository _roomRepository;
+        private readonly IChatRepository _chatRepository;
+        private readonly IPlaylistRepository _playlistRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IPlaylistService _playlistService;
+        private readonly IYouTubeAPIService _youtubeAPIService;
+        private readonly IJwtTokenService _jwtTokenService;
+        private readonly IVideoPlayerStateService _videoPlayerStateService;
+        private readonly IHubConnectionMapper _hubConnectionMapper;
+        private readonly IMapper _mapper;
 
-    public override async Task OnConnectedAsync()
-    {
-        try
+        public AppHub(
+            ILogger<AppHub> logger,
+            IPlaylistService playlistHandler,
+            IYouTubeAPIService youTubeAPIService,
+            IRoomRepository roomRepository,
+            IChatRepository chatRepository,
+            IPlaylistRepository playlistRepository,
+            IUserRepository userRepository,
+            IJwtTokenService tokenService,
+            IVideoPlayerStateService videoPlayerStateService,
+            IHubConnectionMapper hubConnectionMapper,
+            IMapper mapper)
+        {
+            _logger = logger;
+            _playlistService = playlistHandler;
+            _youtubeAPIService = youTubeAPIService;
+            _roomRepository = roomRepository;
+            _chatRepository = chatRepository;
+            _playlistRepository = playlistRepository;
+            _userRepository = userRepository;
+            _jwtTokenService = tokenService;
+            _videoPlayerStateService = videoPlayerStateService;
+            _hubConnectionMapper = hubConnectionMapper;
+            _mapper = mapper;
+        }
+
+        public override async Task OnConnectedAsync()
         {
             var connectionId = Context.ConnectionId;
             var userId = GetUserId();
@@ -68,19 +65,12 @@ public partial class AppHub : Hub
             _logger.LogInformation("User connected: {UserId}", userId);
 
             _hubConnectionMapper.AddUserConnection(userId, connectionId);
-
             await Groups.AddToGroupAsync(connectionId, roomHash);
+
             await base.OnConnectedAsync();
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred in OnConnectedAsync");
-        }
-    }
 
-    public override async Task OnDisconnectedAsync(Exception exception)
-    {
-        try
+        public override async Task OnDisconnectedAsync(Exception exception)
         {
             var userId = GetUserId();
             var connectionId = Context.ConnectionId;
@@ -92,55 +82,60 @@ public partial class AppHub : Hub
                 return;
             }
 
-            await Task.Delay(5000);
+            var disconnectCancellationTokenSource = new CancellationTokenSource();
+            _hubConnectionMapper.TrackPendingDisconnection(userId, disconnectCancellationTokenSource);
 
-            if (_hubConnectionMapper.GetConnectionIdByUserId(userId) == connectionId)
+            try
             {
-                var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
+                await Task.Delay(3500, disconnectCancellationTokenSource.Token);
 
-                _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
+                var remainingConnections = _hubConnectionMapper.GetConnectionIdsByUserId(userId);
 
-                await Groups.RemoveFromGroupAsync(connectionId, roomHash);
-
-                if (removedUser == null)
+                if (remainingConnections.Count == 1)
                 {
-                    await base.OnDisconnectedAsync(exception);
-                    return;
+                    var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
+
+                    _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
+                    await Groups.RemoveFromGroupAsync(connectionId, roomHash);
+
+                    var room = await _roomRepository.GetRoomAsync(roomHash);
+
+                    if (room != null && room.Users.Count == 0)
+                    {
+                        await _roomRepository.DeleteRoomAsync(roomHash);
+                    }
+
+                    if (removedUser == null)
+                    {
+                        return;
+                    }
+
+                    var userDTO = _mapper.Map<UserDTO>(removedUser);
+                    await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
+
+                    _logger.LogInformation("Hub: User {UserId} Disconnected: {ConnectionId}", userId, connectionId);
                 }
-
-                var userDTO = _mapper.Map<UserDTO>(removedUser);
-
-                await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
-
-                var room = await _roomRepository.GetRoomAsync(roomHash);
-
-                if (room.Users.Count == 0)
-                {
-                    await _roomRepository.DeleteRoomAsync(roomHash);
-                }
-
-                _logger.LogInformation("Hub: User Disconnected: {ConnectionId}", connectionId);
             }
-            else
+            catch (TaskCanceledException)
             {
-                _logger.LogInformation("Hub: User {UserId} has another active connection in the same room", userId);
+                _logger.LogInformation("Hub: Disconnection canceled for user {UserId}, connection reestablished", userId);
             }
-
-            await base.OnDisconnectedAsync(exception);
+            finally
+            {
+                _hubConnectionMapper.ClearPendingDisconnection(userId);
+                await base.OnDisconnectedAsync(exception);
+            }
         }
-        catch (Exception ex)
+
+
+        private string GetUserId()
         {
-            _logger.LogError(ex, "An error occurred in OnDisconnectedAsync");
+            return Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
-    }
 
-    private string GetUserId()
-    {
-        return Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-    }
-
-    private string GetRoomHash()
-    {
-        return Context.User?.FindFirst(ClaimTypes.Hash)?.Value;
+        private string GetRoomHash()
+        {
+            return Context.User?.FindFirst(ClaimTypes.Hash)?.Value;
+        }
     }
 }
