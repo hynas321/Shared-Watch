@@ -2,7 +2,6 @@ using AutoMapper;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using WebApi.Api.DTO;
-using WebApi.Api.SignalR;
 using WebApi.Api.SignalR.Interfaces;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Infrastructure.Repositories;
