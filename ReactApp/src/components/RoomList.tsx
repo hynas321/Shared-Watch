@@ -84,5 +84,5 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
     );
   };
 
-  return <div className="list-group rounded-3">{list.map(renderRoomItem)}</div>;
+  return <div className="list-group rounded-3 control-panel-list">{list.map(renderRoomItem)}</div>;
 }
