@@ -33,7 +33,7 @@ public partial class AppHub : Hub
 
             _logger.LogInformation($"{roomHash} KickOut: {userToKickOut.Username}. User identifier: {Context.UserIdentifier}");
 
-            var connectionId = _hubConnectionMapper.GetConnectionIdByUserId(usernameToKickOut);
+            var connectionId = _hubConnectionMapper.GetConnectionIdsByUserId(usernameToKickOut).First();
 
             var kickedOutUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
 
@@ -86,7 +86,7 @@ public partial class AppHub : Hub
                 isAdmin ? Role.Admin : Role.User,
                 roomHash);
 
-            var connectionId = _hubConnectionMapper.GetConnectionIdByUserId(usernameToSetAdminStatus);
+            var connectionId = _hubConnectionMapper.GetConnectionIdsByUserId(usernameToSetAdminStatus).First();
 
             await Clients.Client(connectionId).SendAsync(HubMessages.OnReceiveJwt, newJwtToken);
             await Clients.Group(roomHash).SendAsync(HubMessages.OnSetAdminStatus, JsonHelper.Serialize(updatedUserDTO));

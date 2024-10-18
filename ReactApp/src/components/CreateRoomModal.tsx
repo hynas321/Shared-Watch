@@ -17,9 +17,14 @@ import { HttpStatusCode } from "axios";
 export interface CreateRoomModalProps {
   acceptText: string;
   declineText: string;
+  isEnabled: boolean;
 }
 
-export default function CreateRoomModal({ acceptText, declineText }: CreateRoomModalProps) {
+export default function CreateRoomModal({
+  acceptText,
+  declineText,
+  isEnabled,
+}: CreateRoomModalProps) {
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
   const roomName = useSignal<string>("");
   const roomPassword = useSignal<string>("");
@@ -86,10 +91,12 @@ export default function CreateRoomModal({ acceptText, declineText }: CreateRoomM
 
   return (
     <>
-      <div>
-        <span className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          <Button text="Create" classNames="btn btn-success ms-3" onClick={() => {}} />
-        </span>
+      <div className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <Button
+          text="Create Room"
+          classNames={`btn btn-success ${!isEnabled && "disabled"}`}
+          onClick={() => {}}
+        />
       </div>
 
       <div

@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
 using WebApi.Infrastructure.Repositories;
-using WebApi.Api.Handlers;
 using WebApi.Api.HttpClasses.Input;
 using WebApi.Api.HttpClasses.Output;
 using WebApi.Core.Enums;
@@ -8,6 +7,7 @@ using WebApi.Api.DTO;
 using WebApi.Shared.Constants;
 using AutoMapper;
 using WebApi.Shared.Helpers;
+using WebApi.Core.Entities;
 
 namespace WebApi.Api.Controllers;
 
@@ -19,7 +19,6 @@ public class RoomController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly IRoomRepository _roomRepository;
     private readonly IUserRepository _userRepository;
-    private readonly IRoomControllerHandler _roomHandler;
     private readonly IMapper _mapper;
 
     public RoomController(
@@ -27,14 +26,12 @@ public class RoomController : ControllerBase
         IConfiguration configuration,
         IRoomRepository roomRepository,
         IUserRepository userRepository,
-        IRoomControllerHandler roomHandler,
         IMapper mapper)
     {
         _logger = logger;
         _configuration = configuration;
         _roomRepository = roomRepository;
         _userRepository = userRepository;
-        _roomHandler = roomHandler;
         _mapper = mapper;
     }
 
@@ -47,9 +44,15 @@ public class RoomController : ControllerBase
             return BadRequest();
         }
 
-        //User in any other room - add the check
+        if (await _roomRepository.GetRoomByNameAsync(input.RoomName) != null)
+        {
+            _logger.LogInformation($"Create: Conflict. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
+            return Conflict();
+        }
 
-        var room = await _roomHandler.CreateRoom(input);
+        Room room = new Room(input.RoomName, input.RoomPassword);
+
+        await _roomRepository.AddRoomAsync(room);
 
         var output = new RoomCreateOutput
         {

@@ -10,6 +10,8 @@ namespace WebApi.SignalR;
 
 public partial class AppHub : Hub
 {
+    const int maxPlaylistVideos = 10;
+
     [Authorize]
     [HubMethodName(HubMessages.AddPlaylistVideo)]
     public async Task AddPlaylistVideoAsync(string roomHash, PlaylistVideo playlistVideo)
@@ -21,6 +23,13 @@ public partial class AppHub : Hub
             if (room == null)
             {
                 _logger.LogInformation($"{roomHash} AddPlaylistVideo: Room does not exist. User identifier: {Context.UserIdentifier}");
+                return;
+            }
+
+            if (room.PlaylistVideos.Count >= maxPlaylistVideos)
+            {
+                _logger.LogInformation($"{roomHash} AddPlaylistVideo: Playlist video limit reached. User identifier: {Context.UserIdentifier}");
+                await Clients.Client(Context.ConnectionId).SendAsync(HubMessages.OnAddPlaylistVideo, null);
                 return;
             }
 

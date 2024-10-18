@@ -166,8 +166,6 @@ public class UserController : ControllerBase
         var userDTO = _mapper.Map<UserDTO>(user);
         await _appHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
 
-        var rooms = await _roomRepository.GetRoomsDTOAsync();
-
         _logger.LogInformation($"{roomHash} Leave: OK. User Identifier: {userIdentifier}");
         return Ok();
     }

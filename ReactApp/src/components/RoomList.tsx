@@ -36,6 +36,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
           isEnabled={true}
           maxCharacters={35}
           onChange={(value: string) => setPrivateRoomPassword(value)}
+          type="password"
         />
         <Button
           text="Enter"
@@ -84,5 +85,5 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
     );
   };
 
-  return <div className="list-group rounded-3">{list.map(renderRoomItem)}</div>;
+  return <div className="list-group rounded-3 control-panel-list">{list.map(renderRoomItem)}</div>;
 }
