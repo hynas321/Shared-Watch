@@ -36,6 +36,7 @@ export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }
           isEnabled={true}
           maxCharacters={35}
           onChange={(value: string) => setPrivateRoomPassword(value)}
+          type="password"
         />
         <Button
           text="Enter"

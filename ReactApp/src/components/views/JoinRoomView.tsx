@@ -173,6 +173,7 @@ export default function JoinRoomView() {
                 isEnabled={true}
                 maxCharacters={35}
                 onChange={setPrivateRoomPassword}
+                type="password"
               />
               <Button
                 text="Enter"
