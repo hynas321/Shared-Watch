@@ -91,14 +91,12 @@ export default function CreateRoomModal({
 
   return (
     <>
-      <div>
-        <span className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
-          <Button
-            text="Create Room"
-            classNames={`btn btn-success ms-3 ${!isEnabled && "disabled"}`}
-            onClick={() => {}}
-          />
-        </span>
+      <div className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        <Button
+          text="Create Room"
+          classNames={`btn btn-success ${!isEnabled && "disabled"}`}
+          onClick={() => {}}
+        />
       </div>
 
       <div

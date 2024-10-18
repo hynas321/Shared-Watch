@@ -5,22 +5,25 @@ namespace WebApi.Api.SignalR
 {
     public class HubConnectionMapper : IHubConnectionMapper
     {
-        private static ConcurrentDictionary<string, List<string>> _userConnections { get; } = new ConcurrentDictionary<string, List<string>>();
-        private static ConcurrentDictionary<string, CancellationTokenSource> _pendingDisconnections { get; } = new ConcurrentDictionary<string, CancellationTokenSource>();
+        private static ConcurrentDictionary<string, List<string>> _userConnections = new ConcurrentDictionary<string, List<string>>();
+        private static ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _pendingDisconnections = new ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>>();
 
         public bool AddUserConnection(string userId, string connectionId)
         {
-            if (_pendingDisconnections.TryRemove(userId, out var cancellationTokenSource))
-            {
-                cancellationTokenSource.Cancel();
-            }
+            CancelPendingDisconnection(userId, connectionId);
 
             _userConnections.AddOrUpdate(
                 userId,
                 new List<string> { connectionId },
                 (key, existingConnections) =>
                 {
-                    existingConnections.Add(connectionId);
+                    lock (existingConnections)
+                    {
+                        if (!existingConnections.Contains(connectionId))
+                        {
+                            existingConnections.Add(connectionId);
+                        }
+                    }
                     return existingConnections;
                 });
 
@@ -31,10 +34,13 @@ namespace WebApi.Api.SignalR
         {
             if (_userConnections.TryGetValue(userId, out var connections))
             {
-                connections.Remove(connectionId);
-                if (connections.Count == 0)
+                lock (connections)
                 {
-                    _userConnections.TryRemove(userId, out _);
+                    connections.Remove(connectionId);
+                    if (connections.Count == 0)
+                    {
+                        _userConnections.TryRemove(userId, out _);
+                    }
                 }
                 return true;
             }
@@ -43,27 +49,53 @@ namespace WebApi.Api.SignalR
 
         public string GetUserIdByConnectionId(string connectionId)
         {
-            return _userConnections.FirstOrDefault(pair => pair.Value.Contains(connectionId)).Key;
+            foreach (var pair in _userConnections)
+            {
+                if (pair.Value.Contains(connectionId))
+                {
+                    return pair.Key;
+                }
+            }
+            return null;
         }
 
         public List<string> GetConnectionIdsByUserId(string userId)
         {
-            return _userConnections.TryGetValue(userId, out var connectionIds) ? connectionIds : new List<string>();
+            return _userConnections.TryGetValue(userId, out var connectionIds) ? new List<string>(connectionIds) : new List<string>();
         }
 
-        public bool IsUserConnected(string userId)
+        public void TrackPendingDisconnection(string userId, string connectionId, CancellationTokenSource cts)
         {
-            return _userConnections.ContainsKey(userId) && _userConnections[userId].Any();
+            var userPendingDisconnections = _pendingDisconnections.GetOrAdd(userId, new ConcurrentDictionary<string, CancellationTokenSource>());
+            userPendingDisconnections[connectionId] = cts;
         }
 
-        public void TrackPendingDisconnection(string userId, CancellationTokenSource cts)
+        public void CancelPendingDisconnection(string userId, string connectionId)
         {
-            _pendingDisconnections[userId] = cts;
+            if (_pendingDisconnections.TryGetValue(userId, out var userPendingDisconnections))
+            {
+                if (userPendingDisconnections.TryRemove(connectionId, out var cts))
+                {
+                    cts.Cancel();
+                }
+            }
         }
 
-        public void ClearPendingDisconnection(string userId)
+        public bool IsConnectionPending(string userId, string connectionId)
         {
-            _pendingDisconnections.TryRemove(userId, out _);
+            return _pendingDisconnections.TryGetValue(userId, out var userPendingDisconnections) && userPendingDisconnections.ContainsKey(connectionId);
+        }
+
+        public void ClearPendingDisconnection(string userId, string connectionId)
+        {
+            if (_pendingDisconnections.TryGetValue(userId, out var userPendingDisconnections))
+            {
+                userPendingDisconnections.TryRemove(connectionId, out _);
+                if (userPendingDisconnections.IsEmpty)
+                {
+                    _pendingDisconnections.TryRemove(userId, out _);
+                }
+            }
         }
     }
 }

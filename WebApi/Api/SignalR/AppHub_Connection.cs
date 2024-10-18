@@ -62,13 +62,13 @@ namespace WebApi.SignalR
             }
 
             _logger.LogInformation("User connected: {UserId}", userId);
+            _hubConnectionMapper.CancelPendingDisconnection(userId, connectionId);
 
             _hubConnectionMapper.AddUserConnection(userId, connectionId);
             await Groups.AddToGroupAsync(connectionId, roomHash);
 
             await base.OnConnectedAsync();
         }
-
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var userId = GetUserId();
@@ -82,49 +82,58 @@ namespace WebApi.SignalR
             }
 
             var disconnectCancellationTokenSource = new CancellationTokenSource();
-            _hubConnectionMapper.TrackPendingDisconnection(userId, disconnectCancellationTokenSource);
+            _hubConnectionMapper.TrackPendingDisconnection(userId, connectionId, disconnectCancellationTokenSource);
 
             try
             {
-                await Task.Delay(3500, disconnectCancellationTokenSource.Token);
+                await Task.Delay(5000, disconnectCancellationTokenSource.Token);
 
-                var remainingConnections = _hubConnectionMapper.GetConnectionIdsByUserId(userId);
-
-                if (remainingConnections.Count == 1)
+                if (_hubConnectionMapper.IsConnectionPending(userId, connectionId))
                 {
-                    var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
+                    var remainingConnections = _hubConnectionMapper.GetConnectionIdsByUserId(userId);
 
-                    _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
-                    await Groups.RemoveFromGroupAsync(connectionId, roomHash);
-
-                    var room = await _roomRepository.GetRoomAsync(roomHash);
-
-                    if (room != null && room.Users.Count == 0)
+                    if (remainingConnections.Count >= 1)
                     {
-                        await _roomRepository.DeleteRoomAsync(roomHash);
+                        _logger.LogInformation("Disconnecting user {UserId}, no reconnection within timeout.", userId);
+
+                        var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
+                        var room = await _roomRepository.GetRoomAsync(roomHash);
+
+                        _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
+                        await Groups.RemoveFromGroupAsync(connectionId, roomHash);
+
+                        if (room != null && room.Users.Count == 0)
+                        {
+                            await _roomRepository.DeleteRoomAsync(roomHash);
+                            _logger.LogInformation("Room {RoomHash} deleted as no users remain.", roomHash);
+                        }
+
+                        if (removedUser != null)
+                        {
+                            var userDTO = _mapper.Map<UserDTO>(removedUser);
+                            await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
+
+                            _logger.LogInformation("User {UserId} disconnected and removed from room {RoomHash}.", userId, roomHash);
+                        }
                     }
-
-                    if (removedUser == null)
-                    {
-                        return;
-                    }
-
-                    var userDTO = _mapper.Map<UserDTO>(removedUser);
-                    await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
-
-                    _logger.LogInformation("Hub: User {UserId} Disconnected: {ConnectionId}", userId, connectionId);
+                }
+                else
+                {
+                    _logger.LogInformation("Reconnection occurred for user {UserId}, canceling disconnection.", userId);
                 }
             }
             catch (TaskCanceledException)
             {
-                _logger.LogInformation("Hub: Disconnection canceled for user {UserId}, connection reestablished", userId);
+                _logger.LogInformation("Disconnection canceled, user {UserId} reconnected.", userId);
             }
             finally
             {
-                _hubConnectionMapper.ClearPendingDisconnection(userId);
+                _hubConnectionMapper.ClearPendingDisconnection(userId, connectionId);
                 await base.OnDisconnectedAsync(exception);
             }
         }
+
+
 
 
         private string GetUserId()

@@ -96,6 +96,11 @@ public class RoomRepository : IRoomRepository
             .FirstOrDefaultAsync(r => r.Hash == roomHash);
     }
 
+    public async Task<Room> GetRoomByNameAsync(string roomName)
+    {
+        return await _appData.Rooms.FirstOrDefaultAsync(r => r.RoomSettings.RoomName == roomName);
+    }
+
     public async Task<List<Room>> GetRoomsAsync()
     {
         return await _appData.Rooms

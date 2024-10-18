@@ -1,12 +1,17 @@
-﻿namespace WebApi.Api.SignalR.Interfaces;
+﻿using System.Threading;
 
-public interface IHubConnectionMapper
+namespace WebApi.Api.SignalR.Interfaces
 {
-    bool AddUserConnection(string userId, string connectionId);
-    bool RemoveUserConnection(string userId, string connectionId);
-    string GetUserIdByConnectionId(string connectionId);
-    List<string> GetConnectionIdsByUserId(string userId);
-    bool IsUserConnected(string userId);
-    void TrackPendingDisconnection(string userId, CancellationTokenSource cts);
-    void ClearPendingDisconnection(string userId);
+    public interface IHubConnectionMapper
+    {
+        bool AddUserConnection(string userId, string connectionId);
+        bool RemoveUserConnection(string userId, string connectionId);
+        string GetUserIdByConnectionId(string connectionId);
+        List<string> GetConnectionIdsByUserId(string userId);
+
+        void TrackPendingDisconnection(string userId, string connectionId, CancellationTokenSource cts);
+        void CancelPendingDisconnection(string userId, string connectionId);
+        bool IsConnectionPending(string userId, string connectionId);
+        void ClearPendingDisconnection(string userId, string connectionId);
+    }
 }
