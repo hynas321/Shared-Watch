@@ -23,7 +23,6 @@ import { SessionStorageService } from "../../classes/services/SessionStorageServ
 import { InputField } from "../shared/InputField";
 import CreateRoomModal from "../CreateRoomModal";
 
-// Helper components for rendering static messages
 const EmptyRoomsMessage = () => (
   <>
     <h1 className="text-white text-center" style={{ marginTop: "7rem" }}>
@@ -76,7 +75,6 @@ export default function MainView() {
     config: { mass: 1.75, tension: 150, friction: 20 },
   });
 
-  // Initialization logic
   useEffect(() => {
     const initialize = async () => {
       helix.register();
@@ -87,7 +85,6 @@ export default function MainView() {
     initialize();
   }, [appState.username]);
 
-  // Fetching rooms
   const fetchRooms = async () => {
     setTimeout(async () => {
       const [responseStatusCode, responseData] = await httpService.getAllRooms();

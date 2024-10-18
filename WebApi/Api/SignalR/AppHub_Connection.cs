@@ -61,14 +61,21 @@ namespace WebApi.SignalR
                 return;
             }
 
-            _logger.LogInformation("User connected: {UserId}", userId);
-            _hubConnectionMapper.CancelPendingDisconnection(userId, connectionId);
+            _logger.LogInformation("User connected: {UserId} with ConnectionId: {ConnectionId}", userId, connectionId);
+
+            var previousConnections = _hubConnectionMapper.GetConnectionIdsByUserId(userId);
+
+            foreach (var prevConnectionId in previousConnections)
+            {
+                _hubConnectionMapper.CancelPendingDisconnection(userId, prevConnectionId);
+            }
 
             _hubConnectionMapper.AddUserConnection(userId, connectionId);
             await Groups.AddToGroupAsync(connectionId, roomHash);
 
             await base.OnConnectedAsync();
         }
+
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             var userId = GetUserId();
