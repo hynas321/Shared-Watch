@@ -88,7 +88,7 @@ export default function ControlPanel() {
           containerId: ToastNotificationEnum.Room,
         });
 
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await new Promise((resolve) => setTimeout(resolve, 2500));
         await httpService.leaveRoom(appState.roomHash.value);
         navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
         return;

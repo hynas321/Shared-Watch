@@ -15,7 +15,7 @@ namespace WebApi.SignalR
         private readonly IChatRepository _chatRepository;
         private readonly IPlaylistRepository _playlistRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IPlaylistService _playlistService;
+        private readonly IVideoPlayerService _playlistService;
         private readonly IYouTubeAPIService _youtubeAPIService;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly IVideoPlayerStateService _videoPlayerStateService;
@@ -24,7 +24,7 @@ namespace WebApi.SignalR
 
         public AppHub(
             ILogger<AppHub> logger,
-            IPlaylistService playlistHandler,
+            IVideoPlayerService playlistHandler,
             IYouTubeAPIService youTubeAPIService,
             IRoomRepository roomRepository,
             IChatRepository chatRepository,

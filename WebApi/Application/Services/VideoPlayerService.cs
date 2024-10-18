@@ -3,13 +3,12 @@ using WebApi.Application.Services.Interfaces;
 using WebApi.Core.Entities;
 using WebApi.Infrastructure.Repositories;
 using WebApi.SignalR;
-using System.Threading;
 using System.Collections.Concurrent;
 
-public class PlaylistService : IPlaylistService
+public class VideoPlayerService : IVideoPlayerService
 {
     private readonly IServiceScopeFactory _serviceScopeFactory;
-    private readonly ILogger<PlaylistService> _logger;
+    private readonly ILogger<VideoPlayerService> _logger;
     private readonly IHubContext<AppHub> _hubContext;
     private readonly IYouTubeAPIService _youtubeAPIService;
     private readonly IVideoPlayerStateService _videoStateService;
@@ -18,9 +17,9 @@ public class PlaylistService : IPlaylistService
 
     private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellationTokenSources = new ConcurrentDictionary<string, CancellationTokenSource>();
 
-    public PlaylistService(
+    public VideoPlayerService(
         IServiceScopeFactory serviceScopeFactory,
-        ILogger<PlaylistService> logger,
+        ILogger<VideoPlayerService> logger,
         IHubContext<AppHub> hubContext,
         IYouTubeAPIService youTubeAPIService,
         IVideoPlayerStateService videoStateService
@@ -112,17 +111,15 @@ public class PlaylistService : IPlaylistService
                         {
                             IsServiceRunning = false;
                             _logger.LogWarning($"{roomHash} ManagePlaylistService: No users connected or room does not exist. Exiting.");
-
                             StopPlaylistService(roomHash);
-
                             break;
                         }
 
                         if (room.PlaylistVideos.Count == 0)
                         {
-                            _logger.LogInformation($"[{roomHash}] ManagePlaylistService: No videos in playlist. Waiting for new videos.");
-                            await Task.Delay(5000, token);
-                            continue;
+                            IsServiceRunning = false;
+                            StopPlaylistService(roomHash);
+                            break;
                         }
 
                         currentVideo = room.PlaylistVideos.First();

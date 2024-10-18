@@ -107,7 +107,7 @@ builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddSingleton<IVideoPlayerStateService, VideoPlayerStateService>();
-builder.Services.AddScoped<IPlaylistService, PlaylistService>();
+builder.Services.AddScoped<IVideoPlayerService, VideoPlayerService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 
