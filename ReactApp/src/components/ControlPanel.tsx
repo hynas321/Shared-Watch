@@ -79,15 +79,17 @@ export default function ControlPanel() {
       );
     });
 
-    appHub.on(HubMessages.OnKickOut, (removedUserSerialized: string) => {
+    appHub.on(HubMessages.OnKickOut, async (removedUserSerialized: string) => {
       const removedUser: User = JSON.parse(removedUserSerialized);
       const isCurrentUser = removedUser.username === appState.username.value;
 
       if (isCurrentUser) {
-        toast.error("You have been kicked out", {
-          containerId: ToastNotificationEnum.Main,
+        toast.warning("IMPORTANT: You have been kicked out by the admin", {
+          containerId: ToastNotificationEnum.Room,
         });
-        httpService.leaveRoom(appState.roomHash.value);
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await httpService.leaveRoom(appState.roomHash.value);
         navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
         return;
       }
