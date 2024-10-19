@@ -1,6 +1,6 @@
 # Shared-Watch
 
-https://sharedwatch.azurewebsites.net/
+Hosted, older version of the applicaton: https://sharedwatch.azurewebsites.net/
 
 ## Description
 **Shared Watch** is an online platform created for collaborative video watching sessions in virtual rooms.
