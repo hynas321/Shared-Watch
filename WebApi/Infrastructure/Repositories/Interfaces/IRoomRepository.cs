@@ -9,6 +9,7 @@ public interface IRoomRepository
     Task<Room> DeleteRoomAsync(string roomHash);
     Task<bool> UpdateRoomAsync(Room room);
     Task<Room> GetRoomAsync(string roomHash);
+    Task<Room> GetRoomByNameAsync(string roomName);
     Task<List<Room>> GetRoomsAsync();
     Task<IEnumerable<RoomDTO>> GetRoomsDTOAsync();
 }

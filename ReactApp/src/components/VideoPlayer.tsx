@@ -22,6 +22,26 @@ export default function VideoPlayer() {
   const [isVideoCurrentTimeDifferenceLarge, setIsVideoCurrentTimeDifferenceLarge] =
     useState<boolean>(false);
 
+  const lastKnownTime = useRef<number>(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (videoPlayerRef.current) {
+        const currentTime = videoPlayerRef.current.getCurrentTime();
+        if (Math.abs(currentTime - lastKnownTime.current) > 1) {
+          handleSeek(currentTime);
+        }
+        lastKnownTime.current = currentTime;
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleSeek = (currentTime: number) => {
+    appHub.invoke(HubMessages.SetPlayedSeconds, appState.roomHash.value, currentTime);
+  };
+
   useEffect(() => {
     if (appHub.getState() !== signalR.HubConnectionState.Connected) {
       return;

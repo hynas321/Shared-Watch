@@ -1,7 +1,6 @@
 using WebApi.Application.HostedServices;
 using WebApi.Application.Services;
 using WebApi.Application.Services.Interfaces;
-using WebApi.Api.Handlers;
 using WebApi.Infrastructure.Repositories;
 using WebApi.Shared.Helpers;
 using WebApi.SignalR;
@@ -107,10 +106,8 @@ builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IPlaylistRepository, PlaylistRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddScoped<IRoomControllerHandler, RoomControllerHandler>();
-
 builder.Services.AddSingleton<IVideoPlayerStateService, VideoPlayerStateService>();
-builder.Services.AddScoped<IPlaylistService, PlaylistService>();
+builder.Services.AddScoped<IVideoPlayerService, VideoPlayerService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IHttpContextService, HttpContextService>();
 
@@ -139,6 +136,8 @@ builder.Services.AddControllers()
 builder.Services.AddSignalR(options =>
 {
     options.AddFilter<RoomHashAuthorizationFilter>();
+    options.KeepAliveInterval = TimeSpan.FromSeconds(10);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(20);
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

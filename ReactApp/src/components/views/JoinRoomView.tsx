@@ -6,7 +6,6 @@ import { ToastContainer, toast } from "react-toastify";
 import { BsFillLockFill, BsFillPeopleFill, BsFillPersonLinesFill } from "react-icons/bs";
 import { HttpStatusCode } from "axios";
 import { ping } from "ldrs";
-import Header from "../Header";
 import { InputField } from "../shared/InputField";
 import Button from "../shared/Button";
 import { appState } from "../../context/AppContext";
@@ -18,6 +17,7 @@ import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { Room } from "../../types/Room";
 import { RoomState } from "../../types/RoomState";
+import { SessionStorageService } from "../../classes/services/SessionStorageService";
 
 export default function JoinRoomView() {
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ export default function JoinRoomView() {
   const roomHelper = RoomHelper.getInstance();
   const httpService = HttpService.getInstance();
   const httpUrlHelper = new HttpUrlHelper();
+  const sessionStorageService = SessionStorageService.getInstance();
 
   const isUsernameValid = appState.username.value.length >= 3;
   const isRoomFull = room.value.occupiedSlots >= room.value.totalSlots;
@@ -172,6 +173,7 @@ export default function JoinRoomView() {
                 isEnabled={true}
                 maxCharacters={35}
                 onChange={setPrivateRoomPassword}
+                type="password"
               />
               <Button
                 text="Enter"
@@ -191,7 +193,6 @@ export default function JoinRoomView() {
 
   return (
     <>
-      <Header />
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -205,11 +206,29 @@ export default function JoinRoomView() {
       <div className="container">
         <div className="row justify-content-center">
           <animated.div
-            className="mt-3 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4"
+            className="mt-5 col-xl-6 col-lg-6 col-md-8 col-10 bg-dark bg-opacity-50 py-3 px-5 rounded-4"
             style={springs}
           >
-            <h3 className="text-white text-center mt-3 mb-3">Join the room</h3>
-            <div className="row d-flex justify-content-center align-items-center">
+            <h3 className="text-white text-center mt-4 mb-4">
+              <b>Join the room</b>
+            </h3>
+            <div className="d-flex justify-content-center mt-5 mb-3 mx-5">
+              <InputField
+                classNames={`form-control form-control rounded-3 ${
+                  appState.username.value.length < 3 ? "is-invalid" : "is-valid"
+                }`}
+                placeholder="Username (min. 3 characters)"
+                value={appState.username.value}
+                trim={true}
+                maxCharacters={25}
+                isEnabled={true}
+                onChange={(value: string) => {
+                  appState.username.value = value;
+                  sessionStorageService.setUsername(value);
+                }}
+              />
+            </div>
+            <div className="row d-flex justify-content-center align-items-center mx-5">
               <div className="list-group rounded-3" style={{ paddingRight: 0 }}>
                 {renderContent()}
               </div>

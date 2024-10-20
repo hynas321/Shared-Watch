@@ -39,6 +39,7 @@ export default function RoomView() {
         sessionStorageService.setAuthorizationToken(jwt);
 
         await appHub.stop();
+        await new Promise((resolve) => setTimeout(resolve, 500));
         await appHub.start();
       });
     };

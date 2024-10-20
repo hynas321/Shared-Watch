@@ -69,7 +69,6 @@ public class UserRepository : IUserRepository
                 return null;
             }
 
-            room.Users.Remove(user);
             _dbContext.Users.Remove(user);
             await _dbContext.SaveChangesAsync();
             await transaction.CommitAsync();
