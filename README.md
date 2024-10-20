@@ -148,8 +148,8 @@ User interface supports devices with various resolutions due to the responsive d
 
 ![image](https://github.com/user-attachments/assets/313d642a-46bf-4da2-a103-5cef7ea47e7c)
 
-<img src="https://github.com/user-attachments/assets/2516b3f0-e132-4bac-9b47-c5f27f775139" width="49%" />
 <img src="https://github.com/user-attachments/assets/346ecb3b-75a7-4f71-84eb-92bb3d95e9e1" width="49%" />
+<img src="https://github.com/user-attachments/assets/2516b3f0-e132-4bac-9b47-c5f27f775139" width="49%" />
 
 ### Room View
 
