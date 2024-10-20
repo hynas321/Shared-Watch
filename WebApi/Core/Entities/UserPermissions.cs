@@ -19,7 +19,7 @@ public class UserPermissions
         CanAddChatMessage = true;
         CanAddVideo = true;
         CanRemoveVideo = true;
-        CanStartOrPauseVideo = true;
-        CanSkipVideo = true;
+        CanStartOrPauseVideo = false;
+        CanSkipVideo = false;
     }
 }
