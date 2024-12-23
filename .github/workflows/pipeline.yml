@@ -1,0 +1,41 @@
+name: Build the Application
+
+on:
+  push:
+    branches:
+      - main
+      - feature/cicd
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.19.1"
+
+      - name: Install React dependencies
+        run: |
+          cd ReactApp
+          npm install
+
+      - name: Build React App
+        id: react-build
+        run: |
+          cd ReactApp
+          npm run build
+
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "8.0"
+
+      - name: Build .NET Web API
+        run: |
+          cd WebApi
+          dotnet build
