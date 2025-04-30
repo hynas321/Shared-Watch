@@ -16,6 +16,7 @@ using WebApi.Api.SignalR.Interfaces;
 using WebApi.Api.SignalR;
 using Microsoft.AspNetCore.SignalR;
 using WebApi.Api.Filters;
+using WebApi.Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -136,8 +137,10 @@ builder.Services.AddControllers()
 builder.Services.AddSignalR(options =>
 {
     options.AddFilter<RoomHashAuthorizationFilter>();
+    options.AddFilter<HubExceptionFilter>();
     options.KeepAliveInterval = TimeSpan.FromSeconds(10);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(20);
+    options.EnableDetailedErrors = false;
 });
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -150,6 +153,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<LoggingMiddleware>();
 app.MapHub<AppHub>("/Hub/Room");
 app.UseCors("AllowReactApplication");
 app.UseHttpsRedirection();
