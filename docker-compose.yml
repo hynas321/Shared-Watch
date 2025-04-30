@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   timescaledb:
-    image: timescale/timescaledb-ha:pg14-latest
+    image: timescale/timescaledb:2.19.3-pg16
     container_name: timescaledb
     ports:
       - "5432:5432"
@@ -17,7 +17,7 @@ services:
       - pg-network
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:9.2.0
     container_name: pgadmin
     ports:
       - "80:80"
