@@ -5,79 +5,57 @@ namespace WebApi.Infrastructure.Repositories;
 
 public class PlaylistRepository : IPlaylistRepository
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _dbContext;
 
-    public PlaylistRepository(AppDbContext context)
+    public PlaylistRepository(AppDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 
-    public async Task<bool> AddPlaylistVideoAsync(string roomHash, PlaylistVideo playlistVideo)
+    public async Task<bool> AddPlaylistVideoAsync(string roomHash, PlaylistVideo playlistVideo, CancellationToken cancellationToken)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        var room = await _dbContext.Rooms
+            .Include(r => r.PlaylistVideos)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        try
+        if (room == null)
         {
-            var room = await _context.Rooms
-                .Include(r => r.PlaylistVideos)
-                .FirstOrDefaultAsync(r => r.Hash == roomHash);
-
-            if (room == null)
-            {
-                return false;
-            }
-
-            room.PlaylistVideos.Add(playlistVideo);
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return true;
+            return false;
         }
-        catch (DbUpdateConcurrencyException)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+
+        room.PlaylistVideos.Add(playlistVideo);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return true;
     }
 
-    public async Task<PlaylistVideo> DeletePlaylistVideoAsync(string roomHash, string videoHash)
+    public async Task<PlaylistVideo> DeletePlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        var room = await _dbContext.Rooms
+            .Include(r => r.PlaylistVideos)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        try
+        if (room == null)
         {
-            var room = await _context.Rooms
-                .Include(r => r.PlaylistVideos)
-                .FirstOrDefaultAsync(r => r.Hash == roomHash);
-
-            if (room == null)
-            {
-                return null;
-            }
-
-            var playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
-
-            if (playlistVideo == null)
-            {
-                return null;
-            }
-
-            room.PlaylistVideos.Remove(playlistVideo);
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return playlistVideo;
+            return null;
         }
-        catch (DbUpdateConcurrencyException)
+
+        var playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
+
+        if (playlistVideo == null)
         {
-            await transaction.RollbackAsync();
-            throw;
+            return null;
         }
+
+        _dbContext.PlaylistVideos.Remove(playlistVideo);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return playlistVideo;
     }
 
-    public async Task<PlaylistVideo> GetPlaylistVideoAsync(string roomHash, string videoHash)
+    public async Task<PlaylistVideo> GetPlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
     {
-        var room = await _context.Rooms
+        var room = await _dbContext.Rooms
             .Include(r => r.PlaylistVideos)
             .FirstOrDefaultAsync(r => r.Hash == roomHash);
 

@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace WebApi.Api.SignalR.Interfaces
+﻿namespace WebApi.Api.SignalR.Interfaces
 {
     public interface IHubConnectionMapper
     {

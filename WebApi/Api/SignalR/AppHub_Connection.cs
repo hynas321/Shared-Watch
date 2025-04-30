@@ -103,22 +103,22 @@ namespace WebApi.SignalR
                     {
                         _logger.LogInformation("Disconnecting user {UserId}, no reconnection within timeout.", userId);
 
-                        var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId);
-                        var room = await _roomRepository.GetRoomAsync(roomHash);
+                        var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId, disconnectCancellationTokenSource.Token);
+                        var room = await _roomRepository.GetRoomAsync(roomHash, disconnectCancellationTokenSource.Token);
 
                         _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
                         await Groups.RemoveFromGroupAsync(connectionId, roomHash);
 
                         if (room != null && room.Users.Count == 0)
                         {
-                            await _roomRepository.DeleteRoomAsync(roomHash);
+                            await _roomRepository.DeleteRoomAsync(roomHash, disconnectCancellationTokenSource.Token);
                             _logger.LogInformation("Room {RoomHash} deleted as no users remain.", roomHash);
                         }
 
                         if (removedUser != null)
                         {
                             var userDTO = _mapper.Map<UserDTO>(removedUser);
-                            await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
+                            await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO, Context.ConnectionAborted);
 
                             _logger.LogInformation("User {UserId} disconnected and removed from room {RoomHash}.", userId, roomHash);
                         }
@@ -139,9 +139,6 @@ namespace WebApi.SignalR
                 await base.OnDisconnectedAsync(exception);
             }
         }
-
-
-
 
         private string GetUserId()
         {

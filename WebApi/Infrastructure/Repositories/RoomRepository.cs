@@ -7,120 +7,87 @@ namespace WebApi.Infrastructure.Repositories;
 
 public class RoomRepository : IRoomRepository
 {
-    private readonly AppDbContext _appData;
+    private readonly AppDbContext _dbContext;
 
-    public RoomRepository(AppDbContext appData)
+    public RoomRepository(AppDbContext dbContext)
     {
-        _appData = appData;
+        _dbContext = dbContext;
     }
 
-    public async Task<bool> AddRoomAsync(Room room)
+    public async Task<bool> AddRoomAsync(Room room, CancellationToken cancellationToken)
     {
-        using var transaction = await _appData.Database.BeginTransactionAsync();
+        bool roomExists = await _dbContext.Rooms
+            .AnyAsync(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName, cancellationToken);
 
-        try
+        if (roomExists)
         {
-            var roomExists = await _appData.Rooms
-                .AnyAsync(r => r.RoomSettings.RoomName == room.RoomSettings.RoomName);
-
-            if (roomExists)
-            {
-                return false;
-            }
-
-            await _appData.Rooms.AddAsync(room);
-            await _appData.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return true;
+            return false;
         }
-        catch (DbUpdateConcurrencyException)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+
+        await _dbContext.Rooms.AddAsync(room, cancellationToken);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return true;
     }
 
-    public async Task<Room> DeleteRoomAsync(string roomHash)
+    public async Task<Room> DeleteRoomAsync(string roomHash, CancellationToken cancellationToken)
     {
-        using var transaction = await _appData.Database.BeginTransactionAsync();
+        Room room = await GetRoomAsync(roomHash, cancellationToken);
 
-        try
+        if (room == null)
         {
-            var room = await GetRoomAsync(roomHash);
-
-            if (room == null)
-            {
-                return null;
-            }
-
-            _appData.Rooms.Remove(room);
-            await _appData.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return room;
+            return null;
         }
-        catch (DbUpdateConcurrencyException)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+
+        _dbContext.Rooms.Remove(room);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return room;
     }
 
-    public async Task<bool> UpdateRoomAsync(Room room)
+    public async Task<bool> UpdateRoomAsync(Room room, CancellationToken cancellationToken)
     {
-        using var transaction = await _appData.Database.BeginTransactionAsync();
+        _dbContext.Rooms.Update(room);
+        await _dbContext.SaveChangesAsync(cancellationToken);
 
-        try
-        {
-            _appData.Rooms.Update(room);
-            await _appData.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return true;
-        }
-        catch (DbUpdateConcurrencyException)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+        return true;
     }
 
-    public async Task<Room> GetRoomAsync(string roomHash)
+    public async Task<Room> GetRoomAsync(string roomHash, CancellationToken cancellationToken)
     {
-        return await _appData.Rooms
+        return await _dbContext.Rooms
             .Include(r => r.ChatMessages)
             .Include(r => r.PlaylistVideos)
             .Include(r => r.Users)
             .Include(r => r.RoomSettings)
             .Include(r => r.UserPermissions)
-            .FirstOrDefaultAsync(r => r.Hash == roomHash);
+            .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
     }
 
-    public async Task<Room> GetRoomByNameAsync(string roomName)
+    public async Task<Room> GetRoomByNameAsync(string roomName, CancellationToken cancellationToken)
     {
-        return await _appData.Rooms.FirstOrDefaultAsync(r => r.RoomSettings.RoomName == roomName);
+        return await _dbContext.Rooms
+            .FirstOrDefaultAsync(r => r.RoomSettings.RoomName == roomName, cancellationToken);
     }
 
-    public async Task<List<Room>> GetRoomsAsync()
+    public async Task<List<Room>> GetRoomsAsync(CancellationToken cancellationToken)
     {
-        return await _appData.Rooms
+        return await _dbContext.Rooms
             .Include(r => r.Users)
             .Include(r => r.RoomSettings)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<RoomDTO>> GetRoomsDTOAsync()
+    public async Task<IEnumerable<RoomDTO>> GetRoomsDTOAsync(CancellationToken cancellationToken)
     {
-        return await _appData.Rooms
-            .Include(r => r.Users)
-            .Include(r => r.RoomSettings)
-            .Select(room => new RoomDTO(
-                room.Hash,
-                room.RoomSettings.RoomName,
-                string.IsNullOrEmpty(room.RoomSettings.RoomPassword) ? RoomTypes.Public : RoomTypes.Private,
-                room.Users.Count(),
-                room.RoomSettings.MaxUsers
+        return await _dbContext.Rooms
+            .Select(r => new RoomDTO(
+                r.Hash,
+                r.RoomSettings.RoomName,
+                string.IsNullOrEmpty(r.RoomSettings.RoomPassword) ? RoomTypes.Public : RoomTypes.Private,
+                r.Users.Count,
+                r.RoomSettings.MaxUsers
             ))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 }

@@ -15,20 +15,17 @@ namespace WebApi.Api.Controllers;
 [Route("api/[controller]")]
 public class RoomController : ControllerBase
 {
-    private readonly ILogger<RoomController> _logger;
     private readonly IConfiguration _configuration;
     private readonly IRoomRepository _roomRepository;
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
     public RoomController(
-        ILogger<RoomController> logger,
         IConfiguration configuration,
         IRoomRepository roomRepository,
         IUserRepository userRepository,
         IMapper mapper)
     {
-        _logger = logger;
         _configuration = configuration;
         _roomRepository = roomRepository;
         _userRepository = userRepository;
@@ -36,45 +33,37 @@ public class RoomController : ControllerBase
     }
 
     [HttpPost("Create")]
-    public async Task<IActionResult> Create([FromBody] RoomCreateInput input)
+    public async Task<IActionResult> Create([FromBody] RoomCreateInput input, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
         {
-            _logger.LogInformation($"Create: BadRequest. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return BadRequest();
         }
 
-        if (await _roomRepository.GetRoomByNameAsync(input.RoomName) != null)
+        if (await _roomRepository.GetRoomByNameAsync(input.RoomName, cancellationToken) != null)
         {
-            _logger.LogInformation($"Create: Conflict. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
             return Conflict();
         }
 
         Room room = new Room(input.RoomName, input.RoomPassword);
 
-        await _roomRepository.AddRoomAsync(room);
+        await _roomRepository.AddRoomAsync(room, cancellationToken);
 
-        var output = new RoomCreateOutput
-        {
-            RoomHash = room.Hash
-        };
-
-        _logger.LogInformation($"Create: Created. RoomName: {input.RoomName}, RoomPassword: {input.RoomPassword}, Username: {input.Username}");
-
+        var output = new RoomCreateOutput { RoomHash = room.Hash };
         var serializedOutput = JsonHelper.Serialize(output);
 
         return CreatedAtAction(nameof(Get), new { roomHash = room.Hash }, serializedOutput);
     }
 
     [HttpGet("Exists/{roomHash}")]
-    public async Task<IActionResult> Exists([FromRoute] string roomHash)
+    public async Task<IActionResult> Exists([FromRoute] string roomHash, CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(roomHash))
         {
             return BadRequest();
         }
 
-        var room = await _roomRepository.GetRoomAsync(roomHash);
+        var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
         if (room == null)
         {
@@ -92,50 +81,39 @@ public class RoomController : ControllerBase
     }
 
     [HttpGet("Get/{roomHash}")]
-    public async Task<IActionResult> Get([FromRoute] string roomHash)
+    public async Task<IActionResult> Get([FromRoute] string roomHash, CancellationToken cancellationToken)
     {
-        var room = await _roomRepository.GetRoomAsync(roomHash);
+        var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
         if (room == null)
         {
-            _logger.LogInformation($"{roomHash} Get: NotFound.");
             return NotFound();
         }
 
         var roomDTO = _mapper.Map<RoomDTO>(room);
-
-        _logger.LogInformation($"GetAll: OK.");
-
         var serializedRoomsDTO = JsonHelper.Serialize(roomDTO);
 
         return Ok(serializedRoomsDTO);
     }
 
     [HttpGet("GetAll")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
-        var roomsDTO = await _roomRepository.GetRoomsDTOAsync();
-
-        _logger.LogInformation($"GetAll: OK.");
-
+        var roomsDTO = await _roomRepository.GetRoomsDTOAsync(cancellationToken);
         var serializedRoomsDTO = JsonHelper.Serialize(roomsDTO);
 
         return Ok(serializedRoomsDTO);
     }
 
     [HttpGet("GetAllDetails")]
-    public async Task<IActionResult> GetAllDetails([FromHeader] string globalAdminToken)
+    public async Task<IActionResult> GetAllDetails([FromHeader] string globalAdminToken, CancellationToken cancellationToken)
     {
         if (globalAdminToken != _configuration[AppSettingsVariables.GlobalAdminToken])
         {
-            _logger.LogInformation("GetAllDetails: Unauthorized");
             return Unauthorized();
         }
 
-        var rooms = await _roomRepository.GetRoomsAsync();
-
-        _logger.LogInformation("GetAllDetails: OK");
-
+        var rooms = await _roomRepository.GetRoomsAsync(cancellationToken);
         var serializedRooms = JsonHelper.Serialize(rooms);
 
         return Ok(serializedRooms);

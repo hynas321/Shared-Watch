@@ -1,3 +1,5 @@
+using System.Threading;
+using System.Threading.Tasks;
 using WebApi.Core.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,38 +7,27 @@ namespace WebApi.Infrastructure.Repositories;
 
 public class ChatRepository : IChatRepository
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext _dbContext;
 
-    public ChatRepository(AppDbContext context)
+    public ChatRepository(AppDbContext dbContext)
     {
-        _context = context;
+        _dbContext = dbContext;
     }
 
-    public async Task<bool> AddChatMessageAsync(string roomHash, ChatMessage chatMessage)
+    public async Task<bool> AddChatMessageAsync(string roomHash, ChatMessage chatMessage, CancellationToken cancellationToken)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+        var room = await _dbContext.Rooms
+            .Include(r => r.ChatMessages)
+            .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        try
+        if (room == null)
         {
-            var room = await _context.Rooms
-                .Include(r => r.ChatMessages)
-                .FirstOrDefaultAsync(r => r.Hash == roomHash);
-
-            if (room == null)
-            {
-                return false;
-            }
-
-            room.ChatMessages.Add(chatMessage);
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return true;
+            return false;
         }
-        catch (DbUpdateConcurrencyException)
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+
+        room.ChatMessages.Add(chatMessage);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        return true;
     }
 }

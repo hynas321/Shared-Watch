@@ -13,52 +13,35 @@ public partial class AppHub : Hub
     [HubMethodName(HubMessages.SetRoomPassword)]
     public async Task SetRoomPassword(string roomHash, string newRoomPassword)
     {
-        try
+        var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
+
+        if (room == null)
         {
-            var room = await _roomRepository.GetRoomAsync(roomHash);
-
-            if (room == null)
-            {
-                _logger.LogInformation($"{roomHash} SetRoomPassword: Room does not exist. User identifier: {Context.UserIdentifier}");
-                return;
-            }
-
-            room.RoomSettings.RoomPassword = newRoomPassword;
-            room.RoomSettings.RoomType = string.IsNullOrEmpty(newRoomPassword) ? RoomTypes.Public : RoomTypes.Private;
-
-            await _roomRepository.UpdateRoomAsync(room);
-            await Clients.Group(roomHash).SendAsync(HubMessages.OnSetRoomPassword, newRoomPassword, room.RoomSettings.RoomType);
-
-            var rooms = await _roomRepository.GetRoomsDTOAsync();
+            _logger.LogInformation($"{roomHash} SetRoomPassword: Room does not exist. User identifier: {Context.UserIdentifier}");
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString());
-        }
+
+        room.RoomSettings.RoomPassword = newRoomPassword;
+        room.RoomSettings.RoomType = string.IsNullOrEmpty(newRoomPassword) ? RoomTypes.Public : RoomTypes.Private;
+
+        await _roomRepository.UpdateRoomAsync(room, Context.ConnectionAborted);
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnSetRoomPassword, newRoomPassword, room.RoomSettings.RoomType, Context.ConnectionAborted);
     }
 
     [Authorize(Roles = Role.Admin)]
     [HubMethodName(HubMessages.SetUserPermissions)]
     public async Task SetUserPermissions(string roomHash, UserPermissions userPermissions)
     {
-        try
+        var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
+        if (room == null)
         {
-            var room = await _roomRepository.GetRoomAsync(roomHash);
-
-            if (room == null)
-            {
-                _logger.LogInformation($"{roomHash} SetUserPermissions: Room does not exist. User identifier: {Context.UserIdentifier}");
-                return;
-            }
-
-            room.UserPermissions = userPermissions;
-
-            await _roomRepository.UpdateRoomAsync(room);
-            await Clients.Group(roomHash).SendAsync(HubMessages.OnSetUserPermissions, JsonHelper.Serialize(userPermissions));
+            _logger.LogInformation($"{roomHash} SetUserPermissions: Room does not exist. User identifier: {Context.UserIdentifier}");
+            return;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex.ToString());
-        }
+
+        room.UserPermissions = userPermissions;
+
+        await _roomRepository.UpdateRoomAsync(room, Context.ConnectionAborted);
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnSetUserPermissions, JsonHelper.Serialize(userPermissions), Context.ConnectionAborted);
     }
 }
