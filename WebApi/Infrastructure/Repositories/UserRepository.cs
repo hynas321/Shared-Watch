@@ -23,7 +23,7 @@ public class UserRepository : IUserRepository
             .Include(r => r.Users)
             .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return false;
         }
@@ -42,13 +42,13 @@ public class UserRepository : IUserRepository
             .Include(r => r.Users)
             .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return null;
         }
 
         var user = room.Users.FirstOrDefault(u => u.Username == username);
-        if (user == null)
+        if (user is null)
         {
             return null;
         }
@@ -65,13 +65,13 @@ public class UserRepository : IUserRepository
             .Include(r => r.Users)
             .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return null;
         }
 
         var user = room.Users.FirstOrDefault(u => u.Username == username);
-        if (user == null)
+        if (user is null)
         {
             return null;
         }

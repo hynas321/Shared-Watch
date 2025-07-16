@@ -12,31 +12,28 @@ import { BsFillLayersFill } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 import { useNavigate } from "react-router-dom";
-import { HttpService } from "../classes/services/HttpService";
-import { SessionStorageService } from "../classes/services/SessionStorageService";
 import { HttpUrlHelper } from "../classes/helpers/HttpUrlHelper";
 import { ClientEndpoints } from "../classes/constants/ClientEndpoints";
 import Button from "./shared/Button";
+import api from "../classes/Http/Api";
+import { useSessionStorage } from "../hooks/useSessionStorage";
 
 export default function Header() {
   const appState = useContext(AppStateContext);
 
   const navigate = useNavigate();
   const [, copy] = useClipboardApi();
+  const { username } = useSessionStorage()
 
   const buttonColor = useSignal<string>("primary");
 
-  const httpService = HttpService.getInstance();
-  const localStorageManager = SessionStorageService.getInstance();
-  const httpUrlHelper = new HttpUrlHelper();
-
   useEffect(() => {
-    appState.username.value = localStorageManager.getUsername();
-    appState.roomHash.value = httpUrlHelper.getRoomHash(window.location.href);
+    appState.username.value = username;
+    appState.roomHash.value = HttpUrlHelper.getRoomHash(window.location.href);
   }, []);
 
   const handleLeaveRoomButtonClick = () => {
-    httpService.leaveRoom(appState.roomHash.value);
+    api.leaveRoom(appState.roomHash.value);
 
     appState.isInRoom.value = false;
     navigate(ClientEndpoints.mainMenu);
@@ -77,20 +74,12 @@ export default function Header() {
         <div className="d-flex justify-content-end">
           <div className="justify-content-end me-3 mt-header">
             <Button
-              text={
-                <>
-                  <BsFillLayersFill /> Invitiation Link
-                </>
-              }
+              text={<><BsFillLayersFill /> Invitiation Link</>}
               classNames={`btn btn-${buttonColor.value} btn-sm me-4 ms-3`}
               onClick={handleCopyToClipboard}
             />
             <Button
-              text={
-                <>
-                  <BsDoorOpenFill /> Leave Room
-                </>
-              }
+              text={<><BsDoorOpenFill /> Leave Room</>}
               classNames={"btn btn-danger btn-sm"}
               onClick={handleLeaveRoomButtonClick}
             />

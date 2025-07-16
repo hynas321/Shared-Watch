@@ -9,18 +9,21 @@ import { ping } from "ldrs";
 import { InputField } from "../shared/InputField";
 import Button from "../shared/Button";
 import { appState } from "../../context/AppContext";
-import { HttpService } from "../../classes/services/HttpService";
 import { HttpUrlHelper } from "../../classes/helpers/HttpUrlHelper";
-import { RoomHelper } from "../../classes/helpers/RoomHelper";
 import { ClientEndpoints } from "../../classes/constants/ClientEndpoints";
 import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { Room } from "../../types/Room";
 import { RoomState } from "../../types/RoomState";
-import { SessionStorageService } from "../../classes/services/SessionStorageService";
+import api from "../../classes/Http/Api";
+import { useRoomJoin } from "../../hooks/useRoomJoin";
+import { useSessionStorage } from "../../hooks/useSessionStorage";
 
 export default function JoinRoomView() {
   const navigate = useNavigate();
+
+  const { joinRoom } = useRoomJoin();
+  const { setUsername } = useSessionStorage();
 
   const [privateRoomPassword, setPrivateRoomPassword] = useState("");
   const [isEnterPrivateRoomButtonEnabled, setIsEnterPrivateRoomButtonEnabled] = useState(false);
@@ -33,11 +36,6 @@ export default function JoinRoomView() {
     occupiedSlots: 0,
     totalSlots: 0,
   });
-
-  const roomHelper = RoomHelper.getInstance();
-  const httpService = HttpService.getInstance();
-  const httpUrlHelper = new HttpUrlHelper();
-  const sessionStorageService = SessionStorageService.getInstance();
 
   const isUsernameValid = appState.username.value.length >= 3;
   const isRoomFull = room.value.occupiedSlots >= room.value.totalSlots;
@@ -54,8 +52,8 @@ export default function JoinRoomView() {
   }, []);
 
   const initializeView = async () => {
-    const hash = httpUrlHelper.getRoomHash(window.location.href);
-    const [responseStatus, responseData] = await httpService.getRoom(hash);
+    const hash = HttpUrlHelper.getRoomHash(window.location.href);
+    const [responseStatus, responseData] = await api.getRoom(hash);
 
     if (responseStatus !== HttpStatusCode.Ok) {
       toast.error("Room not found", {
@@ -95,7 +93,7 @@ export default function JoinRoomView() {
       roomPassword: "",
     };
 
-    const canJoin = await roomHelper.joinRoom(roomState);
+    const canJoin = await joinRoom(roomState);
 
     if (canJoin) {
       navigateToRoom(roomState.roomHash);
@@ -109,7 +107,7 @@ export default function JoinRoomView() {
       roomPassword: privateRoomPassword,
     };
 
-    const canJoin = await roomHelper.joinRoom(roomState);
+    const canJoin = await joinRoom(roomState);
 
     if (canJoin) {
       navigateToRoom(roomState.roomHash);
@@ -224,7 +222,7 @@ export default function JoinRoomView() {
                 isEnabled={true}
                 onChange={(value: string) => {
                   appState.username.value = value;
-                  sessionStorageService.setUsername(value);
+                  setUsername(value);
                 }}
               />
             </div>

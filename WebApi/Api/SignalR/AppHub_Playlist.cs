@@ -18,7 +18,7 @@ public partial class AppHub : Hub
     {
         var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
 
-        if (room == null)
+        if (room is null)
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: Room does not exist. User identifier: {Context.UserIdentifier}");
             return;
@@ -49,7 +49,7 @@ public partial class AppHub : Hub
 
         var title = await _youtubeAPIService.GetVideoTitleAsync(playlistVideo.Url);
 
-        if (title == null)
+        if (title is null)
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find title {playlistVideo.Url}. User identifier: {Context.UserIdentifier}");
             await Clients.Client(Context.ConnectionId).SendAsync(HubMessages.OnAddPlaylistVideo, null);
@@ -60,7 +60,7 @@ public partial class AppHub : Hub
 
         var thumbnailUrl = await _youtubeAPIService.GetVideoThumbnailUrlAsync(playlistVideo.Url);
 
-        if (thumbnailUrl == null)
+        if (thumbnailUrl is null)
         {
             _logger.LogInformation($"{roomHash} AddPlaylistVideo: Could not find thumbnail URL {playlistVideo.Url}. User identifier: {Context.UserIdentifier}");
             await Clients.Client(Context.ConnectionId).SendAsync(HubMessages.OnAddPlaylistVideo, null);
@@ -92,7 +92,7 @@ public partial class AppHub : Hub
     {
         var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
 
-        if (room == null)
+        if (room is null)
         {
             _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Room does not exist. User identifier: {Context.UserIdentifier}");
             return;
@@ -108,7 +108,7 @@ public partial class AppHub : Hub
 
         var deletedPlaylistVideo = await _playlistRepository.DeletePlaylistVideoAsync(roomHash, videoHash, Context.ConnectionAborted);
 
-        if (deletedPlaylistVideo == null)
+        if (deletedPlaylistVideo is null)
         {
             _logger.LogInformation($"{roomHash} DeletePlaylistVideo: Error when deleting a queued video. User identifier: {Context.UserIdentifier}, PlaylistVideoHash: {videoHash}");
             return;

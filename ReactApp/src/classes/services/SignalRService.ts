@@ -1,11 +1,9 @@
 import * as signalR from "@microsoft/signalr";
 import { HttpApiEndpoints } from "../constants/HttpApiEndpoints";
-import { SessionStorageService } from "./SessionStorageService";
 
 export class SignalRService {
   private connection: signalR.HubConnection;
   private httpWebSocketUrl: string;
-  private sessionStorage = SessionStorageService.getInstance();
 
   constructor() {
     let env = import.meta.env;
@@ -16,7 +14,7 @@ export class SignalRService {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets,
         withCredentials: false,
-        accessTokenFactory: () => this.sessionStorage.getAuthorizationToken(),
+        accessTokenFactory: () => sessionStorage.getItem("authorizationToken") ?? "",
       })
       .withAutomaticReconnect()
       .build();

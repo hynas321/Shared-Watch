@@ -16,7 +16,7 @@ public partial class AppHub : Hub
 
         var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             _logger.LogInformation($"{roomHash} KickOut: Room does not exist. User identifier: {Context.UserIdentifier}");
             return;
@@ -24,7 +24,7 @@ public partial class AppHub : Hub
 
         var userToKickOut = await _userRepository.GetUserAsync(roomHash, usernameToKickOut, cancellationToken);
 
-        if (userToKickOut == null)
+        if (userToKickOut is null)
         {
             _logger.LogInformation($"{roomHash} KickOut: User does not exist {usernameToKickOut}. User identifier: {Context.UserIdentifier}");
             return;
@@ -36,7 +36,7 @@ public partial class AppHub : Hub
 
         var kickedOutUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId, cancellationToken);
 
-        if (kickedOutUser == null)
+        if (kickedOutUser is null)
         {
             _logger.LogInformation($"{roomHash} KickOut: Error when kicking out a user. User identifier: {connectionId}");
             return;
@@ -53,7 +53,7 @@ public partial class AppHub : Hub
     {
         var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
 
-        if (room == null)
+        if (room is null)
         {
             _logger.LogInformation($"{roomHash} SetAdminStatus: Room does not exist. User identifier: {Context.UserIdentifier}");
             return;
@@ -61,7 +61,7 @@ public partial class AppHub : Hub
 
         var updatedUser = await _userRepository.GetUserAsync(roomHash, usernameToSetAdminStatus, Context.ConnectionAborted);
 
-        if (updatedUser == null)
+        if (updatedUser is null)
         {
             _logger.LogInformation($"{roomHash} SetAdminStatus: User does not exist: {usernameToSetAdminStatus}. User identifier: {Context.UserIdentifier}");
             return;

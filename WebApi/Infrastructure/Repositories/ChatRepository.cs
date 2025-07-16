@@ -20,7 +20,7 @@ public class ChatRepository : IChatRepository
             .Include(r => r.ChatMessages)
             .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return false;
         }

@@ -1,5 +1,5 @@
-import { appState } from "../context/AppContext";
-import { ChatMessage } from "../types/ChatMessage";
+import { appState } from "../../context/AppContext";
+import { ChatMessage } from "../../types/ChatMessage";
 
 export interface MessageProps {
   chatMessage: ChatMessage;

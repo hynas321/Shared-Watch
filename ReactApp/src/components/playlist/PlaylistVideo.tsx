@@ -1,9 +1,10 @@
 import { BsFillXCircleFill } from "react-icons/bs";
-import { HubMessages } from "../classes/constants/HubMessages";
-import { appHub, appState } from "../context/AppContext";
-import { PlaylistVideo } from "../types/PlaylistVideo";
-import VideoIcon from "./../assets/video-icon.png";
-import Button from "./shared/Button";
+import { HubMessages } from "../../classes/constants/HubMessages";
+import { AppHubContext, appState } from "../../context/AppContext";
+import { PlaylistVideo } from "../../types/PlaylistVideo";
+import VideoIcon from "./../../../src/assets/video-icon.png";
+import Button from "../shared/Button";
+import { useContext } from "react";
 
 export interface VideoOnPlaylistProps {
   index: number;
@@ -16,6 +17,8 @@ const videoThumbnailStyle = {
 };
 
 export default function VideoOnPlaylist({ index, playlistVideo }: VideoOnPlaylistProps) {
+  const appHub = useContext(AppHubContext);
+
   const handleDeleteClick = (event: React.MouseEvent, index: number) => {
     event.preventDefault();
     const videoHash = appState.playlistVideos.value[index].hash;

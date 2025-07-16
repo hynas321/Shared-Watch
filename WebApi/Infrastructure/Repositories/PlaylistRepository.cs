@@ -18,7 +18,7 @@ public class PlaylistRepository : IPlaylistRepository
             .Include(r => r.PlaylistVideos)
             .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return false;
         }
@@ -35,14 +35,14 @@ public class PlaylistRepository : IPlaylistRepository
             .Include(r => r.PlaylistVideos)
             .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return null;
         }
 
         var playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
 
-        if (playlistVideo == null)
+        if (playlistVideo is null)
         {
             return null;
         }
@@ -59,7 +59,7 @@ public class PlaylistRepository : IPlaylistRepository
             .Include(r => r.PlaylistVideos)
             .FirstOrDefaultAsync(r => r.Hash == roomHash);
 
-        if (room == null)
+        if (room is null)
         {
             return null;
         }

@@ -52,7 +52,7 @@ public class UserController : ControllerBase
 
         var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return NotFound();
         }
@@ -123,21 +123,21 @@ public class UserController : ControllerBase
 
         var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return NotFound();
         }
 
         var user = await _userRepository.GetUserAsync(roomHash, userIdentifier, cancellationToken);
 
-        if (user == null)
+        if (user is null)
         {
             return Unauthorized();
         }
 
         var deletedUser = await _userRepository.DeleteUserByUsernameAsync(roomHash, userIdentifier, cancellationToken);
 
-        if (deletedUser == null)
+        if (deletedUser is null)
         {
             return StatusCode(StatusCodes.Status500InternalServerError);
         }

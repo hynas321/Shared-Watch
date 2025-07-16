@@ -109,16 +109,16 @@ namespace WebApi.SignalR
                         _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
                         await Groups.RemoveFromGroupAsync(connectionId, roomHash);
 
-                        if (room != null && room.Users.Count == 0)
+                        if (room is not null && room.Users.Count == 0)
                         {
                             await _roomRepository.DeleteRoomAsync(roomHash, disconnectCancellationTokenSource.Token);
                             _logger.LogInformation("Room {RoomHash} deleted as no users remain.", roomHash);
                         }
 
-                        if (removedUser != null)
+                        if (removedUser is not null)
                         {
                             var userDTO = _mapper.Map<UserDTO>(removedUser);
-                            await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO, Context.ConnectionAborted);
+                            await Clients.Group(roomHash).SendAsync(HubMessages.OnLeaveRoom, userDTO);
 
                             _logger.LogInformation("User {UserId} disconnected and removed from room {RoomHash}.", userId, roomHash);
                         }
