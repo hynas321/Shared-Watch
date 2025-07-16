@@ -22,7 +22,7 @@ public class LoggingMiddleware
         ControllerActionDescriptor descriptor =
             endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
 
-        if (descriptor == null)
+        if (descriptor is null)
         {
             await _next(context);
             return;

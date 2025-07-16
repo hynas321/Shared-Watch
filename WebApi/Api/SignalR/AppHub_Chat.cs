@@ -18,7 +18,7 @@ public partial class AppHub : Hub
     {
         var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
 
-        if (room == null)
+        if (room is null)
         {
             _logger.LogInformation($"{roomHash} AddChatMessage: Room does not exist. User identifier: {Context.UserIdentifier}");
             return;
@@ -36,7 +36,7 @@ public partial class AppHub : Hub
         {
             var oldestMessage = room.ChatMessages.FirstOrDefault();
 
-            if (oldestMessage != null)
+            if (oldestMessage is not null)
             {
                 room.ChatMessages.Remove(oldestMessage);
             }

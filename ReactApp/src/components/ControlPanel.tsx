@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { PanelsEnum } from "../enums/PanelsEnum";
 import { BsFillChatTextFill, BsFillLockFill, BsGearFill } from "react-icons/bs";
-import Chat from "./Chat";
-import Playlist from "./Playlist";
-import Users from "./Users";
+import Chat from "./chat/Chat";
+import Playlist from "./playlist/Playlist";
+import UserList from "./user-list/UserList";
 import Settings from "./Settings";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { AppHubContext, appState } from "../context/AppContext";
@@ -14,17 +14,15 @@ import { User } from "../types/User";
 import { toast } from "react-toastify";
 import { ClientEndpoints } from "../classes/constants/ClientEndpoints";
 import { useNavigate } from "react-router-dom";
-import { HttpService } from "../classes/services/HttpService";
 import { UserPermissions } from "../types/UserPermissions";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 import Button from "./shared/Button";
+import api from "../classes/Http/Api";
 
 export default function ControlPanel() {
-  const appHub = useContext(AppHubContext);
   const navigate = useNavigate();
+  const appHub = useContext(AppHubContext);
   const [hubState, setHubState] = useState(appHub.getState());
-
-  const httpService = HttpService.getInstance();
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     appState.activePanel.value = panelsEnumValue;
@@ -89,7 +87,7 @@ export default function ControlPanel() {
         });
 
         await new Promise((resolve) => setTimeout(resolve, 2500));
-        await httpService.leaveRoom(appState.roomHash.value);
+        await api.leaveRoom(appState.roomHash.value);
         navigate(`${ClientEndpoints.mainMenu}`, { replace: true });
         return;
       }
@@ -270,7 +268,7 @@ export default function ControlPanel() {
       <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-4 pb-4 px-4">
         {appState.activePanel.value === PanelsEnum.Chat && <Chat />}
         {appState.activePanel.value === PanelsEnum.Playlist && <Playlist />}
-        {appState.activePanel.value === PanelsEnum.Users && <Users />}
+        {appState.activePanel.value === PanelsEnum.Users && <UserList />}
         {appState.activePanel.value === PanelsEnum.Settings && <Settings />}
       </div>
     </div>

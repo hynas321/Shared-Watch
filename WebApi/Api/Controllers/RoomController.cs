@@ -45,7 +45,7 @@ public class RoomController : ControllerBase
             return Conflict();
         }
 
-        Room room = new Room(input.RoomName, input.RoomPassword);
+        var room = new Room(input.RoomName, input.RoomPassword);
 
         await _roomRepository.AddRoomAsync(room, cancellationToken);
 
@@ -65,7 +65,7 @@ public class RoomController : ControllerBase
 
         var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return NotFound();
         }
@@ -85,7 +85,7 @@ public class RoomController : ControllerBase
     {
         var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return NotFound();
         }

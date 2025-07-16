@@ -41,7 +41,7 @@ public class DatabaseCleanup : IHostedService
                 var method = typeof(DbContext).GetMethod(nameof(DbContext.Set), []).MakeGenericMethod(clrType);
                 var dbSet = method.Invoke(context, null);
 
-                if (dbSet != null)
+                if (dbSet is not null)
                 {
                     var removeRangeMethod = dbSet.GetType().GetMethod("RemoveRange", [typeof(IEnumerable<>).MakeGenericType(clrType)]);
                     removeRangeMethod?.Invoke(dbSet, [dbSet]);

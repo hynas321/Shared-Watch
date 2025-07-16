@@ -1,16 +1,15 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { ChatMessage } from "../types/ChatMessage";
+import { ChatMessage } from "../../types/ChatMessage";
 import { BsSendFill } from "react-icons/bs";
-import { AppStateContext, AppHubContext } from "../context/AppContext";
-import { HubMessages } from "../classes/constants/HubMessages";
+import { AppHubContext, AppStateContext } from "../../context/AppContext";
+import { HubMessages } from "../../classes/constants/HubMessages";
 import MessageOnChat from "./ChatMessage";
-import { InputField } from "./shared/InputField";
-import Button from "./shared/Button";
+import { InputField } from "../shared/InputField";
+import Button from "../shared/Button";
 
 export default function Chat() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
-
   const messagesRef = useRef<HTMLDivElement>(null);
   const [currentChatMessageText, setCurrentChatMessageText] = useState<string>("");
 

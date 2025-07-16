@@ -1,24 +1,24 @@
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import { animated, useSpring } from "@react-spring/web";
 import "react-toastify/dist/ReactToastify.css";
 import Header from "../Header";
-import VideoPlayer from "../VideoPlayer";
+import VideoPlayer from "../video-player/VideoPlayer";
 import ControlPanel from "../ControlPanel";
 import { HttpUrlHelper } from "../../classes/helpers/HttpUrlHelper";
 import { ClientEndpoints } from "../../classes/constants/ClientEndpoints";
-import { appHub, appState } from "../../context/AppContext";
+import { AppHubContext, appState } from "../../context/AppContext";
 import { PanelsEnum } from "../../enums/PanelsEnum";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
-import { SessionStorageService } from "../../classes/services/SessionStorageService";
 import { HubMessages } from "../../classes/constants/HubMessages";
 import { jwtDecode } from "jwt-decode";
+import { useSessionStorage } from "../../hooks/useSessionStorage";
 
 export default function RoomView() {
   const navigate = useNavigate();
-  const httpUrlHelper = new HttpUrlHelper();
-  const sessionStorageService = SessionStorageService.getInstance();
+  const appHub = useContext(AppHubContext);
+  const { setAuthorizationToken, clearAuthorizationToken } = useSessionStorage();
 
   const springs = useSpring({
     from: { y: 400 },
@@ -36,7 +36,7 @@ export default function RoomView() {
 
         appState.isAdmin.value = role == "Admin";
 
-        sessionStorageService.setAuthorizationToken(jwt);
+        setAuthorizationToken(jwt);
 
         await appHub.stop();
         await new Promise((resolve) => setTimeout(resolve, 500));
@@ -49,7 +49,7 @@ export default function RoomView() {
     return () => {
       appHub.off(HubMessages.OnReceiveJwt);
       appHub.stop();
-      sessionStorageService.clearAuthorizationToken();
+      clearAuthorizationToken();
       appState.isInRoom.value = false;
     };
   }, []);
@@ -57,7 +57,7 @@ export default function RoomView() {
   useEffect(() => {
     appState.isInRoom.value = true;
 
-    const roomHash = httpUrlHelper.getRoomHash(window.location.href);
+    const roomHash = HttpUrlHelper.getRoomHash(window.location.href);
 
     if (!roomHash) {
       toast.error("Room not found", {
@@ -76,7 +76,7 @@ export default function RoomView() {
     return () => {
       appState.activePanel.value = PanelsEnum.Chat;
     };
-  }, [appState, navigate, httpUrlHelper]);
+  }, [appState, navigate, HttpUrlHelper]);
 
   return (
     <>

@@ -1,10 +1,10 @@
 import ReactPlayer from "react-player";
 import { useContext, useEffect, useRef, useState } from "react";
-import { AppStateContext, AppHubContext } from "../context/AppContext";
+import { AppHubContext, AppStateContext } from "../../context/AppContext";
 import * as signalR from "@microsoft/signalr";
-import { HubMessages } from "../classes/constants/HubMessages";
+import { HubMessages } from "../../classes/constants/HubMessages";
 import { OnProgressProps } from "react-player/base";
-import { BsCameraVideoOffFill } from "react-icons/bs";
+import NoVideoPlaceholder from "./NoVideoPlaceholder";
 
 export default function VideoPlayer() {
   const appState = useContext(AppStateContext);
@@ -126,11 +126,7 @@ export default function VideoPlayer() {
 
   const handleOnProgress = async (state: OnProgressProps) => {
     if (isVideoCurrentTimeDifferenceLarge && appState.isAdmin.value) {
-      await appHub.invoke(
-        HubMessages.SetPlayedSeconds,
-        appState.roomHash.value,
-        state.playedSeconds
-      );
+      await appHub.invoke(HubMessages.SetPlayedSeconds, appState.roomHash.value, state.playedSeconds);
 
       setIsVideoCurrentTimeDifferenceLarge(false);
     }
@@ -169,20 +165,7 @@ export default function VideoPlayer() {
             onProgress={handleOnProgress}
           />
         ) : (
-          <div
-            className="d-flex align-items-center justify-content-center text-white"
-            style={{
-              width: isMobileView ? "428px" : "854px",
-              height: isMobileView ? "auto" : "480px",
-            }}
-          >
-            <div className="text-center">
-              <h1>
-                <BsCameraVideoOffFill />
-              </h1>
-              <h5>No video to display</h5>
-            </div>
-          </div>
+          <NoVideoPlaceholder isMobileView={isMobileView} />
         )}
       </div>
       <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-2 pb-4 text-center"></div>

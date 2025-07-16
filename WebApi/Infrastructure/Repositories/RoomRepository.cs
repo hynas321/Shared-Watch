@@ -34,7 +34,7 @@ public class RoomRepository : IRoomRepository
     {
         Room room = await GetRoomAsync(roomHash, cancellationToken);
 
-        if (room == null)
+        if (room is null)
         {
             return null;
         }

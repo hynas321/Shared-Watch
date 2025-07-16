@@ -53,7 +53,7 @@ public class VideoPlayerService : IVideoPlayerService
 
             Room room = await roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-            if (room == null)
+            if (room is null)
             {
                 IsServiceRunning = false;
                 _logger.LogWarning($"{roomHash} StartPlaylistService: Room does not exist.");
@@ -100,14 +100,14 @@ public class VideoPlayerService : IVideoPlayerService
 
                 PlaylistVideo currentVideo = _videoStateService.GetCurrentVideo(roomHash);
 
-                if (currentVideo == null)
+                if (currentVideo is null)
                 {
                     using (var scope = _serviceScopeFactory.CreateScope())
                     {
                         var roomRepository = scope.ServiceProvider.GetRequiredService<IRoomRepository>();
                         var room = await roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-                        if (room == null || room.Users.Count == 0)
+                        if (room is null || room.Users.Count == 0)
                         {
                             IsServiceRunning = false;
                             _logger.LogWarning($"{roomHash} ManagePlaylistService: No users connected or room does not exist. Exiting.");
@@ -234,7 +234,7 @@ public class VideoPlayerService : IVideoPlayerService
                 var playlistRepository = scope.ServiceProvider.GetRequiredService<IPlaylistRepository>();
                 var playlistVideo = await playlistRepository.GetPlaylistVideoAsync(roomHash, currentVideo.Hash, cancellationToken);
 
-                if (playlistVideo == null)
+                if (playlistVideo is null)
                 {
                     _logger.LogWarning($"{roomHash} UpdateCurrentTime: Current video '{currentVideo.Hash}' no longer exists in the playlist. Exiting time update loop.");
                     return false;
@@ -297,7 +297,7 @@ public class VideoPlayerService : IVideoPlayerService
 
         var playlistVideo = await playlistRepository.DeletePlaylistVideoAsync(roomHash, videoHash, cancellationToken);
 
-        if (playlistVideo == null)
+        if (playlistVideo is null)
         {
             _logger.LogWarning($"{roomHash} RemovePlaylistVideoAsync: Video '{videoHash}' not found in playlist.");
             return null;

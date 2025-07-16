@@ -1,15 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import { Room } from "../../types/Room";
-import RoomList from "../RoomList";
+import RoomList from "../room-list/RoomList";
 import { useNavigate } from "react-router-dom";
 import { ClientEndpoints } from "../../classes/constants/ClientEndpoints";
-import { HttpService } from "../../classes/services/HttpService";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RoomState } from "../../types/RoomState";
 import { animated, useSpring } from "@react-spring/web";
 import { AppStateContext } from "../../context/AppContext";
-import { RoomHelper } from "../../classes/helpers/RoomHelper";
 import {
   BsDoorOpenFill,
   BsExclamationTriangleFill,
@@ -19,9 +17,11 @@ import {
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { HttpStatusCode } from "axios";
 import { helix } from "ldrs";
-import { SessionStorageService } from "../../classes/services/SessionStorageService";
 import { InputField } from "../shared/InputField";
-import CreateRoomModal from "../CreateRoomModal";
+import CreateRoomModal from "../create-room-modal/CreateRoomModal";
+import { useRoomJoin } from "../../hooks/useRoomJoin";
+import { useSessionStorage } from "../../hooks/useSessionStorage";
+import api from "../../classes/Http/Api";
 
 const EmptyRoomsMessage = () => (
   <>
@@ -61,13 +61,13 @@ const LoadingRooms = () => (
 export default function MainView() {
   const appState = useContext(AppStateContext);
   const navigate = useNavigate();
+
+  const { joinRoom } = useRoomJoin();
+  const { username, setUsername } = useSessionStorage();
+
   const [displayedRooms, setDisplayedRooms] = useState<Room[]>([]);
   const [areRoomsFetched, setAreRoomsFetched] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<boolean>(false);
-
-  const httpService = HttpService.getInstance();
-  const roomHelper = RoomHelper.getInstance();
-  const sessionStorageService = SessionStorageService.getInstance();
 
   const springs = useSpring({
     from: { y: 400 },
@@ -79,7 +79,6 @@ export default function MainView() {
     const initialize = async () => {
       helix.register();
       fetchRooms();
-      const username = sessionStorageService.getUsername();
       if (username) appState.username.value = username;
     };
     initialize();
@@ -87,7 +86,7 @@ export default function MainView() {
 
   const fetchRooms = async () => {
     setTimeout(async () => {
-      const [responseStatusCode, responseData] = await httpService.getAllRooms();
+      const [responseStatusCode, responseData] = await api.getAllRooms();
       if (responseStatusCode !== HttpStatusCode.Ok) {
         toast.error("Could not load the rooms", { containerId: ToastNotificationEnum.Main });
         setFetchError(true);
@@ -105,7 +104,7 @@ export default function MainView() {
       roomName: room.roomName,
       roomPassword: password,
     };
-    if (await roomHelper.joinRoom(roomState))
+    if (await joinRoom(roomState))
       navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
   };
 
@@ -148,7 +147,7 @@ export default function MainView() {
                   isEnabled={true}
                   onChange={(value: string) => {
                     appState.username.value = value;
-                    sessionStorageService.setUsername(value);
+                    setUsername(value);
                   }}
                 />
               </div>

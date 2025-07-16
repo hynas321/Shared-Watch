@@ -1,38 +1,32 @@
 import { useEffect, useState } from "react";
-import Button from "./shared/Button";
-import { InputField } from "./shared/InputField";
-import { HttpService } from "../classes/services/HttpService";
+import Button from "../shared/Button";
+import { InputField } from "../shared/InputField";
 import { useNavigate } from "react-router-dom";
-import { ClientEndpoints } from "../classes/constants/ClientEndpoints";
+import { ClientEndpoints } from "../../classes/constants/ClientEndpoints";
 import { toast } from "react-toastify";
-import { RoomCreateOutput } from "../types/HttpTypes/Output/RoomCreateOutput";
-import { RoomState } from "../types/RoomState";
-import { appState } from "../context/AppContext";
+import { RoomCreateOutput } from "../../types/HttpTypes/Output/RoomCreateOutput";
+import { RoomState } from "../../types/RoomState";
+import { appState } from "../../context/AppContext";
 import { useSignal } from "@preact/signals-react";
-import { RoomHelper } from "../classes/helpers/RoomHelper";
-import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
+import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { ping } from "ldrs";
 import { HttpStatusCode } from "axios";
+import api from "../../classes/Http/Api";
+import { useRoomJoin } from "../../hooks/useRoomJoin";
 
-export interface CreateRoomModalProps {
-  acceptText: string;
-  declineText: string;
-  isEnabled: boolean;
-}
-
-export default function CreateRoomModal({
+export default function CreateRoomForm({
   acceptText,
   declineText,
-  isEnabled,
-}: CreateRoomModalProps) {
+}: {
+  acceptText: string;
+  declineText: string;
+}) {
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
   const roomName = useSignal<string>("");
   const roomPassword = useSignal<string>("");
   const isCreateButtonClicked = useSignal<boolean>(false);
   const navigate = useNavigate();
-
-  const httpService = HttpService.getInstance();
-  const roomHelper = RoomHelper.getInstance();
+  const { joinRoom } = useRoomJoin();
 
   useEffect(() => {
     ping.register();
@@ -51,7 +45,7 @@ export default function CreateRoomModal({
   const handleCreateRoomButtonClick = async () => {
     isCreateButtonClicked.value = true;
     const [statusCode, roomInfo]: [number, RoomCreateOutput | undefined] =
-      await httpService.createRoom(roomName.value, roomPassword.value, appState.username.value);
+      await api.createRoom(roomName.value, roomPassword.value, appState.username.value);
 
     if (statusCode !== HttpStatusCode.Created) {
       handleRoomCreationError(statusCode);
@@ -61,7 +55,7 @@ export default function CreateRoomModal({
 
     const roomState = createRoomState(roomInfo);
 
-    const canJoin = await roomHelper.joinRoom(roomState);
+    const canJoin = await joinRoom(roomState);
 
     if (canJoin) {
       navigate(`${ClientEndpoints.room}/${roomState.roomHash}`, { replace: true });
@@ -88,49 +82,6 @@ export default function CreateRoomModal({
     roomName: roomName.value,
     roomPassword: roomPassword.value,
   });
-
-  return (
-    <>
-      <div className="rounded-1" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        <Button
-          text="Create Room"
-          classNames={`btn btn-success ${!isEnabled && "disabled"}`}
-          onClick={() => {}}
-        />
-      </div>
-
-      <div
-        className="modal fade"
-        id="exampleModal"
-        tabIndex={-1}
-        role="dialog"
-        style={{ marginTop: "3.75rem", backgroundColor: "rgba(0,0,0,.0001)" }}
-      >
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header bg-light">
-              <h5 className="modal-title">Create new room</h5>
-            </div>
-            <div className="modal-body bg-light">
-              {renderRoomNameInput()}
-              {renderRoomPasswordInput()}
-            </div>
-            <div className="modal-footer bg-light">
-              {isCreateButtonClicked.value && (
-                <span
-                  className="spinner-border spinner-border-sm"
-                  role="status"
-                  aria-hidden="true"
-                ></span>
-              )}
-              {renderAcceptButton()}
-              {renderDeclineButton()}
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
-  );
 
   function renderRoomNameInput() {
     return (
@@ -194,4 +145,27 @@ export default function CreateRoomModal({
       </span>
     );
   }
+
+  return (
+    <>
+      <div className="modal-header bg-light">
+        <h5 className="modal-title">Create new room</h5>
+      </div>
+      <div className="modal-body bg-light">
+        {renderRoomNameInput()}
+        {renderRoomPasswordInput()}
+      </div>
+      <div className="modal-footer bg-light">
+        {isCreateButtonClicked.value && (
+          <span
+            className="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+        )}
+        {renderAcceptButton()}
+        {renderDeclineButton()}
+      </div>
+    </>
+  );
 }

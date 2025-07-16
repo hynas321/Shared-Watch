@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BsSaveFill } from "react-icons/bs";
-import { AppStateContext, appHub } from "../context/AppContext";
+import { AppHubContext, AppStateContext } from "../context/AppContext";
 import { useContext } from "react";
 import { HubMessages } from "../classes/constants/HubMessages";
 import { InputField } from "./shared/InputField";
@@ -9,6 +9,8 @@ import Switch from "./shared/Switch";
 
 export default function Settings() {
   const appState = useContext(AppStateContext);
+  const appHub = useContext(AppHubContext);
+
   const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
   const [inputFormPassword, setInputFormPassword] = useState<string>("");
 
@@ -45,11 +47,7 @@ export default function Settings() {
   };
 
   const invokeChange = () => {
-    appHub.invoke(
-      HubMessages.SetUserPermissions,
-      appState.roomHash.value,
-      appState.userPermissions.value
-    );
+    appHub.invoke(HubMessages.SetUserPermissions, appState.roomHash.value, appState.userPermissions.value);
   };
 
   const setCanAddChatMessage = (checked: boolean) => {
@@ -94,11 +92,7 @@ export default function Settings() {
               onKeyDown={handleSetRoomPrivateEnterClick}
             />
             <Button
-              text={
-                <>
-                  <BsSaveFill />
-                </>
-              }
+              text={<><BsSaveFill /></>}
               classNames="btn btn-primary rounded-0"
               onClick={handleSetRoomPrivateButtonClick}
             />
