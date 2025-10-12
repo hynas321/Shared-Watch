@@ -38,7 +38,7 @@ public class DatabaseCleanup : IHostedService
             foreach (var entityType in entityTypes)
             {
                 var clrType = entityType.ClrType;
-                var method = typeof(DbContext).GetMethod(nameof(DbContext.Set), []).MakeGenericMethod(clrType);
+                var method = typeof(DbContext).GetMethod(nameof(DbContext.Set), [])!.MakeGenericMethod(clrType);
                 var dbSet = method.Invoke(context, null);
 
                 if (dbSet is not null)

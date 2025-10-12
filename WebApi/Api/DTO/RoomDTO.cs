@@ -4,8 +4,8 @@ namespace WebApi.Api.DTO;
 
 public class RoomDTO
 {
-    public string RoomHash { get; set; }
-    public string RoomName { get; set; }
+    public string? RoomHash { get; set; }
+    public string? RoomName { get; set; }
     public RoomTypes RoomType { get; set; }
     public int OccupiedSlots { get; set; }
     public int TotalSlots { get; set; }

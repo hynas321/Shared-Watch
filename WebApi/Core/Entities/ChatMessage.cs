@@ -6,14 +6,14 @@ namespace WebApi.Core.Entities;
 public class ChatMessage
 {
     [Key, Column(Order = 0)]
-    public string Username { get; set; }
+    public string? Username { get; set; }
 
     [Key, Column(Order = 1)]
     public DateTime Date { get; set; }
 
     [Required]
-    public string Text { get; set; }
+    public string? Text { get; set; }
 
     // Foreign Key
-    public string RoomHash { get; set; }
+    public string? RoomHash { get; set; }
 }

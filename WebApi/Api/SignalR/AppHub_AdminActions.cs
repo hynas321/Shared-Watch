@@ -1,5 +1,4 @@
 using WebApi.Api.DTO;
-using WebApi.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using WebApi.Application.Constants;
@@ -44,7 +43,7 @@ public partial class AppHub : Hub
 
         var kickedOutUserDTO = _mapper.Map<UserDTO>(kickedOutUser);
 
-        await Clients.Group(roomHash).SendAsync(HubMessages.OnKickOut, JsonHelper.Serialize(kickedOutUserDTO), Context.ConnectionAborted);
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnKickOut, kickedOutUserDTO, Context.ConnectionAborted);
     }
 
     [Authorize(Roles = Role.Admin)]
@@ -81,7 +80,7 @@ public partial class AppHub : Hub
         var connectionId = _hubConnectionMapper.GetConnectionIdsByUserId(usernameToSetAdminStatus).First();
 
         await Clients.Client(connectionId).SendAsync(HubMessages.OnReceiveJwt, newJwtToken, Context.ConnectionAborted);
-        await Clients.Group(roomHash).SendAsync(HubMessages.OnSetAdminStatus, JsonHelper.Serialize(updatedUserDTO), Context.ConnectionAborted);
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnSetAdminStatus, updatedUserDTO, Context.ConnectionAborted);
 
         _logger.LogInformation($"{roomHash} SetAdminStatus: {updatedUser.Username}. Role: {updatedUser.Role} User identifier: {Context.UserIdentifier}");
     }

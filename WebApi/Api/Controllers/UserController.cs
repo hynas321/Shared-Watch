@@ -4,7 +4,6 @@ using WebApi.Api.HttpClasses.Input;
 using WebApi.Api.HttpClasses.Output;
 using WebApi.Core.Entities;
 using WebApi.Infrastructure.Repositories;
-using WebApi.Shared.Helpers;
 using WebApi.SignalR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -101,13 +100,11 @@ public class UserController : ControllerBase
             VideoPlayer = _videoPlayerStateService.GetVideoPlayer(roomHash) ?? new Core.Entities.In_memory.VideoPlayer()
         };
 
-        var serializedOutput = JsonHelper.Serialize(output);
-
         await _appHubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnJoinRoom, newUserDTO);
 
         var rooms = await _roomRepository.GetRoomsDTOAsync(cancellationToken);
 
-        return Ok(serializedOutput);
+        return Ok(output);
     }
 
     [Authorize]
@@ -115,6 +112,11 @@ public class UserController : ControllerBase
     public async Task<IActionResult> LeaveRoom([FromRoute] string roomHash, CancellationToken cancellationToken)
     {
         var userIdentifier = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (userIdentifier is null)
+        {
+            return Unauthorized();
+        }
 
         if (string.IsNullOrEmpty(roomHash))
         {
@@ -144,7 +146,7 @@ public class UserController : ControllerBase
 
         var updatedRoom = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
-        if (updatedRoom.Users.Count == 0)
+        if (updatedRoom?.Users.Count == 0)
         {
             await _roomRepository.DeleteRoomAsync(roomHash, cancellationToken);
         }

@@ -6,7 +6,7 @@ namespace WebApi.Core.Entities;
 public class UserPermissions
 {
     [Key, ForeignKey("Room")]
-    public string RoomHash { get; set; }
+    public string? RoomHash { get; set; }
 
     public bool CanAddChatMessage { get; set; }
     public bool CanAddVideo { get; set; }

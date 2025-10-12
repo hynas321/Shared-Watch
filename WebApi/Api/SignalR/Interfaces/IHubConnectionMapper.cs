@@ -4,7 +4,7 @@
     {
         bool AddUserConnection(string userId, string connectionId);
         bool RemoveUserConnection(string userId, string connectionId);
-        string GetUserIdByConnectionId(string connectionId);
+        string? GetUserIdByConnectionId(string connectionId);
         List<string> GetConnectionIdsByUserId(string userId);
 
         void TrackPendingDisconnection(string userId, string connectionId, CancellationTokenSource cts);

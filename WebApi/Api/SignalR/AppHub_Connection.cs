@@ -61,6 +61,13 @@ namespace WebApi.SignalR
                 return;
             }
 
+            if (string.IsNullOrWhiteSpace(roomHash))
+            {
+                _logger.LogWarning("A user connected without a room hash.");
+                await base.OnConnectedAsync();
+                return;
+            }
+
             _logger.LogInformation("User connected: {UserId} with ConnectionId: {ConnectionId}", userId, connectionId);
 
             var previousConnections = _hubConnectionMapper.GetConnectionIdsByUserId(userId);
@@ -76,13 +83,13 @@ namespace WebApi.SignalR
             await base.OnConnectedAsync();
         }
 
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = GetUserId();
             var connectionId = Context.ConnectionId;
             var roomHash = GetRoomHash();
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(roomHash))
             {
                 await base.OnDisconnectedAsync(exception);
                 return;
@@ -103,7 +110,7 @@ namespace WebApi.SignalR
                     {
                         _logger.LogInformation("Disconnecting user {UserId}, no reconnection within timeout.", userId);
 
-                        var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash, connectionId, disconnectCancellationTokenSource.Token);
+                        var removedUser = await _userRepository.DeleteUserByConnectionIdAsync(roomHash!, connectionId, disconnectCancellationTokenSource.Token);
                         var room = await _roomRepository.GetRoomAsync(roomHash, disconnectCancellationTokenSource.Token);
 
                         _hubConnectionMapper.RemoveUserConnection(userId, connectionId);
@@ -140,12 +147,12 @@ namespace WebApi.SignalR
             }
         }
 
-        private string GetUserId()
+        private string? GetUserId()
         {
             return Context.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
 
-        private string GetRoomHash()
+        private string? GetRoomHash()
         {
             return Context.User?.FindFirst(ClaimTypes.Hash)?.Value;
         }

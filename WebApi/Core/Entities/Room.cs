@@ -6,7 +6,7 @@ namespace WebApi.Core.Entities;
 public class Room
 {
     [Key]
-    public string Hash { get; set; }
+    public string? Hash { get; set; }
 
     public ICollection<ChatMessage> ChatMessages { get; set; }
     public ICollection<PlaylistVideo> PlaylistVideos { get; set; }
@@ -16,7 +16,15 @@ public class Room
 
     //VideoPlayer is an in-memory variable
 
-    public Room() { }
+    public Room()
+    {
+        Hash = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+        ChatMessages = new List<ChatMessage>();
+        PlaylistVideos = new List<PlaylistVideo>();
+        Users = new List<User>();
+        RoomSettings = new RoomSettings();
+        UserPermissions = new UserPermissions();
+    }
 
     public Room(string roomName, string roomPassword)
     {

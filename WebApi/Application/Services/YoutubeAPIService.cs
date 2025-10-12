@@ -36,7 +36,7 @@ public class YouTubeAPIService : IYouTubeAPIService
         });
     }
 
-    public async Task<string> GetVideoTitleAsync(string videoUrl)
+    public async Task<string?> GetVideoTitleAsync(string videoUrl)
     {
         return await Task.Run(() =>
         {
@@ -55,7 +55,7 @@ public class YouTubeAPIService : IYouTubeAPIService
         });
     }
 
-    public async Task<string> GetVideoThumbnailUrlAsync(string videoUrl)
+    public async Task<string?> GetVideoThumbnailUrlAsync(string videoUrl)
     {
         return await Task.Run(() =>
         {
@@ -74,7 +74,7 @@ public class YouTubeAPIService : IYouTubeAPIService
         });
     }
 
-    private string GetVideoId(string videoUrl)
+    private string? GetVideoId(string videoUrl)
     {
         var regex = new Regex(@"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})", RegexOptions.IgnoreCase);
 

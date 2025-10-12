@@ -5,8 +5,8 @@ namespace WebApi.Api.SignalR
 {
     public class HubConnectionMapper : IHubConnectionMapper
     {
-        private static ConcurrentDictionary<string, List<string>> _userConnections = new ConcurrentDictionary<string, List<string>>();
-        private static ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _pendingDisconnections = new ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>>();
+        private static ConcurrentDictionary<string, List<string>> _userConnections = new();
+        private static ConcurrentDictionary<string, ConcurrentDictionary<string, CancellationTokenSource>> _pendingDisconnections = new();
 
         public bool AddUserConnection(string userId, string connectionId)
         {
@@ -47,7 +47,7 @@ namespace WebApi.Api.SignalR
             return false;
         }
 
-        public string GetUserIdByConnectionId(string connectionId)
+        public string? GetUserIdByConnectionId(string connectionId)
         {
             foreach (var pair in _userConnections)
             {

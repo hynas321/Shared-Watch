@@ -15,7 +15,7 @@ public class VideoPlayerService : IVideoPlayerService
 
     public bool IsServiceRunning { get; set; } = false;
 
-    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellationTokenSources = new ConcurrentDictionary<string, CancellationTokenSource>();
+    private readonly ConcurrentDictionary<string, CancellationTokenSource> _cancellationTokenSources = new();
 
     public VideoPlayerService(
         IServiceScopeFactory serviceScopeFactory,
@@ -51,7 +51,7 @@ public class VideoPlayerService : IVideoPlayerService
             using var scope = _serviceScopeFactory.CreateScope();
             var roomRepository = scope.ServiceProvider.GetRequiredService<IRoomRepository>();
 
-            Room room = await roomRepository.GetRoomAsync(roomHash, cancellationToken);
+            var room = await roomRepository.GetRoomAsync(roomHash, cancellationToken);
 
             if (room is null)
             {
@@ -98,7 +98,7 @@ public class VideoPlayerService : IVideoPlayerService
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                PlaylistVideo currentVideo = _videoStateService.GetCurrentVideo(roomHash);
+                var currentVideo = _videoStateService.GetCurrentVideo(roomHash);
 
                 if (currentVideo is null)
                 {
@@ -132,13 +132,12 @@ public class VideoPlayerService : IVideoPlayerService
 
                     _logger.LogInformation($"{roomHash} ManagePlaylistService: Starting playback of video '{currentVideo.Hash}'.");
 
-                    _logger.LogDebug($"{roomHash} ManagePlaylistService: Current video set to '{currentVideo.Hash}', isPlaying: true, currentTime: 0.");
-
                     await _hubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnSetVideoUrl, currentVideo.Url);
-                    _logger.LogDebug($"{roomHash} ManagePlaylistService: Sent video URL '{currentVideo.Url}' to clients.");
+
+                    _logger.LogInformation($"{roomHash} ManagePlaylistService: Waiting 3 seconds before starting playback...");
+                    await Task.Delay(TimeSpan.FromSeconds(3), cancellationToken);
 
                     await _hubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnSetIsVideoPlaying, true);
-                    _logger.LogDebug($"{roomHash} ManagePlaylistService: Notified clients that video is playing.");
 
                     _ = Task.Run(async () =>
                     {
@@ -147,21 +146,15 @@ public class VideoPlayerService : IVideoPlayerService
                             bool hasVideoEndedSuccessfully = await UpdateCurrentTime(roomHash, currentVideo, cancellationToken);
 
                             _videoStateService.SetIsPlaying(roomHash, false);
-                            _logger.LogDebug($"{roomHash} ManagePlaylistService: Video playback ended, isPlaying set to false.");
-
                             await _hubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnSetIsVideoPlaying, false);
-                            _logger.LogDebug($"{roomHash} ManagePlaylistService: Notified clients that video is no longer playing.");
 
                             if (hasVideoEndedSuccessfully)
                             {
-                                await RemovePlaylistVideoAsync(roomHash, currentVideo.Hash, cancellationToken);
+                                await RemovePlaylistVideoAsync(roomHash, currentVideo.Hash!, cancellationToken);
                             }
 
                             _videoStateService.SetCurrentVideo(roomHash, null);
-                            _logger.LogDebug($"{roomHash} ManagePlaylistService: Current video set to null.");
-
                             await _hubContext.Clients.Group(roomHash).SendAsync(HubMessages.OnSetVideoUrl, null);
-                            _logger.LogDebug($"{roomHash} ManagePlaylistService: Sent null video URL to clients.");
                         }
                         catch (OperationCanceledException)
                         {
@@ -202,7 +195,7 @@ public class VideoPlayerService : IVideoPlayerService
 
             _logger.LogInformation($"{roomHash} UpdateCurrentTime: Fetching video duration for URL '{currentVideo.Url}'.");
 
-            durationTime = await _youtubeAPIService.GetVideoDurationAsync(currentVideo.Url);
+            durationTime = await _youtubeAPIService.GetVideoDurationAsync(currentVideo.Url!);
 
             _logger.LogInformation($"{roomHash} UpdateCurrentTime: Video duration is {durationTime} seconds.");
         }
@@ -232,7 +225,7 @@ public class VideoPlayerService : IVideoPlayerService
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var playlistRepository = scope.ServiceProvider.GetRequiredService<IPlaylistRepository>();
-                var playlistVideo = await playlistRepository.GetPlaylistVideoAsync(roomHash, currentVideo.Hash, cancellationToken);
+                var playlistVideo = await playlistRepository.GetPlaylistVideoAsync(roomHash, currentVideo.Hash!, cancellationToken);
 
                 if (playlistVideo is null)
                 {
@@ -290,7 +283,7 @@ public class VideoPlayerService : IVideoPlayerService
         return false;
     }
 
-    public async Task<PlaylistVideo> RemovePlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
+    public async Task<PlaylistVideo?> RemovePlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
     {
         using var scope = _serviceScopeFactory.CreateScope();
         var playlistRepository = scope.ServiceProvider.GetRequiredService<IPlaylistRepository>();

@@ -1,5 +1,4 @@
 using WebApi.Core.Entities;
-using WebApi.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using WebApi.Application.Constants;
@@ -42,7 +41,7 @@ public partial class AppHub : Hub
             }
         }
 
-        if (chatMessage.Text.Length > maxChatMessageTextLength)
+        if (chatMessage.Text?.Length > maxChatMessageTextLength)
         {
             _logger.LogInformation($"{roomHash} AddChatMessage: Maximum message length reached. User identifier: {Context.UserIdentifier}");
             return;
@@ -56,6 +55,6 @@ public partial class AppHub : Hub
             return;
         }
 
-        await Clients.Group(roomHash).SendAsync(HubMessages.OnAddChatMessage, JsonHelper.Serialize(chatMessage), Context.ConnectionAborted);
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnAddChatMessage, chatMessage, Context.ConnectionAborted);
     }
 }

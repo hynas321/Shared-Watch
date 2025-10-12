@@ -12,17 +12,17 @@ public class HttpContextService : IHttpContextService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public string GetUsername()
+    public string? GetUsername()
     {
         return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
     }
 
-    public string GetRole()
+    public string? GetRole()
     {
         return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role);
     }
 
-    public string GetRoomHash()
+    public string? GetRoomHash()
     {
         return _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Hash);
     }

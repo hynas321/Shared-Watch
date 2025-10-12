@@ -11,9 +11,9 @@ public class HubExceptionFilter : IHubFilter
         _logger = logger;
     }
 
-    public async ValueTask<object> InvokeMethodAsync(
+    public async ValueTask<object?> InvokeMethodAsync(
         HubInvocationContext invocationContext,
-        Func<HubInvocationContext, ValueTask<object>> next)
+        Func<HubInvocationContext, ValueTask<object?>> next)
     {
         try
         {

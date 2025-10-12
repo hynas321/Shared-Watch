@@ -5,9 +5,9 @@ namespace WebApi.Api.Filters;
 
 public class RoomHashAuthorizationFilter : IHubFilter
 {
-    public async ValueTask<object> InvokeMethodAsync(
+    public async ValueTask<object?> InvokeMethodAsync(
         HubInvocationContext invocationContext,
-        Func<HubInvocationContext, ValueTask<object>> next)
+        Func<HubInvocationContext, ValueTask<object?>> next)
     {
         var userHashClaim = invocationContext.Context.User?.FindFirst(ClaimTypes.Hash)?.Value;
         var roomHashArgument = invocationContext.HubMethodArguments.FirstOrDefault();
