@@ -34,7 +34,7 @@ public class UserRepository : IUserRepository
         return true;
     }
 
-    public async Task<User> DeleteUserByConnectionIdAsync(string roomHash, string connectionId, CancellationToken cancellationToken)
+    public async Task<User?> DeleteUserByConnectionIdAsync(string roomHash, string connectionId, CancellationToken cancellationToken)
     {
         var username = _hubConnectionMapper.GetUserIdByConnectionId(connectionId);
 
@@ -47,7 +47,7 @@ public class UserRepository : IUserRepository
             return null;
         }
 
-        var user = room.Users.FirstOrDefault(u => u.Username == username);
+        var user = room.Users?.FirstOrDefault(u => u.Username == username);
         if (user is null)
         {
             return null;
@@ -59,7 +59,7 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task<User> DeleteUserByUsernameAsync(string roomHash, string username, CancellationToken cancellationToken)
+    public async Task<User?> DeleteUserByUsernameAsync(string roomHash, string username, CancellationToken cancellationToken)
     {
         var room = await _dbContext.Rooms
             .Include(r => r.Users)
@@ -90,7 +90,7 @@ public class UserRepository : IUserRepository
         return true;
     }
 
-    public async Task<User> GetUserAsync(string roomHash, string username, CancellationToken cancellationToken)
+    public async Task<User?> GetUserAsync(string roomHash, string username, CancellationToken cancellationToken)
     {
         return await _dbContext.Rooms
             .Where(r => r.Hash == roomHash)

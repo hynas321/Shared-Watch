@@ -23,13 +23,13 @@ public class PlaylistRepository : IPlaylistRepository
             return false;
         }
 
-        room.PlaylistVideos.Add(playlistVideo);
+        room.PlaylistVideos?.Add(playlistVideo);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
     }
 
-    public async Task<PlaylistVideo> DeletePlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
+    public async Task<PlaylistVideo?> DeletePlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
     {
         var room = await _dbContext.Rooms
             .Include(r => r.PlaylistVideos)
@@ -40,7 +40,7 @@ public class PlaylistRepository : IPlaylistRepository
             return null;
         }
 
-        var playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
+        var playlistVideo = room?.PlaylistVideos?.FirstOrDefault(v => v.Hash == videoHash);
 
         if (playlistVideo is null)
         {
@@ -53,7 +53,7 @@ public class PlaylistRepository : IPlaylistRepository
         return playlistVideo;
     }
 
-    public async Task<PlaylistVideo> GetPlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
+    public async Task<PlaylistVideo?> GetPlaylistVideoAsync(string roomHash, string videoHash, CancellationToken cancellationToken)
     {
         var room = await _dbContext.Rooms
             .Include(r => r.PlaylistVideos)
@@ -64,7 +64,7 @@ public class PlaylistRepository : IPlaylistRepository
             return null;
         }
 
-        var playlistVideo = room.PlaylistVideos.FirstOrDefault(v => v.Hash == videoHash);
+        var playlistVideo = room.PlaylistVideos?.FirstOrDefault(v => v.Hash == videoHash);
 
         return playlistVideo;
     }

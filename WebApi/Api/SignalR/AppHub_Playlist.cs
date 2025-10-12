@@ -1,6 +1,5 @@
 using System.Text.RegularExpressions;
 using WebApi.Core.Entities;
-using WebApi.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using WebApi.Application.Constants;
@@ -31,7 +30,7 @@ public partial class AppHub : Hub
             return;
         }
 
-        var IsUrlCorrect = CheckIfIsYouTubeVideoLink(playlistVideo.Url);
+        var IsUrlCorrect = CheckIfIsYouTubeVideoLink(playlistVideo.Url!);
 
         if (!IsUrlCorrect)
         {
@@ -47,7 +46,7 @@ public partial class AppHub : Hub
             return;
         }
 
-        var title = await _youtubeAPIService.GetVideoTitleAsync(playlistVideo.Url);
+        var title = await _youtubeAPIService.GetVideoTitleAsync(playlistVideo.Url!);
 
         if (title is null)
         {
@@ -58,7 +57,7 @@ public partial class AppHub : Hub
 
         playlistVideo.Title = title;
 
-        var thumbnailUrl = await _youtubeAPIService.GetVideoThumbnailUrlAsync(playlistVideo.Url);
+        var thumbnailUrl = await _youtubeAPIService.GetVideoThumbnailUrlAsync(playlistVideo.Url!);
 
         if (thumbnailUrl is null)
         {
@@ -83,7 +82,7 @@ public partial class AppHub : Hub
             _playlistService.StartPlaylistService(roomHash);
         }
 
-        await Clients.Group(roomHash).SendAsync(HubMessages.OnAddPlaylistVideo, JsonHelper.Serialize(playlistVideo), Context.ConnectionAborted);
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnAddPlaylistVideo, playlistVideo, Context.ConnectionAborted);
     }
 
     [Authorize]

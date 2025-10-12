@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using WebApi.Application.Constants;
-using System.Threading;
 
 namespace WebApi.SignalR;
 

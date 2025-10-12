@@ -7,11 +7,11 @@ namespace WebApi.Core.Entities;
 public class RoomSettings
 {
     [Key, ForeignKey("Room")]
-    public string RoomHash { get; set; }
+    public string? RoomHash { get; set; }
 
     [Required]
-    public string RoomName { get; set; }
-    public string RoomPassword { get; set; }
+    public string? RoomName { get; set; }
+    public string? RoomPassword { get; set; }
     public RoomTypes RoomType { get; set; }
     public int MaxUsers { get; set; }
 

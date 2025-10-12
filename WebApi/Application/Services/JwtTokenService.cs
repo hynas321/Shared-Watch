@@ -1,18 +1,20 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using WebApi.Application.Services.Interfaces;
+using WebApi.Core.Entities.Static;
 
 namespace WebApi.Application.Services;
 
 public class JwtTokenService : IJwtTokenService
 {
-    private readonly IConfiguration _configuration;
+    private readonly JwtOptions _jwtOptions;
 
-    public JwtTokenService(IConfiguration configuration)
+    public JwtTokenService(IOptions<JwtOptions> jwtOptions)
     {
-        _configuration = configuration;
+        _jwtOptions = jwtOptions.Value;
     }
 
     public string GenerateToken(string username, string role, string roomHash)
@@ -24,12 +26,12 @@ public class JwtTokenService : IJwtTokenService
             new Claim(ClaimTypes.Hash, roomHash)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtOptions.Key!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Issuer"],
+            issuer: _jwtOptions.Issuer,
+            audience: _jwtOptions.Issuer,
             claims: claims,
             expires: DateTime.Now.AddHours(12),
             signingCredentials: creds);

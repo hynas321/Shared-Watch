@@ -65,7 +65,7 @@ public class VideoPlayerStateService : IVideoPlayerStateService
         }
     }
 
-    public PlaylistVideo GetCurrentVideo(string roomHash)
+    public PlaylistVideo? GetCurrentVideo(string roomHash)
     {
         if (_roomStates.TryGetValue(roomHash, out var videoPlayer))
         {
@@ -80,13 +80,13 @@ public class VideoPlayerStateService : IVideoPlayerStateService
         }
     }
 
-    public void SetCurrentVideo(string roomHash, PlaylistVideo playlistVideo)
+    public void SetCurrentVideo(string roomHash, PlaylistVideo? playlistVideo)
     {
         lock (GetRoomLock(roomHash))
         {
             if (_roomStates.ContainsKey(roomHash))
             {
-                _roomStates[roomHash].PlaylistVideo = playlistVideo;
+                _roomStates[roomHash].PlaylistVideo = playlistVideo!;
             }
             else
             {
@@ -116,7 +116,7 @@ public class VideoPlayerStateService : IVideoPlayerStateService
         return false;
     }
 
-    public VideoPlayer GetVideoPlayer(string roomHash)
+    public VideoPlayer? GetVideoPlayer(string roomHash)
     {
         if (_roomStates.TryGetValue(roomHash, out var videoPlayer))
         {

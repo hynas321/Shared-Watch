@@ -30,9 +30,9 @@ public class RoomRepository : IRoomRepository
         return true;
     }
 
-    public async Task<Room> DeleteRoomAsync(string roomHash, CancellationToken cancellationToken)
+    public async Task<Room?> DeleteRoomAsync(string roomHash, CancellationToken cancellationToken)
     {
-        Room room = await GetRoomAsync(roomHash, cancellationToken);
+        Room? room = await GetRoomAsync(roomHash, cancellationToken);
 
         if (room is null)
         {
@@ -53,7 +53,7 @@ public class RoomRepository : IRoomRepository
         return true;
     }
 
-    public async Task<Room> GetRoomAsync(string roomHash, CancellationToken cancellationToken)
+    public async Task<Room?> GetRoomAsync(string roomHash, CancellationToken cancellationToken)
     {
         return await _dbContext.Rooms
             .Include(r => r.ChatMessages)
@@ -64,7 +64,7 @@ public class RoomRepository : IRoomRepository
             .FirstOrDefaultAsync(r => r.Hash == roomHash, cancellationToken);
     }
 
-    public async Task<Room> GetRoomByNameAsync(string roomName, CancellationToken cancellationToken)
+    public async Task<Room?> GetRoomByNameAsync(string roomName, CancellationToken cancellationToken)
     {
         return await _dbContext.Rooms
             .FirstOrDefaultAsync(r => r.RoomSettings.RoomName == roomName, cancellationToken);
@@ -82,8 +82,8 @@ public class RoomRepository : IRoomRepository
     {
         return await _dbContext.Rooms
             .Select(r => new RoomDTO(
-                r.Hash,
-                r.RoomSettings.RoomName,
+                r.Hash!,
+                r.RoomSettings.RoomName!,
                 string.IsNullOrEmpty(r.RoomSettings.RoomPassword) ? RoomTypes.Public : RoomTypes.Private,
                 r.Users.Count,
                 r.RoomSettings.MaxUsers

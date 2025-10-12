@@ -6,7 +6,6 @@ using WebApi.Core.Enums;
 using WebApi.Api.DTO;
 using WebApi.Shared.Constants;
 using AutoMapper;
-using WebApi.Shared.Helpers;
 using WebApi.Core.Entities;
 
 namespace WebApi.Api.Controllers;
@@ -40,19 +39,18 @@ public class RoomController : ControllerBase
             return BadRequest();
         }
 
-        if (await _roomRepository.GetRoomByNameAsync(input.RoomName, cancellationToken) != null)
+        if (await _roomRepository.GetRoomByNameAsync(input.RoomName!, cancellationToken) is not null)
         {
             return Conflict();
         }
 
-        var room = new Room(input.RoomName, input.RoomPassword);
+        var room = new Room(input.RoomName, input.RoomPassword!);
 
         await _roomRepository.AddRoomAsync(room, cancellationToken);
 
         var output = new RoomCreateOutput { RoomHash = room.Hash };
-        var serializedOutput = JsonHelper.Serialize(output);
 
-        return CreatedAtAction(nameof(Get), new { roomHash = room.Hash }, serializedOutput);
+        return CreatedAtAction(nameof(Get), new { roomHash = room.Hash }, output);
     }
 
     [HttpGet("Exists/{roomHash}")]
@@ -75,9 +73,7 @@ public class RoomController : ControllerBase
             RoomType = string.IsNullOrEmpty(room.RoomSettings.RoomPassword) ? RoomTypes.Public : RoomTypes.Private
         };
 
-        var serializedOutput = JsonHelper.Serialize(output);
-
-        return Ok(serializedOutput);
+        return Ok(output);
     }
 
     [HttpGet("Get/{roomHash}")]
@@ -91,18 +87,16 @@ public class RoomController : ControllerBase
         }
 
         var roomDTO = _mapper.Map<RoomDTO>(room);
-        var serializedRoomsDTO = JsonHelper.Serialize(roomDTO);
 
-        return Ok(serializedRoomsDTO);
+        return Ok(roomDTO);
     }
 
     [HttpGet("GetAll")]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
     {
         var roomsDTO = await _roomRepository.GetRoomsDTOAsync(cancellationToken);
-        var serializedRoomsDTO = JsonHelper.Serialize(roomsDTO);
 
-        return Ok(serializedRoomsDTO);
+        return Ok(roomsDTO);
     }
 
     [HttpGet("GetAllDetails")]
@@ -114,8 +108,7 @@ public class RoomController : ControllerBase
         }
 
         var rooms = await _roomRepository.GetRoomsAsync(cancellationToken);
-        var serializedRooms = JsonHelper.Serialize(rooms);
 
-        return Ok(serializedRooms);
+        return Ok(rooms);
     }
 }

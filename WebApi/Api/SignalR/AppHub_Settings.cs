@@ -1,6 +1,5 @@
 using WebApi.Core.Entities;
 using WebApi.Core.Enums;
-using WebApi.Shared.Helpers;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using WebApi.Application.Constants;
@@ -42,6 +41,6 @@ public partial class AppHub : Hub
         room.UserPermissions = userPermissions;
 
         await _roomRepository.UpdateRoomAsync(room, Context.ConnectionAborted);
-        await Clients.Group(roomHash).SendAsync(HubMessages.OnSetUserPermissions, JsonHelper.Serialize(userPermissions), Context.ConnectionAborted);
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnSetUserPermissions, userPermissions, Context.ConnectionAborted);
     }
 }

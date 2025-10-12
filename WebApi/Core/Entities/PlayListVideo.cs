@@ -5,15 +5,15 @@ namespace WebApi.Core.Entities;
 public class PlaylistVideo
 {
     [Key]
-    public string Hash { get; set; } = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
+    public string? Hash { get; set; } = Guid.NewGuid().ToString().Replace("-", "").Substring(0, 8);
 
-    public string Url { get; set; }
+    public string? Url { get; set; }
     public double Duration { get; set; }
-    public string Title { get; set; }
-    public string ThumbnailUrl { get; set; }
+    public string? Title { get; set; }
+    public string? ThumbnailUrl { get; set; }
 
     // Foreign Key
-    public string RoomHash { get; set; } 
+    public string? RoomHash { get; set; } 
 
     public PlaylistVideo() {}
 

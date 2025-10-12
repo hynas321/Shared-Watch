@@ -2,7 +2,6 @@ using WebApi.Application.HostedServices;
 using WebApi.Application.Services;
 using WebApi.Application.Services.Interfaces;
 using WebApi.Infrastructure.Repositories;
-using WebApi.Shared.Helpers;
 using WebApi.SignalR;
 using Google.Apis.Services;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +16,8 @@ using WebApi.Api.SignalR;
 using Microsoft.AspNetCore.SignalR;
 using WebApi.Api.Filters;
 using WebApi.Api.Middleware;
+using System.Text.Json;
+using WebApi.Core.Entities.Static;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -31,6 +32,10 @@ builder.Services.AddSingleton<IYouTubeAPIService, YouTubeAPIService>(sp =>
     return new YouTubeAPIService(youtubeAPIServiceInitializer);
 });
 
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
+
+var jwtOptions = builder.Configuration.GetSection("Jwt").Get<JwtOptions>()!;
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -44,13 +49,13 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = configuration["Jwt:Issuer"],
-        ValidAudience = configuration["Jwt:Issuer"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+        ValidIssuer = jwtOptions.Issuer,
+        ValidAudience = jwtOptions.Issuer,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key!))
     };
 
     options.RequireHttpsMetadata = builder.Environment.IsProduction();
-    options.Authority = "Authority URL";
+    options.Authority = jwtOptions.Authority;
 
     options.Events = new JwtBearerEvents
     {
@@ -131,7 +136,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = new PascalCaseNamingPolicy();
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
     });
 
 builder.Services.AddSignalR(options =>
@@ -141,7 +146,11 @@ builder.Services.AddSignalR(options =>
     options.KeepAliveInterval = TimeSpan.FromSeconds(10);
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(20);
     options.EnableDetailedErrors = false;
-});
+}).AddJsonProtocol(options =>
+{
+    options.PayloadSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+    options.PayloadSerializerOptions.WriteIndented = true;
+}); ;
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
@@ -154,7 +163,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<LoggingMiddleware>();
+app.UseMiddleware<RequestResponseLoggingMiddleware>();
 app.MapHub<AppHub>("/Hub/Room");
 app.UseCors("AllowReactApplication");
 app.UseHttpsRedirection();

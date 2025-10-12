@@ -18,6 +18,7 @@ import { UserPermissions } from "../types/UserPermissions";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 import Button from "./shared/Button";
 import api from "../classes/Http/Api";
+import { ChatMessage } from "../types/ChatMessage";
 
 export default function ControlPanel() {
   const navigate = useNavigate();
@@ -41,9 +42,7 @@ export default function ControlPanel() {
       return;
     }
 
-    appHub.on(HubMessages.OnAddChatMessage, (chatMessageSerialized: string) => {
-      const chatMessage = JSON.parse(chatMessageSerialized);
-
+    appHub.on(HubMessages.OnAddChatMessage, (chatMessage: ChatMessage) => {
       appState.chatMessages.value = [...appState.chatMessages.value, chatMessage];
 
       if (appState.activePanel.value !== PanelsEnum.Chat) {
@@ -51,12 +50,10 @@ export default function ControlPanel() {
       }
     });
 
-    appHub.on(HubMessages.OnAddPlaylistVideo, (playlistVideoSerialized: string | null) => {
-      if (playlistVideoSerialized == null) {
+    appHub.on(HubMessages.OnAddPlaylistVideo, (playlistVideo: PlaylistVideo | null) => {
+      if (playlistVideo == null) {
         return;
       }
-
-      const playlistVideo: PlaylistVideo = JSON.parse(playlistVideoSerialized);
 
       appState.playlistVideos.value = [...appState.playlistVideos.value, playlistVideo];
     });
@@ -77,8 +74,7 @@ export default function ControlPanel() {
       );
     });
 
-    appHub.on(HubMessages.OnKickOut, async (removedUserSerialized: string) => {
-      const removedUser: User = JSON.parse(removedUserSerialized);
+    appHub.on(HubMessages.OnKickOut, async (removedUser: User) => {
       const isCurrentUser = removedUser.username === appState.username.value;
 
       if (isCurrentUser) {
@@ -101,8 +97,7 @@ export default function ControlPanel() {
       );
     });
 
-    appHub.on(HubMessages.OnSetAdminStatus, (updatedUserSerialized: string) => {
-      const updatedUser: User = JSON.parse(updatedUserSerialized);
+    appHub.on(HubMessages.OnSetAdminStatus, (updatedUser: User) => {
       const isCurrentUser = updatedUser.username === appState.username.value;
 
       if (isCurrentUser && updatedUser.isAdmin === true) {
@@ -155,9 +150,7 @@ export default function ControlPanel() {
       }
     });
 
-    appHub.on(HubMessages.OnSetUserPermissions, (userPermissionsSerialized: string) => {
-      const userPermissions: UserPermissions = JSON.parse(userPermissionsSerialized);
-
+    appHub.on(HubMessages.OnSetUserPermissions, (userPermissions: UserPermissions) => {
       if (appState.userPermissions.value != null) {
         appState.userPermissions.value = userPermissions;
       }

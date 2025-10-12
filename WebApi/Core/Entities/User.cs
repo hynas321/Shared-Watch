@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using WebApi.Application.Constants;
 
 namespace WebApi.Core.Entities;
 
@@ -8,13 +7,13 @@ public class User
     [Key]
     public int Id { get; set; }
     [Required]
-    public string Username { get; set; }
+    public string Username { get; set; } = string.Empty;
     [Required]
-    public string Role { get; set; }
+    public string Role { get; set; } = string.Empty;
 
 
     // Foreign Key
-    public string RoomHash { get; set; }
+    public string? RoomHash { get; set; }
 
     public User() { }
 
