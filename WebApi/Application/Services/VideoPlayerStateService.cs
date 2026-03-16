@@ -30,12 +30,10 @@ public class VideoPlayerStateService : IVideoPlayerStateService
 
     public void SetCurrentTime(string roomHash, double currentTime)
     {
-        if (_roomStates.TryGetValue(roomHash, out var videoPlayer))
+        var state = _roomStates.GetOrAdd(roomHash, new VideoPlayer());
+        lock (GetRoomLock(roomHash))
         {
-            lock (GetRoomLock(roomHash))
-            {
-                videoPlayer.CurrentTime = currentTime;
-            }
+            state.CurrentTime = currentTime;
         }
     }
 
@@ -56,12 +54,10 @@ public class VideoPlayerStateService : IVideoPlayerStateService
 
     public void SetIsPlaying(string roomHash, bool isPlaying)
     {
-        if (_roomStates.TryGetValue(roomHash, out var videoPlayer))
+        var state = _roomStates.GetOrAdd(roomHash, new VideoPlayer());
+        lock (GetRoomLock(roomHash))
         {
-            lock (GetRoomLock(roomHash))
-            {
-                videoPlayer.IsPlaying = isPlaying;
-            }
+            state.IsPlaying = isPlaying;
         }
     }
 

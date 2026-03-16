@@ -1,17 +1,23 @@
 using WebApi.Core.Entities;
 using WebApi.Core.Enums;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.AspNetCore.Authorization;
 using WebApi.Application.Constants;
+using System.Security.Claims;
 
 namespace WebApi.SignalR;
 
 public partial class AppHub : Hub
 {
-    [Authorize(Roles = Role.Admin)]
     [HubMethodName(HubMessages.SetRoomPassword)]
     public async Task SetRoomPassword(string roomHash, string newRoomPassword)
     {
+        var userRoleClaim = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRoleClaim != Role.Admin)
+        {
+            _logger.LogInformation($"{roomHash} SetRoomPassword: User is not authorized. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
         var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
 
         if (room is null)
@@ -27,10 +33,16 @@ public partial class AppHub : Hub
         await Clients.Group(roomHash).SendAsync(HubMessages.OnSetRoomPassword, newRoomPassword, room.RoomSettings.RoomType, Context.ConnectionAborted);
     }
 
-    [Authorize(Roles = Role.Admin)]
     [HubMethodName(HubMessages.SetUserPermissions)]
     public async Task SetUserPermissions(string roomHash, UserPermissions userPermissions)
     {
+        var userRoleClaim = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+        if (userRoleClaim != Role.Admin)
+        {
+            _logger.LogInformation($"{roomHash} SetUserPermissions: User is not authorized. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
         var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
         if (room is null)
         {

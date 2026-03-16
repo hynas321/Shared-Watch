@@ -2,15 +2,27 @@ using WebApi.Api.DTO;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
 using WebApi.Application.Constants;
+using System.Security.Claims;
 
 namespace WebApi.SignalR;
 
 public partial class AppHub : Hub
 {
-    [Authorize(Roles = Role.Admin)]
+    private bool IsUserAdmin()
+    {
+        var userRoleClaim = Context.User?.FindFirst(ClaimTypes.Role)?.Value;
+        return userRoleClaim == Role.Admin;
+    }
+
     [HubMethodName(HubMessages.KickOut)]
     public async Task KickOutAsync(string roomHash, string usernameToKickOut)
     {
+        if (!IsUserAdmin())
+        {
+            _logger.LogInformation($"{roomHash} KickOut: User is not authorized. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
         var cancellationToken = Context.ConnectionAborted;
 
         var room = await _roomRepository.GetRoomAsync(roomHash, cancellationToken);
@@ -46,10 +58,16 @@ public partial class AppHub : Hub
         await Clients.Group(roomHash).SendAsync(HubMessages.OnKickOut, kickedOutUserDTO, Context.ConnectionAborted);
     }
 
-    [Authorize(Roles = Role.Admin)]
     [HubMethodName(HubMessages.SetAdminStatus)]
     public async Task SetAdminStatusAsync(string roomHash, string usernameToSetAdminStatus, bool isAdmin)
     {
+
+        if (!IsUserAdmin())
+        {
+            _logger.LogInformation($"{roomHash} SetAdminStatus: User is not authorized. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
         var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
 
         if (room is null)
@@ -77,9 +95,12 @@ public partial class AppHub : Hub
             isAdmin ? Role.Admin : Role.User,
             roomHash);
 
-        var connectionId = _hubConnectionMapper.GetConnectionIdsByUserId(usernameToSetAdminStatus).First();
-
-        await Clients.Client(connectionId).SendAsync(HubMessages.OnReceiveJwt, newJwtToken, Context.ConnectionAborted);
+        var connectionIds = _hubConnectionMapper.GetConnectionIdsByUserId(usernameToSetAdminStatus);
+        if (connectionIds.Any())
+        {
+            var connectionId = connectionIds.First();
+            await Clients.Client(connectionId).SendAsync(HubMessages.OnReceiveJwt, newJwtToken, Context.ConnectionAborted);
+        }
         await Clients.Group(roomHash).SendAsync(HubMessages.OnSetAdminStatus, updatedUserDTO, Context.ConnectionAborted);
 
         _logger.LogInformation($"{roomHash} SetAdminStatus: {updatedUser.Username}. Role: {updatedUser.Role} User identifier: {Context.UserIdentifier}");

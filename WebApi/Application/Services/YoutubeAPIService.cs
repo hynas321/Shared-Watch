@@ -76,6 +76,11 @@ public class YouTubeAPIService : IYouTubeAPIService
 
     private string? GetVideoId(string videoUrl)
     {
+        if (string.IsNullOrEmpty(videoUrl))
+        {
+            return null;
+        }
+
         var regex = new Regex(@"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})", RegexOptions.IgnoreCase);
 
         var match = regex.Match(videoUrl);

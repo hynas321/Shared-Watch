@@ -13,19 +13,19 @@ public class RoomHashAuthorizationFilter : IHubFilter
         var roomHashArgument = invocationContext.HubMethodArguments.FirstOrDefault();
         var roomHash = roomHashArgument?.ToString();
 
-        if (userHashClaim is null)
-        {
-            throw new HubException("Unauthorized: Missing Hash claim.");
-        }
-
         if (roomHash is null)
         {
-            throw new HubException("Invalid request: Missing roomHash parameter.");
+            return await next(invocationContext);
+        }
+
+        if (userHashClaim is null)
+        {
+            return await next(invocationContext);
         }
 
         if (userHashClaim != roomHash)
         {
-            throw new HubException("Unauthorized: Hash claim does not match roomHash.");
+            return await next(invocationContext);
         }
 
         return await next(invocationContext);
