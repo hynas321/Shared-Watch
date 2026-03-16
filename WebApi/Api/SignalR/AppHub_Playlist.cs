@@ -77,7 +77,8 @@ public partial class AppHub : Hub
             return;
         }
 
-        if (room.PlaylistVideos.Count == 1 && !_playlistService.IsServiceRunning)
+        room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
+        if (room != null && room.PlaylistVideos.Count == 1 && !_playlistService.IsServiceRunning)
         {
             _playlistService.StartPlaylistService(roomHash);
         }
