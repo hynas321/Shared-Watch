@@ -1,28 +1,32 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Hosting;
-using WebApi.Application.Services.Interfaces;
-using WebApi.Api.SignalR.Interfaces;
+using WebApi.Application.Services;
 using WebApi.Core.Entities.In_memory;
-using WebApi.Application.HostedServices;
-using System.Reflection;
-using System.Collections.Concurrent;
+using WebApi.Infrastructure.Persistence;
+using WebApi.HostedServices;
 
 public class MockYouTubeAPIService : IYouTubeAPIService
 {
-    public Task<int> GetVideoDurationAsync(string videoUrl)
+    private static bool IsInvalid(string videoUrl) => videoUrl.Contains("invalid-url", StringComparison.OrdinalIgnoreCase);
+
+    public Task<int> GetVideoDurationAsync(string videoUrl) => Task.FromResult(IsInvalid(videoUrl) ? 0 : 300);
+
+    public Task<int> GetVideoDurationAsync(string videoUrl, CancellationToken cancellationToken)
     {
-        return Task.FromResult(300);
+        return Task.FromResult(IsInvalid(videoUrl) ? 0 : 300);
     }
 
     public Task<string?> GetVideoTitleAsync(string videoUrl)
     {
-        return Task.FromResult<string?>("Test Video Title");
+        return Task.FromResult<string?>(IsInvalid(videoUrl) ? null : "Test Video Title");
     }
 
     public Task<string?> GetVideoThumbnailUrlAsync(string videoUrl)
     {
-        return Task.FromResult<string?>("https://example.com/thumbnail.jpg"); // Return fake thumbnail URL
+        return Task.FromResult<string?>("https://example.com/thumbnail.jpg");
     }
 }
 
@@ -32,7 +36,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureServices(services =>
+        builder.ConfigureTestServices(services =>
         {
             var youtubeServiceDescriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(IYouTubeAPIService));
@@ -44,14 +48,18 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
             services.AddSingleton<IYouTubeAPIService, MockYouTubeAPIService>();
 
-            var allDescriptors = services.ToList();
-            foreach (var descriptor in allDescriptors)
+            services.RemoveAll<IDbContextFactory<AppDbContext>>();
+            services.RemoveAll<AppDbContext>();
+            services.RemoveAll<DbContextOptions<AppDbContext>>();
+
+            var contextOptionsConfigurations = services.Where(
+                descriptor => descriptor.ServiceType.IsGenericType &&
+                              descriptor.ServiceType.Name.Contains("DbContextOptionsConfiguration", StringComparison.Ordinal) &&
+                              descriptor.ServiceType.GenericTypeArguments[0] == typeof(AppDbContext))
+                .ToList();
+            foreach (var descriptor in contextOptionsConfigurations)
             {
-                if (descriptor.ServiceType != null &&
-                    descriptor.ServiceType.Name.Contains("DbContextFactory"))
-                {
-                    services.Remove(descriptor);
-                }
+                services.Remove(descriptor);
             }
 
             var hostedServiceDescriptors = services.Where(
@@ -59,7 +67,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
 
             foreach (var descriptor in hostedServiceDescriptors)
             {
-                if (descriptor.ImplementationType == typeof(DatabaseCleanup))
+                if (descriptor.ImplementationType == typeof(RoomPersistenceCleanupService))
                 {
                     services.Remove(descriptor);
                 }
@@ -70,11 +78,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
                 options.UseInMemoryDatabase(_databaseName);
                 options.EnableSensitiveDataLogging();
             });
-
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureCreated();
         });
     }
 
@@ -118,58 +121,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyn
         return scope.ServiceProvider.GetRequiredService<T>();
     }
 
-    public void ResetSingletonState()
-    {
-        try
-        {
-            var videoPlayerService = Services.GetService<IVideoPlayerStateService>();
-            if (videoPlayerService != null)
-            {
-                ClearPrivateField<ConcurrentDictionary<string, object>>(videoPlayerService, "_roomLocks");
-                ClearPrivateField<ConcurrentDictionary<string, VideoPlayer>>(videoPlayerService, "_roomStates");
-            }
+    public void ResetSingletonState() { }
 
-            var hubMapper = Services.GetService<IHubConnectionMapper>();
-            if (hubMapper != null)
-            {
-                ClearAllConcurrentDictionaries(hubMapper);
-            }
-        }
-        catch (Exception) {}
-    }
-
-    private void ClearPrivateField<T>(object target, string fieldName)
-    {
-        var field = target.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance);
-        if (field != null)
-        {
-            var value = field.GetValue(target);
-            if (value is ConcurrentDictionary<string, object> dict)
-            {
-                dict.Clear();
-            }
-            else if (value is ConcurrentDictionary<string, VideoPlayer> dict2)
-            {
-                dict2.Clear();
-            }
-        }
-    }
-
-    private void ClearAllConcurrentDictionaries(object target)
-    {
-        var fields = target.GetType().GetFields(BindingFlags.NonPublic | BindingFlags.Instance);
-        foreach (var field in fields)
-        {
-            var value = field.GetValue(target);
-            if (value != null)
-            {
-                var clearMethod = value.GetType().GetMethod("Clear", BindingFlags.Public | BindingFlags.Instance);
-                clearMethod?.Invoke(value, null);
-            }
-        }
-    }
-
-    public new async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
         ResetSingletonState();
         await Task.CompletedTask;

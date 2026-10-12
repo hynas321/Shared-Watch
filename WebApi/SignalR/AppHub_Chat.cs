@@ -1,0 +1,56 @@
+using WebApi.Core.Entities;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
+using WebApi.Application.Constants;
+
+namespace WebApi.SignalR;
+
+public partial class AppHub : Hub
+{
+    [Authorize]
+    [HubMethodName(HubMessages.AddChatMessage)]
+    public async Task AddChatMessageAsync(string roomHash, ChatMessage chatMessage)
+    {
+        var room = await _roomRepository.GetRoomAsync(roomHash, Context.ConnectionAborted);
+
+        if (room is null)
+        {
+            _logger.LogInformation($"{roomHash} AddChatMessage: Room does not exist. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
+        var isAdmin = await IsCurrentUserAdminAsync(roomHash, Context.ConnectionAborted);
+
+        if (!isAdmin && !room.UserPermissions.CanAddChatMessage)
+        {
+            _logger.LogInformation($"{roomHash} AddChatMessage: User does not have permission. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
+        if (room.ChatMessages.Count >= _chatOptions.MaxMessages)
+        {
+            var oldestMessage = room.ChatMessages.FirstOrDefault();
+
+            if (oldestMessage is not null)
+            {
+                room.ChatMessages.Remove(oldestMessage);
+            }
+        }
+
+        if (chatMessage.Text?.Length > _chatOptions.MaxMessageTextLength)
+        {
+            _logger.LogInformation($"{roomHash} AddChatMessage: Maximum message length reached. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
+        var isChatMessageAdded = await _chatRepository.AddChatMessageAsync(roomHash, chatMessage, Context.ConnectionAborted);
+
+        if (!isChatMessageAdded)
+        {
+            _logger.LogInformation($"{roomHash} AddChatMessage: Error when adding a chat message. User identifier: {Context.UserIdentifier}");
+            return;
+        }
+
+        await Clients.Group(roomHash).SendAsync(HubMessages.OnAddChatMessage, chatMessage, Context.ConnectionAborted);
+    }
+}

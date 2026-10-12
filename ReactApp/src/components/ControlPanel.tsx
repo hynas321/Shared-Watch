@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { PanelsEnum } from "../enums/PanelsEnum";
 import { BsFillChatTextFill, BsFillLockFill, BsGearFill } from "react-icons/bs";
 import Chat from "./chat/Chat";
@@ -7,7 +7,6 @@ import UserList from "./user-list/UserList";
 import Settings from "./Settings";
 import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { AppHubContext, appState } from "../context/AppContext";
-import * as signalR from "@microsoft/signalr";
 import { HubMessages as HubMessages } from "../classes/constants/HubMessages";
 import { PlaylistVideo } from "../types/PlaylistVideo";
 import { User } from "../types/User";
@@ -20,29 +19,30 @@ import Button from "./shared/Button";
 import api from "../classes/Http/Api";
 import { ChatMessage } from "../types/ChatMessage";
 
+const isSamePlaylistVideo = (left: PlaylistVideo, right: PlaylistVideo): boolean =>
+  left.hash != null && right.hash != null
+    ? left.hash === right.hash
+    : left.url === right.url;
+
 export default function ControlPanel() {
   const navigate = useNavigate();
   const appHub = useContext(AppHubContext);
-  const [hubState, setHubState] = useState(appHub.getState());
 
   const handlePanelButtonClick = (panelsEnumValue: PanelsEnum) => {
     appState.activePanel.value = panelsEnumValue;
   };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setHubState(appHub.getState());
-    }, 10);
+    const registeredHandlers: Array<{
+      name: string;
+      handler: (...args: never[]) => void;
+    }> = [];
+    const registerHandler = (name: string, handler: (...args: never[]) => void) => {
+      registeredHandlers.push({ name, handler });
+      appHub.on(name, handler);
+    };
 
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (hubState !== signalR.HubConnectionState.Connected) {
-      return;
-    }
-
-    appHub.on(HubMessages.OnAddChatMessage, (chatMessage: ChatMessage) => {
+    registerHandler(HubMessages.OnAddChatMessage, (chatMessage: ChatMessage) => {
       appState.chatMessages.value = [...appState.chatMessages.value, chatMessage];
 
       if (appState.activePanel.value !== PanelsEnum.Chat) {
@@ -50,31 +50,39 @@ export default function ControlPanel() {
       }
     });
 
-    appHub.on(HubMessages.OnAddPlaylistVideo, (playlistVideo: PlaylistVideo | null) => {
+    registerHandler(HubMessages.OnAddPlaylistVideo, (playlistVideo: PlaylistVideo | null) => {
       if (playlistVideo == null) {
         return;
       }
 
-      appState.playlistVideos.value = [...appState.playlistVideos.value, playlistVideo];
+      if (!appState.playlistVideos.value.some((video) => isSamePlaylistVideo(video, playlistVideo))) {
+        appState.playlistVideos.value = [...appState.playlistVideos.value, playlistVideo];
+      }
     });
 
-    appHub.on(HubMessages.OnDeletePlaylistVideo, (playlistVideoHash: string) => {
+    registerHandler(HubMessages.OnDeletePlaylistVideo, (playlistVideoHash: string) => {
       appState.playlistVideos.value = appState.playlistVideos.value.filter(
         (video) => video.hash !== playlistVideoHash
       );
     });
 
-    appHub.on(HubMessages.OnJoinRoom, (newUser: User) => {
-      appState.users.value = [...appState.users.value, newUser];
+    registerHandler(HubMessages.OnPlaylistReordered, (playlistVideos: PlaylistVideo[]) => {
+      appState.playlistVideos.value = playlistVideos;
     });
 
-    appHub.on(HubMessages.OnLeaveRoom, (removedUser: User) => {
+    registerHandler(HubMessages.OnJoinRoom, (newUser: User) => {
+      appState.users.value = [...appState.users.value, newUser];
+      window.dispatchEvent(new Event("shared-watch:room-changed"));
+    });
+
+    registerHandler(HubMessages.OnLeaveRoom, (removedUser: User) => {
       appState.users.value = appState.users.value.filter(
         (user) => user.username !== removedUser.username
       );
+      window.dispatchEvent(new Event("shared-watch:room-changed"));
     });
 
-    appHub.on(HubMessages.OnKickOut, async (removedUser: User) => {
+    registerHandler(HubMessages.OnKickOut, async (removedUser: User) => {
       const isCurrentUser = removedUser.username === appState.username.value;
 
       if (isCurrentUser) {
@@ -97,7 +105,7 @@ export default function ControlPanel() {
       );
     });
 
-    appHub.on(HubMessages.OnSetAdminStatus, (updatedUser: User) => {
+    registerHandler(HubMessages.OnSetAdminStatus, (updatedUser: User) => {
       const isCurrentUser = updatedUser.username === appState.username.value;
 
       if (isCurrentUser && updatedUser.isAdmin === true) {
@@ -144,51 +152,50 @@ export default function ControlPanel() {
 
       if (userIndex !== -1) {
         const updatedUsers = [...appState.users.value];
-        updatedUsers[userIndex] = { ...updatedUser };
+        updatedUsers[userIndex] = {
+          username: updatedUser.username,
+          isAdmin: updatedUser.isAdmin === true,
+        };
 
         appState.users.value = updatedUsers;
+      } else {
+        appState.users.value = [
+          ...appState.users.value,
+          { username: updatedUser.username, isAdmin: updatedUser.isAdmin === true },
+        ];
       }
     });
 
-    appHub.on(HubMessages.OnSetUserPermissions, (userPermissions: UserPermissions) => {
+    registerHandler(HubMessages.OnSetUserPermissions, (userPermissions: UserPermissions) => {
       if (appState.userPermissions.value != null) {
         appState.userPermissions.value = userPermissions;
       }
     });
 
-    appHub.on(HubMessages.OnSetRoomPassword, (roomPassword: string, roomType: RoomTypesEnum) => {
-      appState.roomPassword.value = roomPassword;
+    registerHandler(HubMessages.OnSetRoomPassword, (roomType: RoomTypesEnum) => {
       appState.roomType.value = roomType;
+      window.dispatchEvent(new Event("shared-watch:room-changed"));
     });
 
     return () => {
-      appHub.off(HubMessages.OnAddChatMessage);
-      appHub.off(HubMessages.OnAddPlaylistVideo);
-      appHub.off(HubMessages.OnDeletePlaylistVideo);
-      appHub.off(HubMessages.OnJoinRoom);
-      appHub.off(HubMessages.OnLeaveRoom);
-      appHub.off(HubMessages.OnKickOut);
-      appHub.off(HubMessages.OnSetAdminStatus);
-      appHub.off(HubMessages.OnSetUserPermissions);
-      appHub.off(HubMessages.OnSetRoomPassword);
-      appHub.off(HubMessages.OnReceiveJwt);
+      registeredHandlers.forEach(({ name, handler }) => appHub.off(name, handler));
     };
-  }, [hubState]);
+  }, [appHub, navigate]);
 
   return (
-    <div>
-      <div className="rounded-top-5 bg-dark bg-opacity-50 pt-3 pb-3 px-4">
+    <div className="room-control-panel">
+      <div className="room-control-panel-header bg-dark bg-opacity-50 pt-3 pb-3 px-4">
         <div className="d-flex align-items-center">
           <div className="text-center flex-grow-1">
-            <h5 className="text-white">
+            <h5 className="room-name text-white mb-0" aria-live="polite">
               {appState.roomType.value === RoomTypesEnum.private && <BsFillLockFill />}{" "}
-              {appState.roomName.value}
+              {appState.roomName.value || "Room"}
             </h5>
           </div>
         </div>
       </div>
-      <div className="row">
-        <div className="btn-group" role="group">
+      <div className="room-panel-tabs row">
+        <div className="btn-group w-100" role="tablist" aria-label="Room panels">
           <Button
             text={
               appState.unreadChatMessagesCount.value !== 0 ? (
@@ -258,7 +265,7 @@ export default function ControlPanel() {
           />
         </div>
       </div>
-      <div className="rounded-bottom-5 bg-dark bg-opacity-50 pt-4 pb-4 px-4">
+      <div className="room-control-panel-content bg-dark bg-opacity-50 pt-4 pb-4 px-4">
         {appState.activePanel.value === PanelsEnum.Chat && <Chat />}
         {appState.activePanel.value === PanelsEnum.Playlist && <Playlist />}
         {appState.activePanel.value === PanelsEnum.Users && <UserList />}

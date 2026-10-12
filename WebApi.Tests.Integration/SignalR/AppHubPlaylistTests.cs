@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Application.Constants;
-using WebApi.Application.Services.Interfaces;
+using WebApi.Application.Services;
 using WebApi.Core.Entities;
 using WebApi.Tests.Integration.Helpers;
 using Xunit;
@@ -30,6 +30,7 @@ public class AppHubPlaylistTests : BaseIntegrationTest, IAsyncLifetime
         var room = new Room("TestRoom", "");
         room.UserPermissions.CanAddVideo = true;
         room.UserPermissions.CanRemoveVideo = true;
+        room.Users.Add(new WebApi.Core.Entities.User("AdminUser", WebApi.Application.Constants.Role.Admin) { RoomHash = room.Hash });
         db.Rooms.Add(room);
         await db.SaveChangesAsync();
         _roomHash = room.Hash!;
@@ -188,6 +189,55 @@ public class AppHubPlaylistTests : BaseIntegrationTest, IAsyncLifetime
         var freshDb = Factory.GetDbContext();
         var updatedRoom = await freshDb.Rooms.Include(r => r.PlaylistVideos).FirstOrDefaultAsync(r => r.Hash == _roomHash);
         updatedRoom!.PlaylistVideos.Should().BeEmpty();
+
+        await _connection.StopAsync();
+    }
+
+    [Fact]
+    public async Task ReorderPlaylistVideos_AdminCanReorderAndBroadcast()
+    {
+        Factory.ResetSingletonState();
+        Factory.ClearDatabase();
+        await SetupRoomAsync();
+
+        var db = Factory.GetDbContext();
+        var room = await db.Rooms.Include(r => r.PlaylistVideos).FirstAsync(r => r.Hash == _roomHash);
+        room.PlaylistVideos.Add(new PlaylistVideo
+        {
+            Hash = "first-video",
+            Url = "https://www.youtube.com/watch?v=first",
+            Title = "First",
+            Position = 0
+        });
+        room.PlaylistVideos.Add(new PlaylistVideo
+        {
+            Hash = "second-video",
+            Url = "https://www.youtube.com/watch?v=second",
+            Title = "Second",
+            Position = 1
+        });
+        await db.SaveChangesAsync();
+
+        var reordered = new TaskCompletionSource<List<PlaylistVideo>>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        _connection.On(HubMessages.OnPlaylistReordered, (List<PlaylistVideo> videos) =>
+            reordered.TrySetResult(videos));
+
+        await _connection.StartAsync();
+        await _connection.InvokeAsync(
+            HubMessages.ReorderPlaylistVideos,
+            _roomHash,
+            new[] { "second-video", "first-video" });
+
+        var received = await reordered.Task.WaitAsync(TimeSpan.FromSeconds(2));
+        received.Select(video => video.Hash).Should().Equal("second-video", "first-video");
+
+        var updatedRoom = await Factory.GetDbContext().Rooms
+            .Include(r => r.PlaylistVideos)
+            .FirstAsync(r => r.Hash == _roomHash);
+        updatedRoom.PlaylistVideos.OrderBy(video => video.Position)
+            .Select(video => video.Hash)
+            .Should().Equal("second-video", "first-video");
 
         await _connection.StopAsync();
     }

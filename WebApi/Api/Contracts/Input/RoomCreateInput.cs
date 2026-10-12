@@ -1,0 +1,19 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace WebApi.Api.Contracts.Input;
+
+public class RoomCreateInput
+{
+    [Required]
+    [MinLength(3)]
+    [MaxLength(55)]
+    public string RoomName { get; set; } = string.Empty;
+    [MinLength(0)]
+    [MaxLength(35)]
+    public string? RoomPassword { get; set; }
+
+    [Required]
+    [MinLength(3)]
+    [MaxLength(25)]
+    public string Username { get; set; } = string.Empty;
+}

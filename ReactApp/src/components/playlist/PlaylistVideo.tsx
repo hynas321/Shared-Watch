@@ -36,7 +36,7 @@ export default function VideoOnPlaylist({ index, playlistVideo }: VideoOnPlaylis
           style={videoThumbnailStyle}
         />
       </div>
-      <div className="d-flex col justify-content-between align-items-center text-secondary">
+      <div className="d-flex col justify-content-between align-items-center text-dark">
         <small style={{ wordWrap: "break-word", maxWidth: "200px" }}>
           <b>{playlistVideo.title || playlistVideo.url}</b>
         </small>

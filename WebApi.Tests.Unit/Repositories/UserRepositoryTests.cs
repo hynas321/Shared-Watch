@@ -1,23 +1,23 @@
 using Microsoft.EntityFrameworkCore;
-using WebApi.Infrastructure.Repositories;
+using WebApi.Infrastructure.Persistence.Repositories;
 using WebApi.Tests.Unit.Helpers;
-using WebApi.Api.SignalR.Interfaces;
+using WebApi.Application.Repositories;
+using WebApi.Application.Services;
 using WebApi.Core.Entities;
 using WebApi.Application.Constants;
+using WebApi.Infrastructure.Persistence;
 
 namespace WebApi.Tests.Unit.Repositories;
 
 public class UserRepositoryTests : IDisposable
 {
     private readonly AppDbContext _context;
-    private readonly Mock<IHubConnectionMapper> _mockHubConnectionMapper;
     private readonly UserRepository _userRepository;
 
     public UserRepositoryTests()
     {
         _context = InMemoryDbContextFactory.CreateContext();
-        _mockHubConnectionMapper = new Mock<IHubConnectionMapper>();
-        _userRepository = new UserRepository(_context, _mockHubConnectionMapper.Object);
+        _userRepository = new UserRepository(_context, new Mock<IHubConnectionRegistry>().Object);
     }
 
     public void Dispose()

@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using WebApi.Application.Constants;
-using WebApi.Application.Services.Interfaces;
+using WebApi.Application.Services;
 using WebApi.Core.Entities;
 using WebApi.Tests.Integration.Helpers;
 
@@ -31,6 +31,8 @@ public class AppHubChatTests : BaseIntegrationTest, IAsyncLifetime
     {
         var db = Factory.GetDbContext();
         var room = new Room("TestRoom", "");
+        room.Users.Add(new User("TestUser", Role.Admin) { RoomHash = room.Hash });
+        room.Users.Add(new User("RegularUser", Role.User) { RoomHash = room.Hash });
         db.Rooms.Add(room);
         await db.SaveChangesAsync();
         _roomHash = room.Hash!;
@@ -167,25 +169,6 @@ public class AppHubChatTests : BaseIntegrationTest, IAsyncLifetime
 
     private string GenerateJwtToken(string username, string role, string roomHash)
     {
-        var key = "p1breq12lv1xptj4pasbln2lpmbdfghw3cb";
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
-        {
-            new Claim(ClaimTypes.NameIdentifier, username),
-            new Claim(ClaimTypes.Role, role),
-            new Claim(ClaimTypes.Hash, roomHash)
-        };
-
-        var token = new JwtSecurityToken(
-            issuer: "localhost",
-            audience: "localhost",
-            claims: claims,
-            expires: DateTime.Now.AddHours(12),
-            signingCredentials: credentials);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return Factory.GetRequiredService<IJwtTokenService>().GenerateToken(username, role, roomHash);
     }
 }

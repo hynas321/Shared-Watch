@@ -1,7 +1,9 @@
-using WebApi.Infrastructure.Repositories;
+using WebApi.Infrastructure.Persistence.Repositories;
+using WebApi.Application.Repositories;
 using WebApi.Tests.Unit.Helpers;
 using WebApi.Core.Entities;
 using WebApi.Core.Enums;
+using WebApi.Infrastructure.Persistence;
 
 namespace WebApi.Tests.Unit.Repositories;
 

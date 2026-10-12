@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using WebApi.Core.Entities;
 using WebApi.Application.Constants;
+using WebApi.Infrastructure.Persistence;
 
 namespace WebApi.Tests.Unit.Helpers;
 

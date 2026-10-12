@@ -1,11 +1,17 @@
 version: '3.8'
 
 services:
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6380:6379"
+    restart: always
+
   timescaledb:
     image: timescale/timescaledb:2.19.3-pg16
     container_name: timescaledb
     ports:
-      - "5432:5432"
+      - "5435:5432"
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: postgres

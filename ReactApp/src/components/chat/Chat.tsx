@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { ChatMessage } from "../../types/ChatMessage";
-import { BsSendFill } from "react-icons/bs";
+import { BsChatDotsFill, BsSendFill } from "react-icons/bs";
 import { AppHubContext, AppStateContext } from "../../context/AppContext";
 import { HubMessages } from "../../classes/constants/HubMessages";
 import MessageOnChat from "./ChatMessage";
@@ -17,7 +17,7 @@ export default function Chat() {
     if (appState.unreadChatMessagesCount.value !== 0) {
       appState.unreadChatMessagesCount.value = 0;
     }
-  }, []);
+  }, [appState.unreadChatMessagesCount]);
 
   useEffect(() => {
     if (messagesRef.current) {
@@ -75,12 +75,15 @@ export default function Chat() {
       <div className="list-group rounded-3 control-panel-list" ref={messagesRef}>
         {appState.chatMessages.value.length !== 0 ? (
           appState.chatMessages.value.map((chatMessage: ChatMessage, index: number) => (
-            <li key={index} className="border border-secondary list-group-item bg-muted border-2">
+            <li key={index} className="chat-message-item border border-secondary list-group-item bg-white text-dark border-2">
               <MessageOnChat chatMessage={chatMessage} />
             </li>
           ))
         ) : (
-          <h6 className="text-white text-center">No messages to display</h6>
+          <div className="empty-state text-white text-center" role="status">
+            <BsChatDotsFill className="empty-state-icon" aria-hidden="true" />
+            <span>No chat messages yet</span>
+          </div>
         )}
       </div>
     </>

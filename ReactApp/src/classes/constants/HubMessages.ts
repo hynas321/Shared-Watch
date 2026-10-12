@@ -1,5 +1,5 @@
 export class HubMessages {
-  //User
+  static RefreshConnectionPresence: string = "RefreshConnectionPresence";
   static KickOut: string = "KickOut";
   static SetAdminStatus: string = "SetAdminStatus";
   static OnJoinRoom: string = "OnJoinRoom";
@@ -7,31 +7,30 @@ export class HubMessages {
   static OnKickOut: string = "OnKickOut";
   static OnSetAdminStatus: string = "OnSetAdminStatus";
 
-  //VideoPlayer
   static SetIsVideoPlaying: string = "SetIsVideoPlaying";
   static SetPlayedSeconds: string = "SetPlayedSeconds";
   static OnSetVideoUrl: string = "OnSetVideoUrl";
   static OnSetIsVideoPlaying: string = "OnSetIsVideoPlaying";
   static OnSetPlayedSeconds: string = "OnSetPlayedSeconds";
+  static GetPlaybackSnapshot: string = "GetPlaybackSnapshot";
+  static NotifyVideoEnded: string = "NotifyVideoEnded";
+  static OnPlaybackSync: string = "OnPlaybackSync";
 
-  //Chat
   static AddChatMessage: string = "AddChatMessage";
   static OnAddChatMessage: string = "OnAddChatMessage";
 
-  //Playlist
   static AddPlaylistVideo: string = "AddPlaylistVideo";
   static DeletePlaylistVideo: string = "DeletePlaylistVideo";
+  static ReorderPlaylistVideos: string = "ReorderPlaylistVideos";
   static OnAddPlaylistVideo: string = "OnAddPlaylistVideo";
   static OnDeletePlaylistVideo: string = "OnDeletePlaylistVideo";
+  static OnPlaylistReordered: string = "OnPlaylistReordered";
 
-  //RoomSettings
   static SetRoomPassword: string = "SetRoomPassword";
   static OnSetRoomPassword: string = "OnSetRoomPassword";
 
-  //UserPermissions
   static SetUserPermissions: string = "SetUserPermissions";
   static OnSetUserPermissions: string = "OnSetUserPermissions";
 
-  //Identity
   static OnReceiveJwt: string = "OnReceiveJwt";
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Button from "../shared/Button";
 import { InputField } from "../shared/InputField";
 import { useNavigate } from "react-router-dom";
@@ -11,15 +11,17 @@ import { useSignal } from "@preact/signals-react";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { ping } from "ldrs";
 import { HttpStatusCode } from "axios";
-import api from "../../classes/Http/Api";
+import api, { NetworkErrorStatus } from "../../classes/Http/Api";
 import { useRoomJoin } from "../../hooks/useRoomJoin";
 
 export default function CreateRoomForm({
   acceptText,
   declineText,
+  onClose,
 }: {
   acceptText: string;
   declineText: string;
+  onClose: () => void;
 }) {
   const [isAcceptButtonEnabled, setIsAcceptButtonEnabled] = useState<boolean>(false);
   const roomName = useSignal<string>("");
@@ -28,19 +30,19 @@ export default function CreateRoomForm({
   const navigate = useNavigate();
   const { joinRoom } = useRoomJoin();
 
+  const clearInputFields = useCallback(() => {
+    roomName.value = "";
+    roomPassword.value = "";
+  }, [roomName, roomPassword]);
+
   useEffect(() => {
     ping.register();
     return () => clearInputFields();
-  }, []);
+  }, [clearInputFields]);
 
   useEffect(() => {
     setIsAcceptButtonEnabled(roomName.value.length >= 3);
   }, [roomName.value]);
-
-  const clearInputFields = () => {
-    roomName.value = "";
-    roomPassword.value = "";
-  };
 
   const handleCreateRoomButtonClick = async () => {
     isCreateButtonClicked.value = true;
@@ -66,6 +68,7 @@ export default function CreateRoomForm({
 
   const handleRoomCreationError = (statusCode: number) => {
     const errorMessages: Record<number, string> = {
+      [NetworkErrorStatus]: "The server is unavailable. Check your connection and try again.",
       [HttpStatusCode.Conflict]: "The room with this name already exists",
       [HttpStatusCode.Unauthorized]: "You are already in a different room",
     };
@@ -125,7 +128,6 @@ export default function CreateRoomForm({
     return (
       <span
         className="rounded-1"
-        {...(isAcceptButtonEnabled ? { "data-bs-dismiss": "modal" } : {})}
       >
         <Button
           text={`${isCreateButtonClicked.value ? "Creating..." : acceptText}`}
@@ -140,7 +142,7 @@ export default function CreateRoomForm({
 
   function renderDeclineButton() {
     return (
-      <span className="rounded-1" data-bs-dismiss="modal">
+      <span className="rounded-1" onClick={onClose}>
         <Button text={declineText} classNames="btn btn-danger" onClick={clearInputFields} />
       </span>
     );

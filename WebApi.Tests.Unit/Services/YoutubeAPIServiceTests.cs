@@ -1,6 +1,6 @@
 using Google.Apis.Services;
 using System.Reflection;
-using WebApi.Application.Services;
+using WebApi.Infrastructure.YouTube;
 
 namespace WebApi.Tests.Unit.Services;
 
@@ -20,7 +20,7 @@ public class YouTubeAPIServiceTests
 
     private string? CallGetVideoId(YouTubeAPIService service, string url)
     {
-        var method = service.GetType().GetMethod("GetVideoId", BindingFlags.NonPublic | BindingFlags.Instance);
+        var method = service.GetType().GetMethod("GetVideoId", BindingFlags.NonPublic | BindingFlags.Static);
         var result = method?.Invoke(service, [url]);
         return result as string;
     }

@@ -4,13 +4,10 @@ import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 import { ToastNotificationEnum } from "../enums/ToastNotificationEnum";
 import { HttpStatusCode } from "axios";
 import { RoomJoinOutput } from "../types/HttpTypes/Output/RoomJoinOutput";
-import api from "../classes/Http/Api";
-import { useSessionStorage } from "./useSessionStorage";
+import api, { NetworkErrorStatus } from "../classes/Http/Api";
 import { RoomState } from "../types/RoomState";
 
 export const useRoomJoin = () => {
-  const { setAuthorizationToken } = useSessionStorage();
-
   const joinRoom = async (roomState: RoomState): Promise<boolean> => {
     const [responseStatusCode, roomInformation] = await api.joinRoom(
       roomState.roomHash,
@@ -20,6 +17,11 @@ export const useRoomJoin = () => {
 
     if (responseStatusCode !== HttpStatusCode.Ok || !roomInformation) {
       switch (responseStatusCode) {
+        case NetworkErrorStatus:
+          toast.error("The server is unavailable. Check your connection and try again.", {
+            containerId: ToastNotificationEnum.Main,
+          });
+          break;
         case HttpStatusCode.Unauthorized:
           toast.error("Wrong room password", {
             containerId: ToastNotificationEnum.Main,
@@ -54,12 +56,12 @@ export const useRoomJoin = () => {
 
   const setAppStateInRoom = (roomState: RoomState, roomInformation: RoomJoinOutput) => {
     appState.roomHash.value = roomState.roomHash;
-    appState.roomName.value = roomState.roomName;
+    appState.roomPassword.value = roomState.roomPassword;
+    appState.roomName.value =
+      roomInformation.roomSettings?.roomName || roomState.roomName;
     appState.roomType.value = roomInformation?.roomSettings.roomType as RoomTypesEnum;
     appState.maxUsers.value = roomInformation?.roomSettings.maxUsers as number;
-    appState.roomPassword.value = roomState.roomPassword;
 
-    setAuthorizationToken(roomInformation?.authorizationToken as string);
     appState.isAdmin.value = roomInformation?.isAdmin as boolean;
 
     appState.chatMessages.value = roomInformation?.chatMessages ?? [];

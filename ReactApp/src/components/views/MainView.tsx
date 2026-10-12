@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { Room } from "../../types/Room";
 import RoomList from "../room-list/RoomList";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ import {
   BsExclamationTriangleFill,
   BsFillCameraReelsFill,
   BsFillPersonLinesFill,
+  BsSearch,
 } from "react-icons/bs";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
 import { HttpStatusCode } from "axios";
@@ -22,13 +23,15 @@ import CreateRoomModal from "../create-room-modal/CreateRoomModal";
 import { useRoomJoin } from "../../hooks/useRoomJoin";
 import { useSessionStorage } from "../../hooks/useSessionStorage";
 import api from "../../classes/Http/Api";
+import BackgroundSelector from "../shared/BackgroundSelector";
 
 const EmptyRoomsMessage = () => (
   <>
     <h1 className="text-white text-center" style={{ marginTop: "7rem" }}>
       <BsDoorOpenFill />
     </h1>
-    <h5 className="text-white text-center">No rooms to display</h5>
+    <h5 className="text-white text-center">No rooms found</h5>
+    <h6 className="text-white-50 text-center">Create a room to get started, or check back later.</h6>
   </>
 );
 
@@ -47,8 +50,10 @@ const ConnectionError = () => (
     <h1 className="text-white text-center" style={{ marginTop: "7rem" }}>
       <BsExclamationTriangleFill />
     </h1>
-    <h5 className="text-white text-center">Connection Issue</h5>
-    <h6 className="text-white text-center">Check your internet connection or refresh the page</h6>
+    <h5 className="text-white text-center">Could not connect to the server</h5>
+    <h6 className="text-white text-center">
+      The room list could not be loaded. Check your connection and try again.
+    </h6>
   </>
 );
 
@@ -56,6 +61,16 @@ const LoadingRooms = () => (
   <h1 className="text-white text-center" style={{ marginTop: "7rem" }}>
     <l-helix size="100" speed="1.25" color="white" />
   </h1>
+);
+
+const NoMatchingRoomsMessage = () => (
+  <>
+    <h1 className="text-white text-center" style={{ marginTop: "7rem" }}>
+      <BsSearch />
+    </h1>
+    <h5 className="text-white text-center">No rooms found for this search</h5>
+    <h6 className="text-white-50 text-center">Try a different room name or clear the search.</h6>
+  </>
 );
 
 export default function MainView() {
@@ -66,8 +81,21 @@ export default function MainView() {
   const { username, setUsername } = useSessionStorage();
 
   const [displayedRooms, setDisplayedRooms] = useState<Room[]>([]);
+  const [roomSearch, setRoomSearch] = useState("");
   const [areRoomsFetched, setAreRoomsFetched] = useState<boolean>(false);
   const [fetchError, setFetchError] = useState<boolean>(false);
+  const backendAvailable = areRoomsFetched && !fetchError;
+
+  const filteredRooms = useMemo(() => {
+    const search = roomSearch.trim().toLocaleLowerCase();
+    if (!search) {
+      return displayedRooms;
+    }
+
+    return displayedRooms.filter((room) =>
+      room.roomName.toLocaleLowerCase().includes(search)
+    );
+  }, [displayedRooms, roomSearch]);
 
   const springs = useSpring({
     from: { y: 400 },
@@ -76,26 +104,42 @@ export default function MainView() {
   });
 
   useEffect(() => {
-    const initialize = async () => {
-      helix.register();
-      fetchRooms();
-      if (username) appState.username.value = username;
+    const disconnectMessage = sessionStorage.getItem("backendDisconnectMessage");
+    if (disconnectMessage) {
+      sessionStorage.removeItem("backendDisconnectMessage");
+      toast.error(disconnectMessage, { containerId: ToastNotificationEnum.Main });
+    }
+
+    helix.register();
+    void fetchRooms();
+
+    const refreshRooms = () => {
+      void fetchRooms();
     };
-    initialize();
-  }, [appState.username]);
+    window.addEventListener("shared-watch:room-changed", refreshRooms);
+    window.addEventListener("focus", refreshRooms);
+
+    if (username) {
+      appState.username.value = username;
+    }
+
+    return () => {
+      window.removeEventListener("shared-watch:room-changed", refreshRooms);
+      window.removeEventListener("focus", refreshRooms);
+    };
+  }, [appState.username, username]);
 
   const fetchRooms = async () => {
-    setTimeout(async () => {
-      const [responseStatusCode, responseData] = await api.getAllRooms();
-      if (responseStatusCode !== HttpStatusCode.Ok) {
-        toast.error("Could not load the rooms", { containerId: ToastNotificationEnum.Main });
-        setFetchError(true);
-      } else {
-        setDisplayedRooms(responseData ?? []);
-        setFetchError(false);
-      }
-      setAreRoomsFetched(true);
-    }, 500);
+    const [responseStatusCode, responseData] = await api.getAllRooms();
+    if (responseStatusCode !== HttpStatusCode.Ok) {
+      await api.healthCheck();
+      setDisplayedRooms([]);
+      setFetchError(true);
+    } else {
+      setDisplayedRooms(responseData ?? []);
+      setFetchError(false);
+    }
+    setAreRoomsFetched(true);
   };
 
   const handleRoomClick = async (room: Room, password: string = "") => {
@@ -121,10 +165,10 @@ export default function MainView() {
         theme="dark"
         style={{ top: "0px", opacity: 0.9 }}
       />
-      <div className="container">
+      <div className="container main-menu-layout">
         <div className="row justify-content-center">
           <animated.div
-            className="main-menu-panel mt-5 col-xl-6 col-lg-7 col-md-9 col-11 bg-dark bg-opacity-50 py-3 px-5 rounded-4"
+            className="main-menu-panel mt-3 col-xl-6 col-lg-7 col-md-9 col-11 bg-dark bg-opacity-50 py-3 px-5 rounded-4"
             style={springs}
           >
             <h3 className="text-white text-center mt-4 mb-4">
@@ -155,7 +199,7 @@ export default function MainView() {
                 <CreateRoomModal
                   acceptText="Create"
                   declineText="Go back"
-                  isEnabled={appState.username.value.length >= 3}
+                  isEnabled={backendAvailable && appState.username.value.length >= 3}
                 />
               </div>
             </div>
@@ -172,16 +216,32 @@ export default function MainView() {
                   <EmptyRoomsMessage />
                 ) : (
                   <div className="mt-5">
+                    <InputField
+                      classNames="form-control rounded-3 mb-3"
+                      placeholder="Search rooms by name"
+                      value={roomSearch}
+                      trim={false}
+                      maxCharacters={55}
+                      isEnabled={true}
+                      onChange={setRoomSearch}
+                    />
+                    {filteredRooms.length === 0 ? (
+                      <NoMatchingRoomsMessage />
+                    ) : (
                     <RoomList
-                      list={displayedRooms}
+                      list={filteredRooms}
                       onPublicRoomClick={handleRoomClick}
                       onPrivateRoomClick={handleRoomClick}
                     />
+                    )}
                   </div>
                 )}
               </>
             )}
           </animated.div>
+        </div>
+        <div className="main-background-selector">
+          <BackgroundSelector />
         </div>
       </div>
     </>

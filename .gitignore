@@ -1,10 +1,17 @@
 ﻿################################################################################
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
-################################################################################
+# Build and tooling output
+**/bin/
+**/obj/
+**/node_modules/
+**/dist/
+**/.vs/
+*.user
 
-/WebApi/.vs/WebApi
-/WebApi/bin/Debug/net8.0
-/WebApi/obj
-/WebApi/obj/Debug/net8.0/ref/WebApi.dll
-/WebApi.Tests.Integration
-/WebApi.Tests.Unit
+# Local runtime data and logs
+/WebApi/video-storage/
+*.log
+
+# Local environment overrides
+*.local
+.env.local

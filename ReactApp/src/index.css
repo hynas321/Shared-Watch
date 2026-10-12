@@ -1,0 +1,75 @@
+.main-menu-panel {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background-color: rgba(17, 23, 34, 0.78) !important;
+  box-shadow: 0 1.25rem 3.5rem rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(12px);
+}
+
+.main-menu-panel h3 { letter-spacing: 0.015em; }
+
+.main-menu-panel .form-control,
+.main-menu-panel .form-select,
+.background-selector .form-select {
+  border-color: rgba(255, 255, 255, 0.18);
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #f8f9fa;
+}
+
+.main-menu-panel .form-control::placeholder { color: rgba(255, 255, 255, 0.58); }
+
+.main-menu-panel .form-control:focus,
+.main-menu-panel .form-select:focus,
+.background-selector .form-select:focus {
+  border-color: rgba(133, 183, 255, 0.8);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.18);
+}
+
+.background-selector .form-select option {
+  background-color: #ffffff;
+  color: #212529;
+}
+
+.main-menu-list .list-group-item,
+.control-panel-list .list-group-item {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.055);
+  color: #f8f9fa;
+  transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.main-menu-list .list-group-item.available-element:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.main-menu-panel .btn-success { box-shadow: 0 0.4rem 1.1rem rgba(25, 135, 84, 0.2); }
+
+.background-dark .bg-dark.bg-opacity-50 {
+  --bs-bg-opacity: 0.92;
+}
+
+.background-dark .control-panel-list .list-group-item {
+  background-color: rgba(52, 58, 64, 0.9);
+}
+
+.user-list {
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.user-list .user-list-item {
+  background-color: #fff !important;
+  color: #212529;
+}
+
+.btn-rectangular { border-radius: 0 !important; }
+
+.btn-group > .btn-rectangular { border-radius: 0 !important; }
+
+.background-selector .form-select { min-width: 8.5rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .main-menu-list .list-group-item { transition: none; }
+}
