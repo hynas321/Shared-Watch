@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
-using WebApi.Api.DTO;
-using WebApi.Api.SignalR.Interfaces;
+using WebApi.Application.DTO;
 using WebApi.Application.Constants;
-using WebApi.Application.Services.Interfaces;
+using WebApi.Application.Services;
 using WebApi.Core.Entities;
 using WebApi.Tests.Integration.Helpers;
 using Xunit;
@@ -30,7 +29,9 @@ public class AppHubAdminActionsTests : BaseIntegrationTest, IAsyncLifetime
     {
         var db = Factory.GetDbContext();
         var room = new Room("TestRoom", "");
+        var adminUser = new User("AdminUser", Role.Admin) { RoomHash = room.Hash };
         var user = new User("TestUser", Role.User) { RoomHash = room.Hash };
+        room.Users.Add(adminUser);
         room.Users.Add(user);
         db.Rooms.Add(room);
         await db.SaveChangesAsync();
@@ -71,28 +72,6 @@ public class AppHubAdminActionsTests : BaseIntegrationTest, IAsyncLifetime
         }
     }
 
-    /*[Fact]
-    public async Task KickOutAsync_AdminCanKickUser_ShouldRemoveUserAndBroadcast()
-    {
-        Factory.ResetSingletonState();
-        await SetupRoomAsync();
-
-        object? kickedUser = null;
-        _connection.On(HubMessages.OnKickOut, (object user) =>
-        {
-            kickedUser = user;
-        });
-
-        await _connection.InvokeAsync(HubMessages.KickOut, _roomHash, "TestUser");
-        await Task.Delay(100);
-
-        kickedUser.Should().NotBeNull();
-
-        var db = Factory.GetDbContext();
-        var room = await db.Rooms.Include(r => r.Users).FirstOrDefaultAsync(r => r.Hash == _roomHash);
-        room!.Users.Should().BeEmpty();
-    }*/
-
     [Fact]
     public async Task SetAdminStatusAsync_AdminCanPromoteUser_ShouldUpdateAndBroadcast()
     {
@@ -113,7 +92,7 @@ public class AppHubAdminActionsTests : BaseIntegrationTest, IAsyncLifetime
 
         var db = Factory.GetDbContext();
         var user = await db.Rooms.Include(r => r.Users).FirstOrDefaultAsync(r => r.Hash == _roomHash);
-        user!.Users.First().Role.Should().Be(Role.Admin);
+        user!.Users.FirstOrDefault(roomUser => roomUser.Username == "TestUser")!.Role.Should().Be(Role.Admin);
     }
 
     [Fact]

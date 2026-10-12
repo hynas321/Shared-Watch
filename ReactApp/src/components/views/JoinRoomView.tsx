@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSignal } from "@preact/signals-react";
 import { animated, useSpring } from "@react-spring/web";
@@ -9,7 +9,7 @@ import { ping } from "ldrs";
 import { InputField } from "../shared/InputField";
 import Button from "../shared/Button";
 import { appState } from "../../context/AppContext";
-import { HttpUrlHelper } from "../../classes/helpers/HttpUrlHelper";
+import { getRoomHash } from "../../classes/helpers/HttpUrlHelper";
 import { ClientEndpoints } from "../../classes/constants/ClientEndpoints";
 import { RoomTypesEnum } from "../../enums/RoomTypesEnum";
 import { ToastNotificationEnum } from "../../enums/ToastNotificationEnum";
@@ -46,13 +46,8 @@ export default function JoinRoomView() {
     setIsEnterPrivateRoomButtonEnabled(privateRoomPassword.length > 0);
   }, [privateRoomPassword]);
 
-  useEffect(() => {
-    ping.register();
-    initializeView();
-  }, []);
-
-  const initializeView = async () => {
-    const hash = HttpUrlHelper.getRoomHash(window.location.href);
+  const initializeView = useCallback(async () => {
+    const hash = getRoomHash(window.location.href);
     const [responseStatus, responseData] = await api.getRoom(hash);
 
     if (responseStatus !== HttpStatusCode.Ok) {
@@ -70,7 +65,23 @@ export default function JoinRoomView() {
     room.value = responseData as Room;
     appState.roomType.value = room.value.roomType;
     appState.isInRoom.value = false;
-  };
+  }, [navigate, room]);
+
+  useEffect(() => {
+    ping.register();
+    void initializeView();
+
+    const refreshRoom = () => {
+      void initializeView();
+    };
+    window.addEventListener("shared-watch:room-changed", refreshRoom);
+    window.addEventListener("focus", refreshRoom);
+
+    return () => {
+      window.removeEventListener("shared-watch:room-changed", refreshRoom);
+      window.removeEventListener("focus", refreshRoom);
+    };
+  }, [initializeView]);
 
   const springs = useSpring({
     from: { y: 400 },

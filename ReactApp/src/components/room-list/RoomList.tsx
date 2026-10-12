@@ -9,7 +9,7 @@ export interface RoomListProps {
 
 export default function RoomList({ list, onPublicRoomClick, onPrivateRoomClick }: RoomListProps) {
   return (
-    <div className="list-group rounded-3 control-panel-list">
+    <div className="list-group rounded-3 control-panel-list main-menu-list">
       {list.map((room, index) => (
         <RoomListItem
           key={index}

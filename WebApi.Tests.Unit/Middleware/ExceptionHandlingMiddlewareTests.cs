@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Http;
-using WebApi.Api.Middleware;
+using WebApi.Middleware;
 using WebApi.Tests.Unit.Helpers;
 
 namespace WebApi.Tests.Unit.Middleware;

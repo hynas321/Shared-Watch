@@ -1,4 +1,4 @@
-using WebApi.Application.Services.Interfaces;
+using WebApi.Application.Services;
 using WebApi.Core.Entities;
 
 namespace WebApi.Tests.Unit.Services;
@@ -54,6 +54,16 @@ public class VideoPlayerStateServiceTests : IDisposable
         var player = _stateService.GetVideoPlayer("test-room");
         player.Should().NotBeNull();
         player!.IsPlaying.Should().BeTrue();
-        player.CurrentTime.Should().Be(45.5);
+        player.CurrentTime.Should().BeApproximately(45.5, 0.1);
+    }
+
+    [Fact]
+    public void SetCurrentTime_WhilePlaying_ShouldPreservePlayingState()
+    {
+        _stateService.SetIsPlaying("seek-room", true);
+        _stateService.SetCurrentTime("seek-room", 45.5);
+
+        _stateService.GetIsPlaying("seek-room").Should().BeTrue();
+        _stateService.GetCurrentTime("seek-room").Should().BeApproximately(45.5, 0.1);
     }
 }

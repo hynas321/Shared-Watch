@@ -2,8 +2,8 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using WebApi.Api.HttpClasses.Output;
-using WebApi.Application.Services.Interfaces;
+using WebApi.Application.Services;
+using WebApi.Api.Contracts.Output;
 using WebApi.Tests.Integration.Helpers;
 using Xunit;
 
@@ -17,14 +17,12 @@ public class UserControllerTests : BaseIntegrationTest
     }
 
     private HttpClient _client = null!;
-    private IJwtTokenService _tokenService = null!;
 
     private void SetupClient()
     {
         Factory.ClearDatabase();
         Factory.ResetSingletonState();
         _client = Factory.CreateClient();
-        _tokenService = Factory.GetRequiredService<IJwtTokenService>();
     }
 
     private async Task<(string roomHash, string roomPassword)> CreateTestRoomAsync(string roomName)
@@ -40,17 +38,11 @@ public class UserControllerTests : BaseIntegrationTest
         var response = await _client.PostAsync("/api/Room/Create", content);
         var responseContent = await response.Content.ReadFromJsonAsync<RoomCreateOutput>();
 
-        return (responseContent!.RoomHash, "");
-    }
-
-    private void AddAuthorizationHeader(string token)
-    {
-        _client.DefaultRequestHeaders.Clear();
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+        return (responseContent?.RoomHash ?? throw new InvalidOperationException("Room creation response omitted the room hash."), "");
     }
 
     [Fact]
-    public async Task JoinRoom_ValidCredentials_ShouldReturnOkWithToken()
+    public async Task JoinRoom_ValidCredentials_ShouldSetHttpOnlyCookie()
     {
         Factory.ResetSingletonState();
         SetupClient();
@@ -68,8 +60,12 @@ public class UserControllerTests : BaseIntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var responseContent = await response.Content.ReadFromJsonAsync<RoomJoinOutput>();
         responseContent.Should().NotBeNull();
-        responseContent!.AuthorizationToken.Should().NotBeNullOrEmpty();
         responseContent.IsAdmin.Should().BeTrue();
+        response.Headers.TryGetValues("Set-Cookie", out var setCookieHeaders).Should().BeTrue();
+        setCookieHeaders.Should().NotBeNull();
+        var setCookieHeader = setCookieHeaders!.First();
+        setCookieHeader.Should().Contain("shared-watch-access-token=");
+        setCookieHeader.Should().Contain("httponly");
         _client?.Dispose();
     }
 
@@ -100,8 +96,9 @@ public class UserControllerTests : BaseIntegrationTest
         var (roomHash, _) = await CreateTestRoomAsync("PrivateRoom");
 
         var db = Factory.GetDbContext();
-        var room = await db.Rooms.FindAsync(roomHash);
-        room!.RoomSettings.RoomPassword = "correctPassword";
+        var passwordService = Factory.GetRequiredService<IRoomPasswordService>();
+        var settings = db.RoomSettings.First(roomSettings => roomSettings.RoomHash == roomHash);
+        settings.RoomPassword = passwordService.Hash("correctPassword");
         await db.SaveChangesAsync();
         await Task.Delay(100);
 
@@ -156,9 +153,7 @@ public class UserControllerTests : BaseIntegrationTest
         var content = new StringContent(JsonSerializer.Serialize(input), Encoding.UTF8, "application/json");
 
         var joinResponse = await _client.PostAsync($"/api/User/Join/{roomHash}", content);
-        var joinContent = await joinResponse.Content.ReadFromJsonAsync<RoomJoinOutput>();
-
-        AddAuthorizationHeader(joinContent!.AuthorizationToken);
+        joinResponse.IsSuccessStatusCode.Should().BeTrue();
         var response = await _client.DeleteAsync($"/api/User/Leave/{roomHash}");
 
         response.StatusCode.Should().Be(HttpStatusCode.OK);

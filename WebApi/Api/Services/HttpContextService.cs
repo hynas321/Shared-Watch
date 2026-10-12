@@ -1,6 +1,4 @@
-﻿using System.Security.Claims;
-using WebApi.Api.Services.Interfaces;
-
+using System.Security.Claims;
 namespace WebApi.Api.Services;
 
 public class HttpContextService : IHttpContextService

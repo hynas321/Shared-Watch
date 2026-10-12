@@ -2,8 +2,9 @@ using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using WebApi.Application.Services;
-using WebApi.Core.Entities.Static;
+using WebApi.Application.Options;
 using WebApi.Tests.Unit.Helpers;
+using WebApi.Infrastructure.Security;
 
 namespace WebApi.Tests.Unit.Services;
 

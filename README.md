@@ -17,11 +17,19 @@ Chat messages include sender usernames and timestamps, while playlist videos fea
 Rooms are deleted upon all users leaving.
 
 ## Configuration
-The working Google Youtube API key is needed in the _dotnet-server/appsettings.Development.json_ file for the playlist and video player to work.
+Set the Google YouTube API key through `YouTubeApi:ApiKey` to add YouTube videos. Uploaded MP4, WebM, and Ogg files do not use the YouTube API.
 
-The key needs to be set in _the dotnet-server/appsettings.json_ file if the application is to be deployed.
+Video uploads are limited to 500 MB by default. `VideoStorage:Path`, `VideoStorage:MaxFileSizeBytes`, and `VideoStorage:MaxDurationSeconds` are bound through typed options; configure them with matching `VideoStorage__...` environment variables in deployment. Set the path to persistent storage, and mount the same shared directory for every backend replica so uploads can be served by any instance. The API streams files with byte-range support for seeking.
 
-Docker is required to run the TimescaleDB.
+Room membership is renewed in Redis while clients are connected. If an API instance stops without a graceful disconnect, an active instance removes the stale room after the presence lease and cleanup grace period expire. Uploaded files no longer referenced by any playlist are reclaimed after a one-hour safety period; normal room closure deletes its uploads immediately.
+
+Set `GlobalAdminToken` through the environment for the protected `api/room/getalldetails` endpoint. The endpoint stays unavailable when this value is not configured. Do not commit the token to the repository.
+
+Room passwords are stored as hashes. Existing plaintext room passwords are upgraded to hashes the next time a user successfully joins those rooms.
+
+Run PostgreSQL/TimescaleDB and Redis for local development with `docker compose up`. Every backend replica must use the same PostgreSQL database and Redis endpoint. Redis carries live playback state, active SignalR connection tracking, and the SignalR backplane; the backend does not keep these as process-local state. Locally Redis is published on port `6380` and PostgreSQL on port `5435` to avoid colliding with common local service ports.
+
+For deployment, configure `ConnectionStrings__Redis`, `ConnectionStrings__DefaultConnection`, and the same `Jwt__Key`/`Jwt__Issuer` values on every replica through the environment. Redis should use private networking and authentication/TLS appropriate to the hosting platform.
 
 ## Technological Specification
 
@@ -46,11 +54,12 @@ Docker is required to run the TimescaleDB.
 
 ## Running the Application
 React application:
-- `npm install`
-- `npm run start` 
+- `cd ReactApp`
+- `npm ci`
+- `npm run dev`
 
 ASP.NET Core application:
-- `dotnet run`
+- `dotnet run --project WebApi/WebApi.csproj`
 
 TimescaleDB:
 - `docker-compose up` in the directory of the `docker-compose.yml` file
@@ -89,15 +98,6 @@ Sample toast notification
 
 
 ![image](https://github.com/user-attachments/assets/9cde7827-7c2f-4e69-aa1c-aaf3fe39ca71)
-
-
-
-
-
-
-
-
-
 
 
 

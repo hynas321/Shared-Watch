@@ -4,4 +4,5 @@ export interface PlaylistVideo {
   duration: number;
   title?: string;
   thumbnailUrl?: string;
+  position?: number;
 }

@@ -11,7 +11,7 @@ export default function NoVideoPlaceholder({ isMobileView }: { isMobileView: boo
     >
       <div className="text-center">
         <h1><BsCameraVideoOffFill /></h1>
-        <h5>No video to display</h5>
+        <h5>No video is playing</h5>
       </div>
     </div>
   );

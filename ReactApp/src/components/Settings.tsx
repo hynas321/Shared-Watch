@@ -1,43 +1,31 @@
 import { useEffect, useState } from "react";
-import { BsSaveFill } from "react-icons/bs";
+import { BsSaveFill, BsTrashFill } from "react-icons/bs";
 import { AppHubContext, AppStateContext } from "../context/AppContext";
 import { useContext } from "react";
 import { HubMessages } from "../classes/constants/HubMessages";
 import { InputField } from "./shared/InputField";
 import Button from "./shared/Button";
 import Switch from "./shared/Switch";
+import { RoomTypesEnum } from "../enums/RoomTypesEnum";
 
 export default function Settings() {
   const appState = useContext(AppStateContext);
   const appHub = useContext(AppHubContext);
 
   const [userPermissions, setUserPermissions] = useState(appState.userPermissions.value);
-  const [inputFormPassword, setInputFormPassword] = useState<string>("");
 
   useEffect(() => {
     setUserPermissions(appState.userPermissions.value);
-  }, [, appState.userPermissions.value]);
+  }, [appState.userPermissions.value]);
 
   const handleSetRoomPrivateButtonClick = () => {
-    if (inputFormPassword === appState.roomPassword.value) {
-      return;
-    }
-
-    if (inputFormPassword.length > 0) {
-      appHub.invoke(HubMessages.SetRoomPassword, appState.roomHash.value, inputFormPassword);
-
-      setInputFormPassword("");
-    } else {
-      appHub.invoke(HubMessages.SetRoomPassword, appState.roomHash.value, "");
-
-      setInputFormPassword("");
-    }
+    void appHub.invoke(HubMessages.SetRoomPassword, appState.roomHash.value, appState.roomPassword.value)
+      .catch((error: unknown) => console.warn("Unable to update the room password.", error));
   };
 
   const handleRemovePasswordButtonClick = () => {
     appHub.invoke(HubMessages.SetRoomPassword, appState.roomHash.value, "");
-
-    setInputFormPassword("");
+    appState.roomPassword.value = "";
   };
 
   const handleSetRoomPrivateEnterClick = (key: string) => {
@@ -78,42 +66,39 @@ export default function Settings() {
   return (
     <>
       {appState.isAdmin.value && (
-        <div className="d-block mb-3">
-          <h6 className="text-orange text-center mb-3">Room settings</h6>
-          <div className="d-flex">
+        <div className="settings-section settings-room mb-3">
+          <h6 className="settings-section-title text-white mb-3">Room settings</h6>
+          <label className="form-label text-white mb-1">Room password</label>
+          <div className="settings-password-row d-flex flex-nowrap gap-0">
             <InputField
               classNames="form-control rounded-0"
-              placeholder={"Enter password (private room)"}
-              value={inputFormPassword}
+              placeholder={appState.roomPassword.value ? "Room password" : "No password set"}
+              value={appState.roomPassword.value}
               trim={false}
               isEnabled={true}
               maxCharacters={35}
-              onChange={(value: string) => setInputFormPassword(value)}
+              onChange={(value: string) => (appState.roomPassword.value = value)}
               onKeyDown={handleSetRoomPrivateEnterClick}
+              type="text"
             />
             <Button
               text={<><BsSaveFill /></>}
               classNames="btn btn-primary rounded-0"
               onClick={handleSetRoomPrivateButtonClick}
             />
-          </div>
-          {appState.roomPassword.value.length > 0 && (
-            <div className="mt-2">
-              <span className="text-white room-password">
-                Current password: {appState.roomPassword.value}{" "}
-              </span>
+            {appState.roomType.value === RoomTypesEnum.private && (
               <Button
-                text={"Remove password"}
-                classNames="text-orange button-text"
+                text={<BsTrashFill />}
+                classNames="btn btn-danger text-white text-nowrap ms-2"
                 onClick={handleRemovePasswordButtonClick}
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
-      <div className="d-block">
-        <h6 className="text-orange text-center">User permissions</h6>
-        <div className="mt-3">
+      <div className="settings-section settings-permissions">
+        <h6 className="settings-section-title text-white">User permissions</h6>
+        <div className="settings-permission-group mt-3">
           <Switch
             label={"Send chat messages"}
             isChecked={userPermissions?.canAddChatMessage as boolean}
@@ -121,7 +106,7 @@ export default function Settings() {
             onCheckChange={(checked: boolean) => setCanAddChatMessage(checked)}
           />
         </div>
-        <div className="mt-3">
+        <div className="settings-permission-group mt-3">
           <Switch
             label={"Add videos to the playlist"}
             isChecked={appState.userPermissions.value?.canAddVideo as boolean}
@@ -135,7 +120,7 @@ export default function Settings() {
             onCheckChange={(checked: boolean) => setCanRemoveVideo(checked)}
           />
         </div>
-        <div className="mt-3">
+        <div className="settings-permission-group mt-3">
           <Switch
             label={"Start/Pause videos"}
             isChecked={appState.userPermissions.value?.canStartOrPauseVideo as boolean}
@@ -143,7 +128,7 @@ export default function Settings() {
             onCheckChange={(checked: boolean) => setCanStartOrPauseVideo(checked)}
           />
           <Switch
-            label={"Skip videos"}
+            label={"Change video time"}
             isChecked={appState.userPermissions.value?.canSkipVideo as boolean}
             isEnabled={appState.isAdmin.value}
             onCheckChange={(checked: boolean) => setCanSkipVideo(checked)}

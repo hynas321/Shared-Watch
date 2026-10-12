@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Application.Constants;
-using WebApi.Application.Services.Interfaces;
+using WebApi.Application.Services;
 using WebApi.Core.Entities;
 using WebApi.Core.Enums;
 using WebApi.Tests.Integration.Helpers;
@@ -29,6 +29,7 @@ public class AppHubSettingsTests : BaseIntegrationTest, IAsyncLifetime
         var db = Factory.GetDbContext();
         var room = new Room("TestRoom", "password123");
         room.RoomSettings.RoomType = RoomTypes.Private;
+        room.Users.Add(new User("AdminUser", Role.Admin));
         db.Rooms.Add(room);
         await db.SaveChangesAsync();
         _roomHash = room.Hash!;
@@ -73,23 +74,20 @@ public class AppHubSettingsTests : BaseIntegrationTest, IAsyncLifetime
         await SetupRoomAsync();
         await _connection.StartAsync();
 
-        string? receivedPassword = null;
-        RoomTypes? receivedType = null;
-        _connection.On(HubMessages.OnSetRoomPassword, (string password, RoomTypes type) =>
+        var receivedType = new TaskCompletionSource<RoomTypes>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _connection.On(HubMessages.OnSetRoomPassword, (RoomTypes type) =>
         {
-            receivedPassword = password;
-            receivedType = type;
+            receivedType.TrySetResult(type);
         });
 
         await _connection.InvokeAsync(HubMessages.SetRoomPassword, _roomHash, "newPassword");
-        await Task.Delay(100);
 
-        receivedPassword.Should().Be("newPassword");
-        receivedType.Should().Be(RoomTypes.Private);
+        (await receivedType.Task.WaitAsync(TimeSpan.FromSeconds(3))).Should().Be(RoomTypes.Private);
 
         var db = Factory.GetDbContext();
         var room = await db.Rooms.Include(r => r.RoomSettings).FirstOrDefaultAsync(r => r.Hash == _roomHash);
-        room!.RoomSettings.RoomPassword.Should().Be("newPassword");
+        var passwordService = Factory.GetRequiredService<IRoomPasswordService>();
+        passwordService.Verify("newPassword", room!.RoomSettings.RoomPassword!).Should().BeTrue();
 
         await _connection.StopAsync();
     }

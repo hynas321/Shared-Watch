@@ -3,12 +3,13 @@ import { ReactNode } from "react";
 export interface ButtonProps {
   text: string | ReactNode;
   classNames: string;
-  onClick: (any: any) => void;
+  onClick: React.MouseEventHandler<HTMLButtonElement>;
+  disabled?: boolean;
 }
 
-export default function Button({ text, classNames, onClick }: ButtonProps) {
+export default function Button({ text, classNames, onClick, disabled = false }: ButtonProps) {
   return (
-    <button className={classNames} onClick={onClick}>
+    <button type="button" className={classNames} onClick={onClick} disabled={disabled}>
       {text}
     </button>
   );

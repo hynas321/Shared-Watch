@@ -3,10 +3,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using WebApi.Application.Services;
-using WebApi.Application.Services.Interfaces;
+using WebApi.Application.Repositories;
 using WebApi.Core.Entities;
-using WebApi.Infrastructure.Repositories;
+using WebApi.Infrastructure.Persistence.Repositories;
 using WebApi.SignalR;
+using WebApi.HostedServices;
 
 namespace WebApi.Tests.Unit.Services;
 
@@ -70,7 +71,7 @@ public class VideoPlayerServiceTests : IDisposable
         room.Users.Add(new User { Username = "test-user" });
 
         _mockRoomRepository.Setup(x => x.GetRoomAsync(roomHash, It.IsAny<CancellationToken>())).ReturnsAsync(room);
-        _mockYouTubeAPIService.Setup(x => x.GetVideoDurationAsync(It.IsAny<string>())).ReturnsAsync(120);
+        _mockYouTubeAPIService.Setup(x => x.GetVideoDurationAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(120);
 
         _videoPlayerService.StartPlaylistService(roomHash);
         Thread.Sleep(200);

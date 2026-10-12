@@ -40,7 +40,7 @@ export default function UserListItem({
 
   return (
     <li
-      className="d-flex justify-content-between align-items-center border border-secondary list-group-item bg-muted border-2"
+      className="user-list-item d-flex justify-content-between align-items-center border border-secondary list-group-item bg-white text-dark border-2"
     >
       <span className={isMe ? "text-orange" : "text-dark"}>
         {user.isAdmin ? <BsShieldFillCheck /> : <BsFillPersonFill />} {user.username}

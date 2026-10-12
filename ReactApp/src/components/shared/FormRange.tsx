@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface RangeProps {
   label: string;
@@ -20,13 +20,18 @@ export default function FormRange({
   onChange,
 }: RangeProps) {
   const [inputValue, setInputValue] = useState<number>(defaultValue);
+  const onChangeRef = useRef(onChange);
+
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
 
   const handleInputValueChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(parseInt(event.target.value));
   };
 
   useEffect(() => {
-    onChange(inputValue);
+    onChangeRef.current(inputValue);
   }, [inputValue]);
 
   return (

@@ -1,6 +1,6 @@
-using WebApi.Api.DTO;
-using WebApi.Api.HttpClasses.Output;
+using WebApi.Application.DTO;
 using WebApi.Tests.Integration.Helpers;
+using WebApi.Api.Contracts.Output;
 
 namespace WebApi.Tests.Integration.Controllers;
 
@@ -33,10 +33,8 @@ public class RoomControllerTests : IClassFixture<IntegrationTestFixture>
         };
         var content = new StringContent(JsonSerializer.Serialize(input), Encoding.UTF8, "application/json");
 
-        // Act
         var response = await _client.PostAsync("/api/Room/Create", content);
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var responseContent = await response.Content.ReadFromJsonAsync<RoomCreateOutput>();
         responseContent.Should().NotBeNull();
@@ -46,7 +44,6 @@ public class RoomControllerTests : IClassFixture<IntegrationTestFixture>
     [Fact]
     public async Task Create_DuplicateRoomName_ShouldReturnConflict()
     {
-        // Arrange
         using var _client = CreateFreshClient();
         var input = new
         {
@@ -60,17 +57,14 @@ public class RoomControllerTests : IClassFixture<IntegrationTestFixture>
 
         var newContent = new StringContent(JsonSerializer.Serialize(input), Encoding.UTF8, "application/json");
 
-        // Act
         var response = await _client.PostAsync("/api/Room/Create", newContent);
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Conflict);
     }
 
     [Fact]
     public async Task Exists_ExistingRoom_ShouldReturnOk()
     {
-        // Arrange
         using var _client = CreateFreshClient();
         var input = new
         {
@@ -83,23 +77,18 @@ public class RoomControllerTests : IClassFixture<IntegrationTestFixture>
         var createResponse = await _client.PostAsync("/api/Room/Create", content);
         var createContent = await createResponse.Content.ReadFromJsonAsync<RoomCreateOutput>();
 
-        // Act
         var response = await _client.GetAsync($"/api/Room/Exists/{createContent!.RoomHash}");
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
     [Fact]
     public async Task GetAll_EmptyDatabase_ShouldReturnEmptyList()
     {
-        // Arrange
         using var _client = CreateFreshClient();
 
-        // Act
         var response = await _client.GetAsync("/api/Room/GetAll");
 
-        // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var roomsResponse = await response.Content.ReadFromJsonAsync<List<RoomDTO>>();
         roomsResponse.Should().NotBeNull();
