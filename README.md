@@ -16,6 +16,36 @@ Chat messages include sender usernames and timestamps, while playlist videos fea
 
 Rooms are deleted upon all users leaving.
 
+## User interface
+
+User interface supports devices with various resolutions due to the responsive design.
+
+### Main View
+
+<img width="1917" height="906" alt="Screenshot 2026-10-12 210119" src="https://github.com/user-attachments/assets/26ff193c-0af1-4678-b510-e040f3753ba2" />
+
+### Room View
+
+<img width="1876" height="905" alt="Screenshot 2026-10-12 212428" src="https://github.com/user-attachments/assets/3009bcf9-31f0-410e-85f5-79e0fc362e0d" />
+<img width="1867" height="902" alt="Screenshot 2026-10-12 213107" src="https://github.com/user-attachments/assets/a55aa714-ea73-43af-9315-a434aa8d2642" />
+
+
+### Room Control Panel
+
+<img width="49%" alt="Screenshot 2026-10-12 210926" src="https://github.com/user-attachments/assets/48c8d9a0-7cab-4f62-a27a-61c863c3ddd1" />
+<img width="49%" alt="Screenshot 2026-10-12 214236" src="https://github.com/user-attachments/assets/b6c581c2-5744-4d7a-8a6d-9bf2bfa8ebba" />
+<img width="49%" alt="Screenshot 2026-10-12 212619" src="https://github.com/user-attachments/assets/e20d0e6c-4544-474a-9692-3f6852f7737b" />
+<img width="49%" alt="Screenshot 2026-10-12 2126423" src="https://github.com/user-attachments/assets/89f2b641-dcf5-4a22-8875-7dd04f4a2cad" />
+
+### Join Room View
+
+![image](https://github.com/user-attachments/assets/f41c0dc5-c483-4848-8c0f-be60d03b3eaa)
+
+### Other
+
+Sample toast notification
+![image](https://github.com/user-attachments/assets/9cde7827-7c2f-4e69-aa1c-aaf3fe39ca71)
+
 ## Configuration
 Set the Google YouTube API key through `YouTubeApi:ApiKey` to add YouTube videos. Uploaded MP4, WebM, and Ogg files do not use the YouTube API.
 
@@ -63,41 +93,6 @@ ASP.NET Core application:
 
 TimescaleDB:
 - `docker-compose up` in the directory of the `docker-compose.yml` file
-
-
-## User interface
-
-User interface supports devices with various resolutions due to the responsive design.
-
-### Main View
-
-![image](https://github.com/user-attachments/assets/313d642a-46bf-4da2-a103-5cef7ea47e7c)
-
-<img src="https://github.com/user-attachments/assets/346ecb3b-75a7-4f71-84eb-92bb3d95e9e1" width="49%" />
-<img src="https://github.com/user-attachments/assets/2516b3f0-e132-4bac-9b47-c5f27f775139" width="49%" />
-
-### Room View
-
-![image](https://github.com/user-attachments/assets/a5f65f81-4da7-49e4-ae29-d46297e3b0a9)
-
-### Room Control Panel
-
-<img src="https://github.com/user-attachments/assets/75622dd7-f8d6-43a6-b44b-bbac3dbe5b47" width="49%" />
-<img src="https://github.com/user-attachments/assets/ab5f76b4-4834-479f-a131-707025ab9322" width="49%" />
-
-<img src="https://github.com/user-attachments/assets/d25737ac-b48d-45fd-90db-ee5bc8a870d2" width="49%" />
-<img src="https://github.com/user-attachments/assets/87ac48a5-8dac-46a5-bc4c-5e88a2578828" width="49%" />
-
-### Join Room View
-
-![image](https://github.com/user-attachments/assets/f41c0dc5-c483-4848-8c0f-be60d03b3eaa)
-
-### Other
-
-Sample toast notification
-
-
-![image](https://github.com/user-attachments/assets/9cde7827-7c2f-4e69-aa1c-aaf3fe39ca71)
 
 
 
