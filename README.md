@@ -44,6 +44,7 @@ User interface supports devices with various resolutions due to the responsive d
 ### Other
 
 Sample toast notification
+
 ![image](https://github.com/user-attachments/assets/9cde7827-7c2f-4e69-aa1c-aaf3fe39ca71)
 
 ## Configuration
